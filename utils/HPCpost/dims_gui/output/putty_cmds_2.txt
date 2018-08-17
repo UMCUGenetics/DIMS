@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /hpc/shared/dbg_mz/Martin/Direct-Infusion-Pipeline_2.1
+sh ./run.sh
+sleep 10s
+qstat -u melferink
+sleep 10s

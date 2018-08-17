@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1534250009129.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2154456785",
+    "id" : "6D39A341",
+    "lastKnownWriteTime" : 1519920172,
+    "last_content_update" : 1519920172,
+    "path" : "/Volumes/Metab/Metabolomics/Test/HPCpost/dims_gui/app_1.0.R",
+    "project_path" : "dims_gui/app_1.0.R",
+    "properties" : {
+        "cursorPosition" : "311,25",
+        "scrollLine" : "306"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
