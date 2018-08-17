@@ -1,3 +1,4 @@
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 run <- function(file,outdir,trim,resol,nrepl){
 # file="./data/RES_DBS_20180312_099.mzXML"
 # outdir="./results"

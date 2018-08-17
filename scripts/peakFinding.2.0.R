@@ -1,3 +1,4 @@
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 run <- function(file, scripts, outdir, thresh, resol, scanmode){
 # file="./results/average_pklist/S_P53.1_pos.RData"
 # file="./results/average_pklist/P53.1_pos.RData"

@@ -1,3 +1,4 @@
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 run <- function(resultDir, scanmode){
 # resultDir="./results"
 # scanmode="negative"

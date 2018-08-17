@@ -1,3 +1,4 @@
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 run <- function(file, scanmode, outdir, adducts) {
 # file="./results/hmdb_part/negative_hmdb.1.RData"
 # file="/hpc/shared/dbg_mz/marcel/DIMSinDiagnostics/results/hmdb_part/positive_hmdb.187.RData"
