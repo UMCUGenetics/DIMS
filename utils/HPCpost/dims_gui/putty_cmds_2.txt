@@ -1,0 +1,10 @@
+echo "Bingo!"
+#cd /hpc/shared/dbg_mz/marcel/DIMSinDiagnostics
+cd /hpc/shared/dbg_mz/marcel/Direct-Infusion-Pipeline_2.1_2
+pwd
+mkdir ./results
+ls -h
+sh ./run.sh 
+sleep 10s
+qstat -u mwillemsen
+sleep 20s

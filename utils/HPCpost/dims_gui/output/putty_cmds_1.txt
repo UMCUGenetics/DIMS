@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /hpc/shared/dbg_mz/Martin/Direct-Infusion-Pipeline_2.1
+mkdir ./results
