@@ -3,59 +3,59 @@ run <- function(outdir, nrepl, dimsThresh=100){
 # outdir="./results"
 # nrepl=3
 # dimsThresh=100
-  
+
   #thresh2remove = 1*10^9 # plasma
   thresh2remove = 5*10^8 # blod spots
-  #thresh2remove = 1*10^8 # research (Mia)  
+  #thresh2remove = 1*10^8 # research (Mia)
 
   removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
     # bad_samples=remove_pos
-    
+
     tmp = repl.pattern
-    
+
     removeFromGroup=NULL
-    
+
     for (i in 1:length(tmp)){
       tmp2 = repl.pattern[[i]]
-      
+
       remove=NULL
-      
+
       for (j in 1:length(tmp2)){
         if (tmp2[j] %in% bad_samples){
           message(tmp2[j])
           message(paste("remove",tmp2[j]))
           message(paste("remove i",i))
           message(paste("remove j",j))
-          
+
           remove = c(remove, j)
         }
       }
-      
-      if (length(remove)==nrepl) removeFromGroup=c(removeFromGroup,i) 
+
+      if (length(remove)==nrepl) removeFromGroup=c(removeFromGroup,i)
       if (!is.null(remove)) repl.pattern[[i]]=repl.pattern[[i]][-remove]
     }
-    
+
     if (length(removeFromGroup)!=0) {
       repl.pattern=repl.pattern[-removeFromGroup]
-    }  
+    }
 
     return(list("pattern"=repl.pattern))
   }
-  
+
   dir.create(paste(outdir, "specpks", sep="/"),showWarnings = F)
   dir.create(paste(outdir, "Gaussian_fit", sep="/"),showWarnings = F)
   dir.create(paste(outdir, "average_pklist", sep="/"),showWarnings = F)
-  
+
   # get repl.pattern
-  load(paste(outdir, "init.RData", sep="/"))
-  
+  load(paste(indir, "init.RData", sep="/"))
+
   remove_neg=NULL
   remove_pos=NULL
   for (i in 1:length(repl.pattern)) {
-    
+
     techRepsArray.pos = NULL
     techRepsArray.neg = NULL
-    
+
     tech_reps = as.vector(unlist(repl.pattern[i]))
     sum_neg=0
     sum_pos=0
@@ -71,9 +71,9 @@ run <- function(outdir, nrepl, dimsThresh=100){
         remove_neg=c(remove_neg, tech_reps[j])
       } else {
         n_neg=n_neg+1
-        sum_neg=sum_neg+pklist$neg  
+        sum_neg=sum_neg+pklist$neg
       }
-      
+
       techRepsArray.neg = cbind(techRepsArray.neg, pklist$neg)
 
       if (sum(pklist$pos[,1])<thresh2remove){
@@ -82,14 +82,14 @@ run <- function(outdir, nrepl, dimsThresh=100){
         n_pos=n_pos+1
         sum_pos=sum_pos+pklist$pos
       }
-      
+
       techRepsArray.pos = cbind(techRepsArray.pos, pklist$pos)
     }
 
     # filter within bins on at least signal in more than one tech. rep.!!!
     if (!is.null(dim(sum_pos))) sum_pos[apply(techRepsArray.pos,1,function(x) length(which(x>dimsThresh))==1),1]=0
     if (!is.null(dim(sum_neg))) sum_neg[apply(techRepsArray.neg,1,function(x) length(which(x>dimsThresh))==1),1]=0
-    
+
     if (n_neg!=0){
       sum_neg[,1]=sum_neg[,1]/n_neg
       colnames(sum_neg)=names(repl.pattern)[i]
@@ -101,7 +101,7 @@ run <- function(outdir, nrepl, dimsThresh=100){
       save(sum_pos, file=paste(paste(outdir, "average_pklist", sep="/"),"/", names(repl.pattern)[i], "_pos.RData", sep=""))
     }
   }
-  
+
   # remove_pos=c("RES_DBS_20180312_0184","RES_DBS_20180312_0185","RES_DBS_20180312_0186","RES_DBS_20180312_0229","RES_DBS_20180312_0230")
   retVal = removeFromRepl.pat(remove_pos, repl.pattern, nrepl)
   repl.pattern.filtered = retVal$pattern

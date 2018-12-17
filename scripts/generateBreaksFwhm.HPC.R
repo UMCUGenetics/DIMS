@@ -2,10 +2,10 @@
 run <- function(file,outdir,trim,resol,nrepl){
 # file="./data/RES_DBS_20180312_099.mzXML"
 # outdir="./results"
-# nrepl=3  
-  
+# nrepl=3
+
   library("xcms")
-  
+
   trimLeft=NULL
   trimRight=NULL
   breaks.fwhm=NULL
@@ -22,11 +22,11 @@ run <- function(file,outdir,trim,resol,nrepl){
     return(NULL)
   }
 
-  trimLeft = round(x@scantime[length(x@scantime)*trim])  
+  trimLeft = round(x@scantime[length(x@scantime)*trim])
   trimRight = round(x@scantime[length(x@scantime)*(1-trim)])
   message(paste("trimLeft", trimLeft, sep=" "))
   message(paste("trimRight", trimRight, sep=" "))
-  
+
   # Mass range m/z
   lowMZ = x@mzrange[1]
   highMZ = x@mzrange[2]
@@ -52,19 +52,19 @@ run <- function(file,outdir,trim,resol,nrepl){
 
     # average the m/z instead of start value
     range = seq(from=(startsegm+fwhmsegm),to=endsegm, by=0.2*fwhmsegm)
-    deltaMZ = range[2]-range[1] 
+    deltaMZ = range[2]-range[1]
     breaks.fwhm.avg <- c(breaks.fwhm.avg, range + 0.5 * deltaMZ)
-    
+
   }
-  
+
   save(breaks.fwhm,breaks.fwhm.avg,trimLeft,trimRight,file=paste(outdir, "breaks.fwhm.RData", sep="/"))
-  
-  # tbl=read.table(file=paste(outdir,"..","sampleNames.txt" ,sep = "/"), header = TRUE, sep="\t")  
+
+  # tbl=read.table(file=paste(outdir,"..","sampleNames.txt" ,sep = "/"), header = TRUE, sep="\t")
   # sampleNames=as.vector(unlist(tbl$File_Name))
   # groupNames=unique(as.vector(unlist(tbl$Sample_Name)))
   # # groupNames=unique(unlist(lapply(strsplit(as.vector(unlist(tbl$Sample_Name)), ".", fixed = TRUE), function(x) x[1])))
   # # save(tbl, file=paste(outdir, "sampleNames.RData", sep="/"))
-  # 
+  #
   # ###############################################################################################
   # ####################### experimental design ###################################################
   # ###############################################################################################
@@ -77,8 +77,8 @@ run <- function(file,outdir,trim,resol,nrepl){
   # } else if (nrepl == 5){
   #   for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-4],sampleNames[x*nrepl-3],sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
   # }
-  # 
-  # save(nsampgrps, repl.pattern, groupNames, sampleNames, file=paste(outdir, "init.RData", sep="/")) 
+  #
+  # save(nsampgrps, repl.pattern, groupNames, sampleNames, file=paste(indir, "init.RData", sep="/")) 
   # ###############################################################################################
   # ###############################################################################################
 
