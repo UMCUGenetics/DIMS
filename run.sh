@@ -30,7 +30,7 @@ else
 	# All the pipeline files and possible input files are listed here.
 	for pipelineFile in \
 		$indir"/settings.config" \
-	  $indir"/init.RDATA" \
+	  $indir"/init.RData" \
 	  #$PWD"/db" \
 
 	# Their presences are checked.
