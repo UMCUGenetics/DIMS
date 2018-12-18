@@ -114,6 +114,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3], as.numeric(cmd_args[4], as.numeric(cmd_args[5]))
+run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
 
 message("Ready")
