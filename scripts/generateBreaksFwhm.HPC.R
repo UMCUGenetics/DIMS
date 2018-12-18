@@ -1,5 +1,5 @@
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-run <- function(file,outdir,trim,resol,nrepl){
+run <- function(file,outdir,indir,trim,resol,nrepl){
 # file="./data/RES_DBS_20180312_099.mzXML"
 # outdir="./results"
 # nrepl=3
@@ -78,7 +78,7 @@ run <- function(file,outdir,trim,resol,nrepl){
   #   for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-4],sampleNames[x*nrepl-3],sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
   # }
   #
-  # save(nsampgrps, repl.pattern, groupNames, sampleNames, file=paste(indir, "init.RData", sep="/")) 
+  # save(nsampgrps, repl.pattern, groupNames, sampleNames, file=paste(indir, "init.RData", sep="/"))
   # ###############################################################################################
   # ###############################################################################################
 
@@ -92,6 +92,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
+run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
 
 message("Ready")

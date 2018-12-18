@@ -1,13 +1,5 @@
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-run <- function(outdir, nrepl, dimsThresh=100){
-# outdir="./results"
-# nrepl=3
-# dimsThresh=100
-
-  #thresh2remove = 1*10^9 # plasma
-  thresh2remove = 5*10^8 # blod spots
-  #thresh2remove = 1*10^8 # research (Mia)
-
+run <- function(outdir, indir, nrepl, thresh2remove, dimsThresh){
   removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
     # bad_samples=remove_pos
 
@@ -122,6 +114,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], as.numeric(cmd_args[2]))
+run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3], as.numeric(cmd_args[4], as.numeric(cmd_args[5]))
 
 message("Ready")
