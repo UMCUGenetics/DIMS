@@ -3,7 +3,7 @@ file=$1
 outdir=$2
 trim=$3
 resol=$4
-scripts=$5
+scripts=$5/generateBreaksFwhm.HPC.R
 nrepl=$6
 
 echo "### Inputs runGenerateBreaks.sh #####################################################"
@@ -19,4 +19,4 @@ echo "Generate breaks.fwhm"
 echo "`pwd`"
 
 module load R
-R --slave --no-save --no-restore --no-environ --args $file $outdir $indir $trim $resol $nrepl < $scripts/generateBreaksFwhm.HPC.R
+R --slave --no-save --no-restore --no-environ --args $file $outdir $indir $trim $resol $nrepl < $scripts
