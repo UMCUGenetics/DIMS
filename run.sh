@@ -29,8 +29,8 @@ if [ ! -d "$indir" ]; then
 else
 	# All the pipeline files and possible input files are listed here.
 	for pipelineFile in \
-		$indir"/settings.config" \
-	  $indir"/init.RData" \
+		$indir/settings.config \
+	  $indir/init.RData \
 	  #$PWD"/db" \
 
 	# Their presences are checked.
@@ -56,6 +56,9 @@ if [ "$arg" == "--h" ] || [ "$arg" == "--help" ] || [ "$arg" == "-h" ] || [ "$ar
 		echo "Pipeline not started"
 		exit
 fi
+
+# load parameters
+. $indir/settings.config
 
 # make jobs dir if it doesnt exist
 mkdir -p $jobs
