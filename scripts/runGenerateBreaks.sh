@@ -19,4 +19,4 @@ echo "Generate breaks.fwhm"
 echo "`pwd`"
 
 module load R
-R --slave --no-save --no-restore --no-environ --args $file $outdir $indir $trim $resol $nrepl < "$scripts/generateBreaksFwhm.HPC.R"
+R --slave --no-save --no-restore --no-environ --args $file $outdir $indir $trim $resol $nrepl < $scripts/generateBreaksFwhm.HPC.R
