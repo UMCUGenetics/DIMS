@@ -1,14 +1,16 @@
 #!/bin/bash
 file=$1
 outdir=$2
-trim=$3
-resol=$4
-scripts=$5
-nrepl=$6
+indir=$3
+trim=$4
+resol=$5
+scripts=$6
+nrepl=$7
 
 echo "### Inputs runGenerateBreaks.sh #####################################################"
 echo "	file:		  $file"
 echo "	outdir:		$outdir"
+echo "	indir:		$indir"
 echo "  trim:     $trim"
 echo "  resol:    $resol"
 echo "  scripts:    $scripts"
