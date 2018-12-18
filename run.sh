@@ -15,11 +15,11 @@ fi
 
 # Make vars for all the directories that will be used
 scripts=$PWD/scripts
+jobs=$PWD/jobs
 
 base=/hpc/dbg_mz
 indir=$base/raw_data/$1
-outdir=$base/processed
-#jobs=$base/jobs
+outdir=$base/processed/$1
 
 
 # Check existence input dir
@@ -64,17 +64,17 @@ find $indir -iname "*.mzXML" | while read mzXML;
      it=$((it+1))
 
      if [[ $it == 1 ]] || [[ $it == 2 ]]; then
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -o $jobsdir -e $jobsdir -m as $scripts/runGenerateBreaks.sh $mzXML $outdir $trim $resol $scripts $nrepl
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -o $jobs -e $jobs -m as $scripts/runGenerateBreaks.sh $mzXML $outdir $trim $resol $scripts $nrepl
      fi
 
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -o $jobsdir -e $jobsdir -m as -hold_jid "breaks" $scripts/runDIMS.sh $mzXML $scripts $outdir $trim $dimsThresh $resol
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -o $jobs -e $jobs -m as -hold_jid "breaks" $scripts/runDIMS.sh $mzXML $scripts $outdir $trim $dimsThresh $resol
  done
 
-qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -o $jobsdir -e $jobsdir -m as -hold_jid "dims" $scripts/runAverageTechReps.sh $scripts $outdir $nrepl
+qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -o $jobs -e $jobs -m as -hold_jid "dims" $scripts/runAverageTechReps.sh $scripts $outdir $nrepl
 
 scanmode="negative"
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_$scanmode" -o $jobsdir -e $jobsdir -m as -hold_jid "average" $scripts/queuePeakFinding.sh $scripts $outdir $indir $thresh_neg $resol $scanmode $normalization
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_$scanmode" -o $jobs -e $jobs -m as -hold_jid "average" $scripts/queuePeakFinding.sh $scripts $outdir $indir $thresh_neg $resol $scanmode $normalization
 scanmode="positive"
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_$scanmode" -o $jobsdir -e $jobsdir -m as -hold_jid "average" $scripts/queuePeakFinding.sh $scripts $outdir $indir $thresh_pos $resol $scanmode $normalization
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_$scanmode" -o $jobs -e $jobs -m as -hold_jid "average" $scripts/queuePeakFinding.sh $scripts $outdir $indir $thresh_pos $resol $scanmode $normalization
 
 ##qsub -l h_rt=00:05:00 -l h_vmem=1G -N "mail_negative" -hold_jid "collect3_negative" ./scripts/mail.sh "negative"
