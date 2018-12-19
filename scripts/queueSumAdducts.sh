@@ -11,7 +11,7 @@ echo "##########################################################################
 
 if [ "$scanmode" == "negative" ]; then
  label="negative_*"
- adducts="1" 
+ adducts="1"
 else
  label="positive_*"
  adducts="1,2"

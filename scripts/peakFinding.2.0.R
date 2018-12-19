@@ -9,31 +9,31 @@ run <- function(file, scripts, outdir, thresh, resol, scanmode){
 # scanmode="positive"
   
   dir.create(paste(outdir, "Gaussian_fit", sep="/"),showWarnings = F)
-  
+
   load(paste(outdir, "breaks.fwhm.RData", sep="/"))
   load(file)
-  
+
   print(file)
-  
+
   sampname = strsplit(file, "/")[[1]]
   sampname = sampname[length(sampname)]
   sampname = strsplit(sampname, "_")[[1]]
   sampname = paste(sampname[1:(length(sampname)-1)], collapse = "_")
   print(sampname)
-  
+
 #  install.packages("Cairo", lib ="/hpc/local/CentOS6/dbg_mz/R-3.1.2/library")
 #  library( "yourLibrary", lib.loc = "/hpc/local/osversion/group/path" )
 #  library("Cairo")
 
   options(digits=16)
-  int.factor=1*10^5 # Number of x used to calc area under Gaussian (is not analytic) 
+  int.factor=1*10^5 # Number of x used to calc area under Gaussian (is not analytic)
   scale=2 # Initial value used to estimate scaling parameter
   width=1024
   height=768
-  
+
   source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
-  
+
   if (scanmode=="negative"){
     # pklist$neg
     # pklist$breaksFwhm

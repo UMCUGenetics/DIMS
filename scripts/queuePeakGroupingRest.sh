@@ -1,7 +1,7 @@
 #!/bin/bash
 scripts=$1
 outdir=$2
-inpdir=$3
+indir=$3
 thresh=$4
 resol=$5
 scanmode=$6
@@ -10,7 +10,7 @@ normalization=$7
 echo "### Inputs queuePeakGroupingRest.sh ###############################################"
 echo "	scripts:	${scripts}"
 echo "	outdir:		${outdir}"
-echo "	inpdir:		${inpdir}"
+echo "	indir:		${indir}"
 echo "	thresh:   ${thresh}"
 echo "	resol:    ${resol}"
 echo "	scanmode: ${scanmode}"

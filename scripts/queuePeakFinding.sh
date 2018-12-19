@@ -1,7 +1,7 @@
 #!/bin/bash
 scripts=$1
 outdir=$2
-inpdir=$3
+indir=$3
 thresh=$4
 resol=$5
 scanmode=$6
@@ -10,7 +10,7 @@ normalization=$7
 echo "### Inputs queuePeakFinding.sh ###############################################"
 echo "	scripts:	${scripts}"
 echo "	outdir:		${outdir}"
-echo "	outdir:		${inpdir}"
+echo "	indir:		${indir}"
 echo "	thresh:   ${thresh}"
 echo "	resol:    ${resol}"
 echo "	scanmode: ${scanmode}"
@@ -30,4 +30,4 @@ find "$outdir/average_pklist" -iname $label | while read sample;
  done
 
 qsub -l h_rt=00:15:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_$scanmode" $scripts/runCollectSamples.sh $scripts $outdir $scanmode
-qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" $scripts/queuePeakGrouping.sh $scripts $outdir $inpdir $thresh $resol $scanmode $normalization
+qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" $scripts/queuePeakGrouping.sh $scripts $outdir $indir $thresh $resol $scanmode $normalization

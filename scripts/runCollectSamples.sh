@@ -12,6 +12,6 @@ echo "##########################################################################
 echo "`pwd`"
 
 module load R
-R --slave --no-save --no-restore --no-environ --args "$outdir" "$scanmode" < "$scripts/collectSamples.R"
+R --slave --no-save --no-restore --no-environ --args "$outdir" "$scanmode" "$scripts" < "$scripts/collectSamples.R"
 
 echo $(date)

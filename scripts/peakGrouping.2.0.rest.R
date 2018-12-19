@@ -4,19 +4,19 @@ run <- function(fileIn, scriptDir, outdir, resol, scanmode){
   # scriptDir="./scripts"
   # outdir="./results"
   # scanmode="negative"
-  
+
   dir.create(outdir,showWarnings = F)
   dir.create(paste(outdir, "grouping_rest", sep="/"),showWarnings = F)
-  
+
   options(digits=16)
-  
+
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
-  
+
   message(paste("File to group:", fileIn))
-  
+
   groupingRest(outdir, fileIn, scanmode)
-  
+
 }
 
 message("Start")
