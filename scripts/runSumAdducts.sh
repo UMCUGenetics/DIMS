@@ -16,4 +16,4 @@ echo "##########################################################################
 echo "Outdir: $outdir"
 
 module load R
-R --slave --no-save --no-restore --no-environ --args $file $scanmode $outdir $adducts < "$scripts/runSumAdducts.R"
+R --slave --no-save --no-restore --no-environ --args $file $scanmode $outdir $adducts $scripts < "$scripts/runSumAdducts.R"
