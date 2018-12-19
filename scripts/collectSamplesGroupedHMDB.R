@@ -3,39 +3,39 @@ run <- function(resultDir, scanmode, ppm=2){
   # resultDir="./results"
   # scanmode="negative"
   # scanmode="positive"
-  
+
   # filepath =  paste(resultDir, "grouping_hmdb", sep="/")
   # files = list.files(filepath,recursive=TRUE, full.names=TRUE, pattern=paste("*_",scanmode,".RData",sep=""))
-  # 
+  #
   # outlist.tot=NULL
-  # 
+  #
   # for (i in 1:length(files)) {
   #   #message(files[i])
   #   load(files[i])
-  #   
+  #
   #   outlist.tot = rbind(outlist.tot, outpgrlist)
   # }
-  # 
+  #
   # save(outlist.tot, file=paste(resultDir, paste(paste("grouped_HMDB", scanmode, sep="_"), "RData", sep="."), sep="/"))
 
   filepath =  paste(resultDir, "grouping_hmdb_done", sep="/")
   files = list.files(filepath,recursive=TRUE, full.names=TRUE, pattern=paste("*_",scanmode,".RData",sep=""))
-  
+
   index = NULL
   for (i in 1:length(files)) {
     #message(files[i])
     load(files[i])
-    
+
     index = c(index, which(outlist.copy[,"height.pkt"]==-1))
   }
-  
+
   load(paste(resultDir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
 
   remove = which(outlist.tot[,"mzmed.pkt"] %in% outlist.copy[index,"mzmed.pkt"])
   outlist.rest = outlist.tot[-remove,]
-  
+
   # save(outlist.rest, file=paste(resultDir, "specpks_all", paste(scanmode, "rest.RData", sep="_"), sep="/"))
-  
+
   outdir=paste(resultDir, "specpks_all_rest", sep="/")
   dir.create(outdir)
 
@@ -101,7 +101,7 @@ run <- function(resultDir, scanmode, ppm=2){
   # message(paste("Process", i+2-1,":", dim(outlist_i_min_1)[1]))
   save(outlist_i_min_1, file=paste(outdir, paste(scanmode, paste("outlist_i_min_1",i+1,"RData", sep="."), sep="_"), sep="/"))
   check=check+dim(outlist_i_min_1)[1]
-  
+
   if (check==dim(outlist)[1]){
     message(paste("Check is oke!"))
   } else {

@@ -3,28 +3,28 @@ run <- function(fileIn, scriptDir, outdir, resol, scanmode){
   # rdata="./results/specpks_all/positive_outlist_i_min_1.197.RData"
   # scriptDir="./scripts"
   # outdir="./results"
-  # inpdir="./data"
+  # indir="./data"
   # thresh=2000
   # resol=140000
   # scanmode="positive"
 
   # dir.create(outdir,showWarnings = F)
   # dir.create(paste(outdir, "peak_grouping", sep="/"),showWarnings = F)
-  
+
   options(digits=16)
-  
+
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
-  
+
   message(paste("File to group:", fileIn))
-  
+
   # load(paste(outdir, "repl.pattern.RData", sep="/"))
   # if (scanmode=="negative") {
-  #   sampleNames=groupNames.neg  
+  #   sampleNames=groupNames.neg
   # } else {
-  #   sampleNames=groupNames.pos  
+  #   sampleNames=groupNames.pos
   # }
-  # 
+  #
   # peak.grouping.Gauss.HPC(outdir, fileIn, scanmode, resol, sampleNames)
   # groupingAndIdent(outdir, fileIn, scanmode)
   groupingOnHMDB(outdir, fileIn, scanmode)

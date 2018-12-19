@@ -9,7 +9,7 @@ run <- function(file, scanmode, resol, outdir, thresh, scripts) {
 # outdir="./results"
 
   message(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
-  
+
   source(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
   replaceZeros(file,scanmode,resol,outdir,thresh,scripts)
 }
@@ -24,5 +24,3 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), cmd_args[4], as.numeric(cmd_args[5]), cmd_args[6])
 
 message("Ready")
-
-
