@@ -5,36 +5,36 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
 # resol=140000
 # thresh=2000
 # outdir="./results"
-  
+
   control_label="C"
-  
+
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
-  
+
   dir.create(paste(outdir, "samplePeaksFilled", sep="/"), showWarnings = FALSE)
 
-  # int.factor=1*10^5 # Number of x used to calc area under Gaussian (is not analytic) 
+  # int.factor=1*10^5 # Number of x used to calc area under Gaussian (is not analytic)
   # scale=2 # Initial value used to estimate scaling parameter
   # width=1024
   # height=768
-  
+
   message(paste("file", file))
   message(paste("scanmode", scanmode))
   message(paste("resol", resol))
   message(paste("outdir", outdir))
   message(paste("thresh", thresh))
   message(paste("scriptDir", scriptDir))
-  
+
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
-  
+
   name = as.vector(unlist(strsplit(file, "/", fixed=TRUE)))
   name = name[length(name)]
   message(paste("File name: ", name))
-  
+
   # load samplePeaks
   # load  outpgrlist
-  load(file)  
-  
+  load(file)
+
   # #################################################################################
   # # filter on at least signal in two control samples
   # int.cols = grep(control_label, colnames(outpgrlist),fixed = TRUE)
@@ -43,7 +43,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   # keep = apply(outpgrlist, 1, function(x) if (length(which(as.numeric(x[int.cols]) > 0)) > 1) keep=c(keep,TRUE) else keep=c(keep,FALSE))
   # outpgrlist = outpgrlist[keep,]
   # #################################################################################
-  
+
   ################################################################################
   # For now only replace zeros
   if (!is.null(outpgrlist)) {
@@ -59,10 +59,10 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
     }
   }
   ################################################################################
-  
+
 
   #################### identification #########################################################
-  # load(paste(outdir, "../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
+  # load(paste(scriptDir, "../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
 
   # Add average column
   outpgrlist = cbind(outpgrlist, "avg.int"=apply(outpgrlist[, 7:(ncol(outpgrlist)-4)], 1, mean))
@@ -87,7 +87,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   # message(paste(sum(final.outlist.idpat[ , "iso_HMDB"] != ""), "assigned isomeres"))
 
   # Identify noise peaks
-  noise.MZ <- read.table(file=paste(outdir, "../db/TheoreticalMZ_NegPos_incNaCl.txt", sep="/"), sep="\t", header=TRUE, quote = "")
+  noise.MZ <- read.table(file=paste(scriptDir, "../db/TheoreticalMZ_NegPos_incNaCl.txt", sep="/"), sep="\t", header=TRUE, quote = "")
   noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
 
   # Replace "Negative" by "negative" in ident.hires.noise
@@ -98,7 +98,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
 
   final.outlist.idpat3 <- cbind(outpgrlist, tmp)
   #############################################################################################
-  
+
   message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
   save(final.outlist.idpat3, file=paste(outdir, "/samplePeaksFilled/", name, sep=""))
 }
