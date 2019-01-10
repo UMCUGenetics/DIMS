@@ -1,19 +1,12 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+!/usr/bin/Rscript
 
-run <- function(xmlfile, scripts, outdir, trim, dimsThresh, resol){
-# dimsThresh=100
-# nrepl=3
-# xmlfile="./data/BSP20150716_58.mzXML"
-# scripts="./scripts"
-# outdir="./results"
-# trim=0.1
-# resol=140000
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
 
   dir.create(outdir,showWarnings = F)
   dir.create(paste(outdir, "pklist", sep="/"),showWarnings = F)
   dir.create(paste(outdir, "QC", sep="/"),showWarnings = F)
-
-  print(xmlfile)
 
   sampname <- strsplit(xmlfile, "/")[[1]]
   sampname <- sampname[length(sampname)]
@@ -68,13 +61,13 @@ run <- function(xmlfile, scripts, outdir, trim, dimsThresh, resol){
 
 }
 
-message("Start")
+message("\nStart DIMS.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
+run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
 
-message("Ready")
+message("Ready DIMS.R")

@@ -1,25 +1,20 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-run <- function(file, scripts, outdir, thresh, resol, scanmode){
-# file="./results/average_pklist/S_P53.1_pos.RData"
-# file="./results/average_pklist/P53.1_pos.RData"
-# scripts="./scripts"
-# outdir="./results"
-# thresh=2000
-# resol=140000
-# scanmode="positive"
-  
+#!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(file, scripts, outdir, thresh, resol, scanmode) {
   dir.create(paste(outdir, "Gaussian_fit", sep="/"),showWarnings = F)
 
   load(paste(outdir, "breaks.fwhm.RData", sep="/"))
   load(file)
 
-  print(file)
+  #print(file)
 
   sampname = strsplit(file, "/")[[1]]
   sampname = sampname[length(sampname)]
   sampname = strsplit(sampname, "_")[[1]]
   sampname = paste(sampname[1:(length(sampname)-1)], collapse = "_")
-  print(sampname)
+  #print(sampname)
 
 #  install.packages("Cairo", lib ="/hpc/local/CentOS6/dbg_mz/R-3.1.2/library")
 #  library( "yourLibrary", lib.loc = "/hpc/local/osversion/group/path" )
@@ -34,7 +29,7 @@ run <- function(file, scripts, outdir, thresh, resol, scanmode){
   source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
 
-  if (scanmode=="negative"){
+  if (scanmode == "negative") {
     # pklist$neg
     # pklist$breaksFwhm
     findPeaks.Gauss.HPC(sum_neg, breaks.fwhm, int.factor, scale, resol, outdir, sampname, scanmode, FALSE, thresh, width, height)
@@ -43,7 +38,7 @@ run <- function(file, scripts, outdir, thresh, resol, scanmode){
   }
 }
 
-message("Start")
+message("\nStart peakFinding.2.0.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -52,4 +47,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
 
-message("Ready")
+message("Ready peakFinding.2.0.R")
