@@ -135,7 +135,7 @@ find $INDIR -iname "*.mzXML" | while read mzXML;
      echo "Processing file $mzXML"
      it=$((it+1))
 
-     if [ $it == 1 && [ ! -f $OUTDIR/breaks.fwhm.RData] ; then # || [[ $it == 2 ]]
+     if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData] ; then # || [[ $it == 2 ]]
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -o $JOBS -e $ERRORS runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $scripts $nrepl
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
