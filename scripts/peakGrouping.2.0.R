@@ -1,4 +1,7 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+#!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
 run <- function(fileIn, scriptDir, outdir, resol, scanmode){
   # rdata="./results/specpks_all/positive_outlist_i_min_1.197.RData"
   # scriptDir="./scripts"
@@ -31,7 +34,7 @@ run <- function(fileIn, scriptDir, outdir, resol, scanmode){
 
 }
 
-message("Start")
+message("\nStart peakGrouping.2.0.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -40,4 +43,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), cmd_args[5])
 
-message("Ready")
+message("Ready peakGrouping.2.0.R")

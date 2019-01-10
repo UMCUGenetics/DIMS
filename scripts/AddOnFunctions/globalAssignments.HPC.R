@@ -1,4 +1,4 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 ## calculate relative abundancies from theoretical mass and composition
 
 #library(Rdisop)
@@ -72,7 +72,7 @@ plus3Na <- list(name= "plus3Na", mass=68, isotope=list(mass=c(0.96931)), abundan
 plus2NaH <- list(name= "plus2NaH", mass=47, isotope=list(mass=c(0.2985712)), abundance=c(1))
 plusNa2H <- list(name= "plusNa2H", mass=25, isotope=list(mass=c(0.00432284)), abundance=c(1))
 
-Cl37 <- list(name= "Cl37", mass=37,  isotope=list(mass=c(-0.03409741)),  abundance=c(1)) 
+Cl37 <- list(name= "Cl37", mass=37,  isotope=list(mass=c(-0.03409741)),  abundance=c(1))
 
 allelements <- list(Ba, Br, C, Ca, Cl, Cr, Cu, F, Fe, H, Hg, I, K, Li, Mg, Mn, N, Na, Ni, O, P, S, Se, Si, Sn, Zn)
 allAdducts <- list(Ba, Br, Ca, Cl, Cl37, Cr, Cu, Fe, Hg, I, K, Li, Mg, Mn, Na, Ni, Se, Si, Sn, Zn, NH4, Ac, NaCl, For,Na2,CH3OH,NaCl2,NaCl3,NaCl4,NaCl5,Na3,KCl,H2PO4,HSO4,Met2,Met3,Met4,Met5,NaminH,KminH,H2O,NaK,min2H,plus2H,plus2Na,plusNaH,plusKH,min3H,plus3H,plusHNH,plus3Na,plus2NaH,plusNa2H)

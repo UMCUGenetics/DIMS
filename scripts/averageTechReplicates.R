@@ -1,4 +1,7 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+#!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
 run <- function(outdir, indir, nrepl, thresh2remove, dimsThresh){
   removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
     # bad_samples=remove_pos
@@ -107,7 +110,7 @@ run <- function(outdir, indir, nrepl, thresh2remove, dimsThresh){
   write.table(remove_neg, file=paste(outdir, "miss_infusions_neg.txt", sep="/"), row.names=FALSE, col.names=FALSE ,sep= "\t")
 }
 
-message("Start")
+message("\nStart averageTechReplicates.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -116,4 +119,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
 
-message("Ready")
+message("Ready averageTechReplicates.R")

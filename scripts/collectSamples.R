@@ -1,8 +1,8 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-run <- function(resultDir, scanmode, scripts){
-# resultDir="./results"
-# scanmode="negative"
-# scanmode="positive"
+#!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(resultDir, scanmode, scripts) {
 
   ppm=2
 
@@ -29,7 +29,8 @@ run <- function(resultDir, scanmode, scripts){
 
     outlist.tot=NULL
     for (i in 1:length(files)) {
-      #message(files[i])
+
+      message(files[i])
       load(files[i])
 
       if (is.null(outlist.persample) || (dim(outlist.persample)[1]==0)){
@@ -152,7 +153,7 @@ run <- function(resultDir, scanmode, scripts){
   }
 }
 
-message("Start")
+message("\nStart collectSamples.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -161,4 +162,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3])
 
-message("Ready")
+message("Ready collectSamples.R")

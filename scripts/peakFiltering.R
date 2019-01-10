@@ -1,4 +1,7 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
 run <- function(scripts, resol, outdir, thresh, indir, scanmode, version) {
   # scripts="./scripts"
   # outdir="./results"
@@ -38,7 +41,7 @@ run <- function(scripts, resol, outdir, thresh, indir, scanmode, version) {
   }
 }
 
-message("Start")
+message("\nStart peakFiltering.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -47,4 +50,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], as.numeric(cmd_args[2]), cmd_args[3], as.numeric(cmd_args[4]), cmd_args[5], cmd_args[6], as.numeric(cmd_args[7]))
 
-message("Ready")
+message("Ready peakFIltering.R")

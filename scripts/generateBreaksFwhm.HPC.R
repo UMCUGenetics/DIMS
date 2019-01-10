@@ -1,8 +1,8 @@
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-run <- function(file,outdir,indir,trim,resol,nrepl){
-# file="./data/RES_DBS_20180312_099.mzXML"
-# outdir="./results"
-# nrepl=3
+!/usr/bin/Rscript
+
+#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(xmlfile,outdir,indir,trim,resol,nrepl) {
 
   library("xcms")
 
@@ -17,7 +17,7 @@ run <- function(file,outdir,indir,trim,resol,nrepl){
   dir.create(outdir, showWarnings = F)
 
   x = NULL
-  try({x = xcmsRaw(file)}, silent = TRUE)
+  try({x = xcmsRaw(xmlfile)}, silent = TRUE)
   if (is.null(x)){
     return(NULL)
   }
@@ -58,34 +58,10 @@ run <- function(file,outdir,indir,trim,resol,nrepl){
   }
 
   save(breaks.fwhm,breaks.fwhm.avg,trimLeft,trimRight,file=paste(outdir, "breaks.fwhm.RData", sep="/"))
-
-  # tbl=read.table(file=paste(outdir,"..","sampleNames.txt" ,sep = "/"), header = TRUE, sep="\t")
-  # sampleNames=as.vector(unlist(tbl$File_Name))
-  # groupNames=unique(as.vector(unlist(tbl$Sample_Name)))
-  # # groupNames=unique(unlist(lapply(strsplit(as.vector(unlist(tbl$Sample_Name)), ".", fixed = TRUE), function(x) x[1])))
-  # # save(tbl, file=paste(outdir, "sampleNames.RData", sep="/"))
-  #
-  # ###############################################################################################
-  # ####################### experimental design ###################################################
-  # ###############################################################################################
-  # # nsampgrps = number of individual biological samples
-  # # nrepl = number of technical replicates per sample
-  # nsampgrps = length(sampleNames)/nrepl
-  # repl.pattern = NULL
-  # if (nrepl == 3){
-  #   for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
-  # } else if (nrepl == 5){
-  #   for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-4],sampleNames[x*nrepl-3],sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
-  # }
-  #
-  # save(nsampgrps, repl.pattern, groupNames, sampleNames, file=paste(indir, "init.RData", sep="/"))
-  # ###############################################################################################
-  # ###############################################################################################
-
 }
 
 
-message("Start")
+message("\nStart generateBreaksFwhm.HPC.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -94,4 +70,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
 
-message("Ready")
+message("Ready generateBreaksFwhm.HPC.R")
