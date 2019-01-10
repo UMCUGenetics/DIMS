@@ -1,7 +1,5 @@
 #!/usr/bin/Rscript
 
-#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-
 run <- function(file, scanmode, resol, outdir, thresh, scripts) {
 # file="./results/grouping_rest/negative_1.RData"
 # file="./results/grouping_hmdb/1_negative.RData"
