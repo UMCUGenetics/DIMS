@@ -1,7 +1,5 @@
 #!/usr/bin/Rscript
 
-#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-
 run <- function(fileIn, scriptDir, outdir, resol, scanmode){
   # rdata="./results/specpks_all/positive_outlist_i_min_1.197.RData"
   # scriptDir="./scripts"

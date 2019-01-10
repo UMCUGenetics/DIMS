@@ -1,11 +1,5 @@
 #!/usr/bin/Rscript
 
-#.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-
-run <- function(xmlfile,outdir,indir,trim,resol,nrepl) {
-
-  library("xcms")
-
   trimLeft=NULL
   trimRight=NULL
   breaks.fwhm=NULL
