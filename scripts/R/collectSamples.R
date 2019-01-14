@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(resultDir, scanmode, scripts) {
+run <- function(resultDir, scripts, scanmode) {
 
   ppm=2
 
@@ -55,7 +55,7 @@ run <- function(resultDir, scanmode, scripts) {
     save(outlist.tot, file=paste(outdir, paste(scanmode, "RData", sep="."), sep="/"))
 
     # cut HMDB ##########################################################################################################################################
-    load(paste(scripts, "../db/HMDB_add_iso_corrNaCl.RData", sep="/"))
+    load(paste(scripts, "../../db/HMDB_add_iso_corrNaCl.RData", sep="/"))
     outdir=paste(resultDir, "hmdb_part", sep="/")
     dir.create(outdir, showWarnings = FALSE)
     load(paste(resultDir, "breaks.fwhm.RData", sep="/"))

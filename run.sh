@@ -24,7 +24,7 @@ VERBOSE=0
 RESTART=0
 QSUB=0
 NAME=""
-EMAIL=""
+MAIL=""
 
 # Show usage information
 function show_help() {
@@ -65,7 +65,7 @@ do
   r) RESTART=1 ;;
   q) QSUB=1 ;;
   n) NAME=${OPTARG} ;;
-	m) EMAIL=${OPTARG} ;;
+	m) MAIL=${OPTARG} ;;
 	esac
 done
 
@@ -73,7 +73,6 @@ shift "$((OPTIND-1))"
 
 if [ -z ${NAME} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${VERBOSE} -gt 0 ] ; then set -x ; fi
-
 
 BASE=/hpc/dbg_mz
 #BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
@@ -118,109 +117,32 @@ fi
 
 
 
-# Create logging directories
+# Delete and create temp logging directories
 rm -rf $JOBS
 mkdir -p $JOBS
 rm -rf $ERRORS
 mkdir -p $ERRORS
 
-# Enter the script directory
-cd $SCRIPTS
-
 
 
 it=0
-find $INDIR -iname "*.mzXML" | while read mzXML;
+find $INDIR -iname "*.mzXML" | sort | while read mzXML;
  do
      echo "Processing file $mzXML"
      it=$((it+1))
 
-     if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData] ; then # || [[ $it == 2 ]]
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -o $JOBS -e $ERRORS runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $scripts $nrepl
+     if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
 
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -o $JOBS -e $ERRORS runDIMS.sh $mzXML $SCRIPTS $OUTDIR $trim $dimsThresh $resol
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $SCRIPTS $trim $dimsThresh $resol
      #Rscript DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
  done
 
-qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -o $JOBS -e $ERRORS runAverageTechReps.sh $SCRIPTS $OUTDIR $nrepl
+qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/3-runAverageTechReps.sh $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh
 #Rscript averageTechReplicates.R $OUTDIR $INDIR $nrepl $thresh2remove $dimsThresh
 
 
-function doScanmodes() {
-  scanmode=$1
-  label=$2
-  thresh=$3
-  adducts=$4
-
-
-  #queuePeakFinding.sh
-  find "$OUTDIR/average_pklist" -iname $label | while read sample;
-   do
-       qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_$scanmode" -hold_jid "average" -o $JOBS -e $ERRORS runPeakFinding.sh $sample $SCRIPTS $OUTDIR $thresh $resol $scanmode
-       #Rscript peakFinding.2.0.R $sample $SCRIPTS $OUTDIR $thresh $resol $scanmode
-   done
-
-  qsub -l h_rt=00:15:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_$scanmode" -o $JOBS -e $ERRORS runCollectSamples.sh $OUTDIR $scanmode $SCRIPTS
-  #Rscript collectSamples.R $OUTDIR $scanmode $SCRIPTS
-
-
-  #queuePeakGrouping.sh
-  label2="${scanmode}_*"
-
-  find "$OUTDIR/hmdb_part" -iname $label2 | while read hmdb;
-   do
-       qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_$scanmode" -hold_jid "collect_$scanmode" -o $JOBS -e $ERRORS runPeakGrouping.sh $hmdb $SCRIPTS $OUTDIR $resol $scanmode
-       #Rscript peakGrouping.2.0.R $hmdb $SCRIPTS $OUTDIR $resol $scanmode
-   done
-
-  qsub -l h_rt=00:15:00 -l h_vmem=8G -N "collect1_$scanmode" -hold_jid "grouping_$scanmode" -o $JOBS -e $ERRORS runCollectSamplesGroupedHMDB.sh $OUTDIR $scanmode
-  #Rscript collectSamplesGroupedHMDB.R $OUTDIR $scanmode
-
-
-  #queuePeakGroupingRest.sh
-  find "$OUTDIR/specpks_all_rest" -iname $label2 | while read file;
-   do
-       qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_$scanmode" -hold_jid "collect1_$scanmode" -o $JOBS -e $ERRORS runPeakGroupingRest.sh $file $SCRIPTS $OUTDIR $resol $scanmode
-       #Rscript peakGrouping.2.0.rest.R $file $SCRIPTS $OUTDIR $resol $scanmode
-   done
-
-
-  #queueFillMissing.sh
-  label3="*_${scanmode}.RData"
-
-   find "$OUTDIR/grouping_rest" -iname $label2 | while read rdata;
-    do
-     qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_$scanmode" -hold_jid "grouping2_$scanmode" -o $JOBS -e $ERRORS runFillMissing.sh $rdata $scanmode $resol $OUTDIR $thresh $SCRIPTS
-     #Rscript runFillMissing.R $rdata $scanmode $resol $OUTDIR $thresh $SCRIPTS
-   done
-
-   find "$OUTDIR/grouping_hmdb" -iname $label3 | while read rdata2;
-    do
-     qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_$scanmode" -hold_jid "peakFilling_$scanmode" -o $JOBS -e $ERRORS  runFillMissing.sh $rdata2 $scanmode $resol $OUTDIR $thresh $SCRIPTS
-     #Rscript runFillMissing.R $rdata2 $scanmode $resol $OUTDIR $thresh $SCRIPTS
-   done
-
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -hold_jid "peakFilling2_$scanmode" -o $JOBS -e $ERRORS runCollectSamplesFilled.sh $OUTDIR $scanmode $SCRIPTS $normalization
-   #Rscript collectSamplesFilled.R $OUTDIR $scanmode $SCRIPTS $normalization
-
-
-   #queueSumAdducts.sh
-   find "$OUTDIR/hmdb_part_adductSums" -iname $label2 | while read hmdb;
-    do
-     qsub -l h_rt=02:00:00 -l h_vmem=8G -N "sumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -o $JOBS -e $ERRORS runSumAdducts.sh $hmdb $scanmode $OUTDIR $adducts $SCRIPTS
-     #Rscript runSumAdducts.R $hmdb $scanmode $OUTDIR $adducts $SCRIPTS
-   done
-
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_$scanmode" -o $JOBS -e $ERRORS runCollectSamplesAdded.sh $OUTDIR $scanmode
-   #Rscript collectSamplesAdded.R $OUTDIR $scanmode
-}
-
-doScanmodes "negative" "*_neg.RData" $thresh_neg "1" &
-doScanmodes "positive" "*_pos.RData" $thresh_pos "1,2" &
-wait ${!}
-
-end=`date +%s`
-runtime=$((end-start))
-echo "Finished after $runtime seconds."
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "dims" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "negative" $thresh_neg "*_neg.RData" "1"
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "dims" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"

@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
+run <- function(xmlfile, outdir, scripts, trim, dimsThresh, resol) {
 
   dir.create(outdir,showWarnings = F)
   dir.create(paste(outdir, "pklist", sep="/"),showWarnings = F)
@@ -66,6 +66,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
+run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
 
 message("Ready DIMS.R")

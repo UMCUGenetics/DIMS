@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(outdir, indir, nrepl, thresh2remove, dimsThresh){
+run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
   removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
     # bad_samples=remove_pos
 

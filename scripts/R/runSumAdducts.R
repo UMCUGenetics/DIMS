@@ -1,11 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(file, scanmode, outdir, adducts, scripts) {
-# file="./results/hmdb_part/negative_hmdb.1.RData"
-# file="/hpc/shared/dbg_mz/marcel/DIMSinDiagnostics/results/hmdb_part/positive_hmdb.187.RData"
-# scanmode="negative"
-# outdir="./results"
-# adducts="1,2"
+run <- function(file, outdir, scripts, scanmode, adducts) {
 
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
 

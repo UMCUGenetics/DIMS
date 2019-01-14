@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(file, scripts, outdir, thresh, resol, scanmode) {
+run <- function(file, outdir, scripts, scanmode, thresh, resol) {
   dir.create(paste(outdir, "Gaussian_fit", sep="/"),showWarnings = F)
 
   load(paste(outdir, "breaks.fwhm.RData", sep="/"))
@@ -43,6 +43,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
+run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
 
 message("Ready peakFinding.2.0.R")
