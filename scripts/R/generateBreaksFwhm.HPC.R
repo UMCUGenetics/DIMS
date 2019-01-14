@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 
+run <- function(file, outdir, trim, resol, nrepl){
   trimLeft=NULL
   trimRight=NULL
   breaks.fwhm=NULL
@@ -62,6 +63,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]))
+run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
 
 message("Ready generateBreaksFwhm.HPC.R")
