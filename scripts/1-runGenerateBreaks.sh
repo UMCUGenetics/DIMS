@@ -1,3 +1,4 @@
 #!/bin/bash
+echo $PWD
 
-Rscript R/generateBreaksFwhm.HPC.R "$@"
+Rscript ${@: -1}/R/generateBreaksFwhm.HPC.R "$@"
