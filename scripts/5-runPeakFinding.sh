@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/peakFinding.2.0.R "$@"
+Rscript ${@: -1}/peakFinding.2.0.R "$@"

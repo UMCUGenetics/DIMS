@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(resultDir, scanmode){
+run <- function(resultDir, scanmode) {
 # resultDir="./results"
 # scanmode="negative"
 

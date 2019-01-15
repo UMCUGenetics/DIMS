@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(resultDir, scripts, scanmode) {
+run <- function(resultDir, scanmode, scripts) {
 
   ppm=2
 

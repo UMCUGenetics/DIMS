@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/runFillMissing.R "$@"
+Rscript ${@: -1}/runFillMissing.R "$@"

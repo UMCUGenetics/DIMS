@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/collectSamplesAdded.R "$@"
+Rscript ${@: -1}/collectSamplesAdded.R "$@"

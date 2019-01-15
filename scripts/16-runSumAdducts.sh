@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/runSumAdducts.R "$@"
+Rscript ${@: -1}/runSumAdducts.R "$@"
