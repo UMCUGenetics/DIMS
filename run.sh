@@ -4,6 +4,7 @@
 # getting the same output as before;
 # mailing;
 # something that checks which steps have already been done when starting pipeline
+# figure out .Rprofile to never have to load libraries or point to where they are
 
 
 start=`date +%s`
