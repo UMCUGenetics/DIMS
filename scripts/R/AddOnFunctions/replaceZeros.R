@@ -62,7 +62,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
 
 
   #################### identification #########################################################
-  # load(paste(scriptDir, "../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
+  # load(paste(scriptDir, "../../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
 
   # Add average column
   outpgrlist = cbind(outpgrlist, "avg.int"=apply(outpgrlist[, 7:(ncol(outpgrlist)-4)], 1, mean))
@@ -87,7 +87,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   # message(paste(sum(final.outlist.idpat[ , "iso_HMDB"] != ""), "assigned isomeres"))
 
   # Identify noise peaks
-  noise.MZ <- read.table(file=paste(scriptDir, "../db/TheoreticalMZ_NegPos_incNaCl.txt", sep="/"), sep="\t", header=TRUE, quote = "")
+  noise.MZ <- read.table(file=paste(scriptDir, "../../db/TheoreticalMZ_NegPos_incNaCl.txt", sep="/"), sep="\t", header=TRUE, quote = "")
   noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
 
   # Replace "Negative" by "negative" in ident.hires.noise
