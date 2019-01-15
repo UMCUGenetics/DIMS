@@ -15,7 +15,7 @@ adducts=$9
 
 find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | while read hmdb;
  do
-     qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${hmdb}.txt" -e $LOGDIR/'$JOB_NAME'"_${hmdb}.txt" $SCRIPTS/8-runPeakGrouping.sh $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R
+     qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${hmdb##*/}.txt" -e $LOGDIR/'$JOB_NAME'"_${hmdb##*/}.txt" $SCRIPTS/8-runPeakGrouping.sh $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R
      #Rscript peakGrouping.2.0.R $hmdb $SCRIPTS $OUTDIR $resol $scanmode
  done
 
