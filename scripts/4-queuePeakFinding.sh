@@ -4,13 +4,12 @@ INDIR=$1
 OUTDIR=$2
 SCRIPTS=$3
 LOGDIR=$4
-ERRORS=$5
-MAIL=$6
+MAIL=$5
 
-scanmode=$7
-thresh=$8
-label=$9
-adducts=$10
+scanmode=$6
+thresh=$7
+label=$8
+adducts=$9
 
 . $INDIR/settings.config
 
@@ -23,4 +22,4 @@ find "$OUTDIR/average_pklist" -iname $label | while read sample;
 qsub -l h_rt=00:15:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/6-runCollectSamples.sh $OUTDIR $scanmode $SCRIPTS/R
 #Rscript collectSamples.R $OUTDIR $scanmode $SCRIPTS
 
-qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/7-queuePeakGrouping.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL $scanmode $thresh $label $adducts
+qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/7-queuePeakGrouping.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL $scanmode $thresh $label $adducts
