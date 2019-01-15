@@ -29,4 +29,4 @@ find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | while read rdata2;
 qsub -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -hold_jid "peakFilling2_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/14-runCollectSamplesFilled.sh $OUTDIR $scanmode $normalization $SCRIPTS/R
 #Rscript collectSamplesFilled.R $OUTDIR $scanmode $SCRIPTS $normalization
 
-qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/15-queueSumAdducts.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL $scanmode $thresh $label $adducts
+qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/15-queueSumAdducts.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $ERRORS $MAIL $scanmode $thresh $label $adducts

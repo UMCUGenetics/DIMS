@@ -23,4 +23,4 @@ done
 qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/17-runCollectSamplesAdded.sh $OUTDIR $scanmode $SCRIPTS/R
 #Rscript collectSamplesAdded.R $OUTDIR $scanmode
 
-#qsub -l h_rt=00:05:00 -l h_vmem=500M -N "mail_$scanmode" -hold_jid "sumAdducts_$scanmode" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/18-mail.sh $MAIL
+#qsub -l h_rt=00:05:00 -l h_vmem=500M -N "mail_$scanmode" -hold_jid "sumAdducts_$scanmode" -m as -M $MAIL -o $LOGDIR -e $ERRORS $SCRIPTS/18-mail.sh $MAIL
