@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/peakGrouping.2.0.rest.R "$@"
+Rscript ${@: -1}/peakGrouping.2.0.rest.R "$@"

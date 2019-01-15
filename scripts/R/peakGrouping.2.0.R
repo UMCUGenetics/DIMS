@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(fileIn, outdir, scriptDir, scanmode, resol) {
+run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
 
   options(digits=16)
 
@@ -29,6 +29,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], as.numeric(cmd_args[5]))
+run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), cmd_args[5])
 
 message("Ready peakGrouping.2.0.R")

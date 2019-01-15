@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/collectSamplesGroupedHMDB.R "$@"
+Rscript ${@: -1}/collectSamplesGroupedHMDB.R "$@"

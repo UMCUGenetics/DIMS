@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(scripts, resol, outdir, thresh, indir, scanmode, version) {
+run <- function(indir, outdir, scanmode, thresh, resol, version, scripts) {
   # scripts="./scripts"
   # outdir="./results"
   # version=2.0
@@ -46,6 +46,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], as.numeric(cmd_args[2]), cmd_args[3], as.numeric(cmd_args[4]), cmd_args[5], cmd_args[6], as.numeric(cmd_args[7]))
+run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), as.numeric(cmd_args[6]), cmd_args[7])
 
 message("Ready peakFIltering.R")

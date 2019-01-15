@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(file, outdir, scripts, scanmode, adducts) {
+run <- function(file, outdir, scanmode, adducts, scripts) {
 
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
 

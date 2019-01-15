@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript ${@: -1}/R/DIMS.R "$@"
+Rscript ${@: -1}/DIMS.R "$@"

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript R/averageTechReplicates.R "$@"
+Rscript ${@: -1}/averageTechReplicates.R "$@"

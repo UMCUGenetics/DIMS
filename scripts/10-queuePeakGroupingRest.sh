@@ -16,7 +16,7 @@ adducts=$10
 
 find "$OUTDIR/specpks_all_rest" -iname "${scanmode}_*" | while read file;
  do
-     qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_$scanmode" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/11-runPeakGroupingRest.sh $file $OUTDIR $SCRIPTS/R $scanmode $resol
+     qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_$scanmode" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/11-runPeakGroupingRest.sh $file $OUTDIR $scanmode $resol $SCRIPTS/R
      #Rscript peakGrouping.2.0.rest.R $file $SCRIPTS $OUTDIR $resol $scanmode
  done
 
