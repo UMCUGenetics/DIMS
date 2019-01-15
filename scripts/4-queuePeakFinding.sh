@@ -15,7 +15,7 @@ adducts=$9
 
 find "$OUTDIR/average_pklist" -iname $label | while read sample;
  do
-     qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${sample}.txt" -e $LOGDIR/'$JOB_NAME'"_${sample}.txt" $SCRIPTS/5-runPeakFinding.sh $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R
+     qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_$scanmode" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${sample##*/}.txt" -e $LOGDIR/'$JOB_NAME'"_${sample##*/}.txt" $SCRIPTS/5-runPeakFinding.sh $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R
      #Rscript peakFinding.2.0.R $sample $SCRIPTS $OUTDIR $thresh $resol $scanmode
  done
 
