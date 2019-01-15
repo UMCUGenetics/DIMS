@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-run <- function(file, outdir, trim, resol, nrepl){
+run <- function(xmlfile, outdir, trim, resol, nrepl){
   trimLeft=NULL
   trimRight=NULL
   breaks.fwhm=NULL
