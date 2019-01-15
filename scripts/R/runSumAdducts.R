@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
 run <- function(file, outdir, scanmode, adducts, scripts) {
 
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))

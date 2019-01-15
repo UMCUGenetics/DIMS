@@ -1,6 +1,8 @@
 #!/usr/bin/Rscript
 
-run <- function(resultDir, scanmode, ppm=2){
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(resultDir, scanmode, ppm=2) {
 
   # filepath =  paste(resultDir, "grouping_hmdb", sep="/")
   # files = list.files(filepath,recursive=TRUE, full.names=TRUE, pattern=paste("*_",scanmode,".RData",sep=""))

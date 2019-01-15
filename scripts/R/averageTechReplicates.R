@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
 run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
   removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
     # bad_samples=remove_pos

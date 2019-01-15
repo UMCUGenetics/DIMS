@@ -1,6 +1,8 @@
 #!/usr/bin/Rscript
 
-run <- function(xmlfile, outdir, trim, resol, nrepl){
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+
+run <- function(xmlfile, outdir, trim, resol, nrepl) {
   trimLeft=NULL
   trimRight=NULL
   breaks.fwhm=NULL
