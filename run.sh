@@ -135,8 +135,8 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
-     continue
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $SCRIPTS $trim $dimsThresh $resol
+     exit 0
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
      #Rscript DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
  done
 
