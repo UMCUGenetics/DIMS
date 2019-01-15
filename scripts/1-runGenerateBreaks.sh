@@ -1,3 +1,3 @@
 #!/bin/bash
 
-Rscript ${@: -1}/R/generateBreaksFwhm.HPC.R "$@"
+Rscript --verbose ${@: -1}/R/generateBreaksFwhm.HPC.R "$@"

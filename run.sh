@@ -79,7 +79,7 @@ BASE=/hpc/dbg_mz
 INDIR=$BASE/raw_data/${NAME}
 OUTDIR=$BASE/processed/${NAME}
 SCRIPTS=$PWD/scripts
-JOBS=$PWD/tmp/${NAME}/'$JOB_NAME.txt' #/output
+JOBS=$PWD/tmp/${NAME} #/output
 #ERRORS=$PWD/tmp/${NAME}/errors
 
 while [[ ${RESTART} -gt 0 ]]
@@ -120,6 +120,7 @@ fi
 # Delete and create temp logging directories
 rm -rf $JOBS
 mkdir -p $JOBS
+JOBS=$PWD/tmp/${NAME}/'$JOB_NAME.txt'
 #rm -rf $ERRORS
 #mkdir -p $ERRORS
 
@@ -132,11 +133,11 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
      it=$((it+1))
 
      if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $JOBS -e $JOBS $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m ase -M $MAIL -o $JOBS -e $JOBS $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
      exit 0
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m ase -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
      #Rscript DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
  done
 
