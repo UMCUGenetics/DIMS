@@ -138,7 +138,5 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/3-runAverageTechReps.sh $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R
 #Rscript averageTechReplicates.R $OUTDIR $INDIR $nrepl $thresh2remove $dimsThresh
 
-exit 0
-
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $ERRORS $MAIL "negative" $thresh_neg "*_neg.RData" "1"
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $ERRORS $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"
