@@ -26,7 +26,7 @@ run <- function(resultDir, scanmode, normalization, scripts) {
 
   # normalization
   load(paste0(resultDir, "/repl.pattern.",scanmode,".RData"))
-  load(paste(scripts, "../db/HMDB_add_iso_corrNaCl.RData", sep="/"))
+  load(paste(scripts, "../../db/HMDB_add_iso_corrNaCl.RData", sep="/"))
 
   if (scanmode=="negative"){
     label = "MNeg"
