@@ -1,11 +1,11 @@
 #!/bin/bash
 
-$INDIR=$1
-$OUTDIR=$2
-$SCRIPTS=$3
-$LOGDIR=$4
-$ERRORS=$5
-$MAIL=$6
+INDIR=$1
+OUTDIR=$2
+SCRIPTS=$3
+LOGDIR=$4
+ERRORS=$5
+MAIL=$6
 
 scanmode=$7
 thresh=$8
