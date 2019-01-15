@@ -128,17 +128,17 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
      it=$((it+1))
 
      if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $LOGDIR/'${JOB_NAME}.txt' -e $LOGDIR/'${JOB_NAME}.txt' $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $LOGDIR/'${JOB_NAME}_${mzXML}.txt' -e $LOGDIR/'${JOB_NAME}_${mzXML}.txt' $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${mzXML}.txt" -e $LOGDIR/'$JOB_NAME'"_${mzXML}.txt" $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R
      #Rscript DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
  done
 
-qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'${JOB_NAME}.txt' -e $LOGDIR/'${JOB_NAME}.txt' $SCRIPTS/3-runAverageTechReps.sh $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R
+qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/3-runAverageTechReps.sh $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R
 #Rscript averageTechReplicates.R $OUTDIR $INDIR $nrepl $thresh2remove $dimsThresh
 
 exit 0
 
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'${JOB_NAME}.txt' -e $LOGDIR/'${JOB_NAME}.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "negative" $thresh_neg "*_neg.RData" "1"
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'${JOB_NAME}.txt' -e $LOGDIR/'${JOB_NAME}.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "negative" $thresh_neg "*_neg.RData" "1"
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $JOBS $ERRORS $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"
