@@ -9,6 +9,8 @@ run <- function(xmlfile, outdir, trim, resol, nrepl){
   posRes=NULL
   negRes=NULL
 
+  library("xcms")
+
   dir.create(outdir, showWarnings = F)
 
   x = NULL
