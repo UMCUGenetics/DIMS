@@ -131,7 +131,7 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/1-runGenerateBreaks.sh $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R
        #Rscript generateBreaksFwhm.HPC.R $mzXML $OUTDIR $INDIR $trim $resol $nrepl
      fi
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${mzXML}.txt" -e $LOGDIR/'$JOB_NAME'"_${mzXML}.txt" $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims" -hold_jid "breaks" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME'"_${mzXML##*/}.txt" -e $LOGDIR/'$JOB_NAME'"_${mzXML##*/}.txt" $SCRIPTS/2-runDIMS.sh $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R
      #Rscript DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS
  done
 
