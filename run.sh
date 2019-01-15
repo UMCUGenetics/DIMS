@@ -23,7 +23,6 @@ NC='\033[0m' # No Color
 # Defaults
 VERBOSE=0
 RESTART=0
-QSUB=0
 NAME=""
 MAIL=""
 
@@ -36,15 +35,14 @@ function show_help() {
   fi
   printf "
   ${P}USAGE:
-    ${0} -n <run dir> [-m <email>] [-r] [-q] [-v] [-h]
+    ${0} -n <run dir> -m <email> [-r] [-v] [-h]
 
   ${B}REQUIRED ARGS:
-    -n - name of input folder, eg run1 (required)${NC}
+    -n - name of input folder, eg run1 (required)
+    -m - email address to send failing jobs to${NC}
 
   ${C}OPTIONAL ARGS:
-    -m - email address to send errors to (default logs to stdout)
     -r - restart the pipeline, removing any existing output for the entered run (default off)
-    -q - qsub the commands (only possible on HPC server) (default off)
     -v - verbose logging (default off)
     -h - show help${NC}
 
@@ -64,7 +62,6 @@ do
 		;;
 	v) VERBOSE=1 ;;
   r) RESTART=1 ;;
-  q) QSUB=1 ;;
   n) NAME=${OPTARG} ;;
 	m) MAIL=${OPTARG} ;;
 	esac
