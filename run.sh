@@ -125,22 +125,21 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
  do
      echo "Processing file $mzXML"
      it=$((it+1))
-     output=$(basename $mzXML .mzXML)+".RData"
+     output=$(basename $mzXML .mzXML)".RData"
 
      if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
        echo "Rscript $SCRIPTS/R/generateBreaksFwhm.HPC.R $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R" > $OUTDIR/jobs/breaks.sh
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N breaks -m as -M $MAIL -o $OUTDIR/logs -e $OUTDIR/logs $OUTDIR/jobs/breaks.sh
      fi
-     
+
      mkdir -p $OUTDIR/logs/pklist
      echo "Rscript $SCRIPTS/R/DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $output $SCRIPTS/R" > $OUTDIR/jobs/${output}.sh
      qsub -l h_rt=00:10:00 -l h_vmem=4G -N dims -hold_jid breaks -m as -M $MAIL -o $OUTDIR/logs/pklist/${output}.o -e $OUTDIR/logs/pklist/${output}.e $OUTDIR/jobs/${output}.sh
  done
 
+echo "Rscript $SCRIPTS/R/averageTechReplicates.R $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R" > $OUTDIR/jobs/averageTechReplicates.sh
+qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $OUTDIR/logs/miss_infusions.o -e $OUTDIR/logs/miss_infusions.e $OUTDIR/jobs/averageTechReplicates.sh
+
 exit 0
-
-qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/3-runAverageTechReps.sh $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R
-#Rscript averageTechReplicates.R $OUTDIR $INDIR $nrepl $thresh2remove $dimsThresh
-
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL "negative" $thresh_neg "*_neg.RData" "1"
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $MAIL -o $LOGDIR/'$JOB_NAME.txt' -e $LOGDIR/'$JOB_NAME.txt' $SCRIPTS/4-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"
