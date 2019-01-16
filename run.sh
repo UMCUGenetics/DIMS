@@ -133,8 +133,10 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
      fi
 
      mkdir -p $OUTDIR/logs/pklist
-     echo "Rscript $SCRIPTS/R/DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $output $SCRIPTS/R" > $OUTDIR/jobs/${output}.sh
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N dims -hold_jid breaks -m as -M $MAIL -o $OUTDIR/logs/pklist/${output}.o -e $OUTDIR/logs/pklist/${output}.e $OUTDIR/jobs/${output}.sh
+     if [ ! -f $OUTDIR/pklist/$output ] ; then
+       echo "Rscript $SCRIPTS/R/DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $output $SCRIPTS/R" > $OUTDIR/jobs/${output}.sh
+       qsub -l h_rt=00:10:00 -l h_vmem=4G -N dims -hold_jid breaks -m as -M $MAIL -o $OUTDIR/logs/pklist/${output}.o -e $OUTDIR/logs/pklist/${output}.e $OUTDIR/jobs/${output}.sh
+     fi
  done
 
 echo "Rscript $SCRIPTS/R/averageTechReplicates.R $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R" > $OUTDIR/jobs/averageTechReplicates.sh
