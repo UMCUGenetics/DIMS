@@ -116,6 +116,8 @@ fi
 
 mkdir -p $LOGDIR
 mkdir -p $OUTDIR
+mkdir -p $OUTDIR/jobs
+mkdir -p $OUTDIR/logs 
 
 
 it=0
@@ -126,7 +128,7 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
 
      if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
        echo "Rscript $SCRIPTS/R/generateBreaksFwhm.HPC.R $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R" > $OUTDIR/jobs/breaks.sh
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N breaks -m as -M $MAIL -o $OUTDIR/logs/ -e -o $OUTDIR/logs/ $OUTDIR/jobs/breaks.sh
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N breaks -m as -M $MAIL -o $OUTDIR/logs/ -e $OUTDIR/logs/ $OUTDIR/jobs/breaks.sh
      fi
      echo "Rscript $SCRIPTS/R/DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R" > $OUTDIR/jobs/dims_${it}.sh
      qsub -l h_rt=00:10:00 -l h_vmem=4G -N dims -hold_jid breaks -m as -M $MAIL -o $OUTDIR/logs/ -e -o $OUTDIR/logs/ $OUTDIR/jobs/dims_${it}.sh
