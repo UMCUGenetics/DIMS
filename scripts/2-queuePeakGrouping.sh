@@ -17,8 +17,8 @@ it=0
 find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | while read hmdb;
  do
    it=$((it+1))
-   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/peakGrouping_${scanmode}_${i}.sh
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_${i}" -m as -M $MAIL -o $OUTDIR/logs/grouping_hmdb/${scanmode}_${i}.o -e $OUTDIR/logs/grouping_hmdb/${scanmode}_${i}.e $OUTDIR/jobs/peakGrouping_${scanmode}_${i}.sh
+   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/peakGrouping_${scanmode}_${it}.sh
+   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/grouping_hmdb/${scanmode}_${it}.o -e $OUTDIR/logs/grouping_hmdb/${scanmode}_${it}.e $OUTDIR/jobs/peakGrouping_${scanmode}_${it}.sh
  done
 
 echo "Rscript $SCRIPTS/R/7-collectSamplesGroupedHMDB.R $OUTDIR $scanmode $SCRIPTS/R" > $OUTDIR/jobs/collectSamplesGroupedHMDB_${scanmode}.sh

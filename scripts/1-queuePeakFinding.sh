@@ -17,8 +17,8 @@ it=0
 find "$OUTDIR/average_pklist" -iname $label | while read sample;
  do
    it=$((it+1))
-   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/peakFinding_${scanmode}_${i}.sh
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_${i}" -m as -M $MAIL -o $OUTDIR/logs/specpks/ -e $OUTDIR/logs/specpks $OUTDIR/jobs/peakFinding_${scanmode}_${i}.sh
+   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/peakFinding_${scanmode}_${it}.sh
+   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/specpks/ -e $OUTDIR/logs/specpks $OUTDIR/jobs/peakFinding_${scanmode}_${it}.sh
  done
 
 exit 0
