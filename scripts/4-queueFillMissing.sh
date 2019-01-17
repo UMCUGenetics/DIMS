@@ -14,7 +14,7 @@ adducts=$9
 . $INDIR/settings.config
 
 it=0
-find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | while read rdata;
+find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
   it=$((it+1))
   echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/fillMissing_${scanmode}_${it}.sh
@@ -22,7 +22,7 @@ find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | while read rdata;
  done
 
 it=0
-find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | while read rdata2;
+find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rdata2;
  do
   it=$((it+1))
   echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata2 $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/fillMissing2_${scanmode}_${it}.sh

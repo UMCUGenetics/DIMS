@@ -14,7 +14,7 @@ adducts=$9
 . $INDIR/settings.config
 
 it=0
-find "$OUTDIR/hmdb_part_adductSums" -iname "${scanmode}_*" | while read hmdb;
+find "$OUTDIR/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
     it=$((it+1))
     echo "Rscript $SCRIPTS/R/11-runSumAdducts.R $hmdb $OUTDIR $scanmode $adducts $SCRIPTS/R" > $OUTDIR/jobs/sumAdducts_${scanmode}_${it}.sh
