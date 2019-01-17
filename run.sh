@@ -114,7 +114,7 @@ fi
 . $INDIR/settings.config
 
 
-mkdir -p $LOGDIR
+#mkdir -p $LOGDIR
 mkdir -p $OUTDIR
 mkdir -p $OUTDIR/jobs
 mkdir -p $OUTDIR/logs

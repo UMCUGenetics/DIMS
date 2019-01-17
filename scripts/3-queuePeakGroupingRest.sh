@@ -14,7 +14,7 @@ adducts=$9
 . $INDIR/settings.config
 
 it=0
-find "$OUTDIR/specpks_all_rest" -iname "${scanmode}_*" | while read file;
+find "$OUTDIR/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
    it=$((it+1))
    echo "Rscript $SCRIPTS/R/8-peakGrouping.2.0.rest.R $file $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/peakGroupingRest_${scanmode}_${it}.sh

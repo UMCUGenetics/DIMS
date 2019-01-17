@@ -14,7 +14,7 @@ adducts=$9
 . $INDIR/settings.config
 
 it=0
-find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | while read hmdb;
+find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    it=$((it+1))
    echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/peakGrouping_${scanmode}_${it}.sh
