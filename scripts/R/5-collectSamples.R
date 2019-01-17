@@ -53,7 +53,7 @@ run <- function(resultDir, scanmode, scripts) {
     if (length(index)>0) outlist.tot = outlist.tot[-index,]
 
     outdir=paste(resultDir, "specpks_all", sep="/")
-    dir.create(outdir)
+    dir.create(outdir,showWarnings = F)
     save(outlist.tot, file=paste(outdir, paste(scanmode, "RData", sep="."), sep="/"))
 
     # cut HMDB ##########################################################################################################################################
