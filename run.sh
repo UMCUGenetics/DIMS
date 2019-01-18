@@ -127,6 +127,7 @@ mkdir -p $OUTDIR/logs/grouping_rest
 #mkdir -p $OUTDIR/logs/hmdb_part_adductSums
 mkdir -p $OUTDIR/logs/pklist
 mkdir -p $OUTDIR/logs/samplePeaksFilled
+mkdir -p $OUTDIR/logs/samplePeaksFilled2
 mkdir -p $OUTDIR/logs/specpks
 #mkdir -p $OUTDIR/logs/specpks_all
 #mkdir -p $OUTDIR/logs/specpks_all_rest

@@ -18,7 +18,7 @@ find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
   it=$((it+1))
   echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/fillMissing_${scanmode}_${it}.sh
-  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/samplePeaksFilled/${it}.o -e $OUTDIR/logs/samplePeaksFilled/${it}.e $OUTDIR/jobs/fillMissing_${scanmode}_${it}.sh
+  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/samplePeaksFilled/${scanmode}_${it}.o -e $OUTDIR/logs/samplePeaksFilled/${scanmode}_${it}.e $OUTDIR/jobs/fillMissing_${scanmode}_${it}.sh
  done
 
 it=0
