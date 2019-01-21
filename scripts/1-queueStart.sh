@@ -20,7 +20,7 @@ find $INDIR -iname "*.mzXML" | sort | while read mzXML;
      fi
 
      echo "Rscript $SCRIPTS/R/2-DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R" > $OUTDIR/jobs/2-DIMS/$(basename $mzXML .mzXML).sh
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${i}" -hold_jid "breaks" -m as -M $MAIL -o $OUTDIR/logs/2-DIMS -e $OUTDIR/logs/2-DIMS $OUTDIR/jobs/2-DIMS/$(basename $mzXML .mzXML).sh
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${it}" -hold_jid "breaks" -m as -M $MAIL -o $OUTDIR/logs/2-DIMS -e $OUTDIR/logs/2-DIMS $OUTDIR/jobs/2-DIMS/$(basename $mzXML .mzXML).sh
  done
 
 echo "Rscript $SCRIPTS/R/3-averageTechReplicates.R $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R" > $OUTDIR/jobs/3-averageTechReplicates.sh
