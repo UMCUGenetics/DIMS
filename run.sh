@@ -72,8 +72,8 @@ shift "$((OPTIND-1))"
 if [ -z ${NAME} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${VERBOSE} -gt 0 ] ; then set -x ; fi
 
-BASE=/hpc/dbg_mz
-#BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
+#BASE=/hpc/dbg_mz
+BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 INDIR=$BASE/raw_data/${NAME}
 OUTDIR=$BASE/processed/${NAME}
 SCRIPTS=$PWD/scripts
@@ -90,69 +90,69 @@ do
       * ) echo "Please answer yes or no.";;
   esac
 done
+declare -a scriptsSH=("1-queueStart" \
+                      "2-queuePeakFinding" \
+                      "3-queuePeakGrouping" \
+                      "4-queuePeakGroupingRest" \
+                      "5-queueFillMissing" \
+                      "6-queueSumAdducts" )
+
+declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
+                     "2-DIMS" \
+                     "3-averageTechReplicates" \
+                     "4-peakFinding.2.0" \
+                     "5-collectSamples" \
+                     "6-peakGrouping.2.0" \
+                     "7-collectSamplesGroupedHMDB" \
+                     "8-peakGrouping.2.0.rest" \
+                     "9-runFillMissing" \
+                     "10-collectSamplesFilled" \
+                     "11-runSumAdducts" \
+                     "12-collectSamplesAdded" )
+
 
 # Check existence input dir
 if [ ! -d $INDIR ]; then
 	show_help "The input directory for run $NAME does not exist at
     $INDIR${NC}\n"
 else
-	# All the pipeline files and possible input files are listed here.
-	for pipelineFile in \
+  # bash queueing scripts
+  for s in "${scriptsSH[@]}"
+  do
+    script=$SCRIPTS/${s}.sh
+    if ! [ -f ${script} ]; then
+     show_help "${script} does not exist."
+    fi
+    mkdir -p $OUTDIR/logs/queue/$s
+    mkdir -p $OUTDIR/jobs/queue/$s
+  done
+
+  # R scripts
+  for s in "${scriptsR[@]}"
+  do
+    script=$SCRIPTS/R/${s}.R
+    if ! [ -f ${script} ]; then
+     show_help "${script} does not exist."
+    fi
+    mkdir -p $OUTDIR/logs/$s
+    mkdir -p $OUTDIR/jobs/$s
+  done
+
+  # etc files
+  for file in \
 		$INDIR/settings.config \
 	  $INDIR/init.RData \
-	  #$PWD"/db" \
-
-	# Their presence are checked.
+	  $PWD/db/HMDB_add_iso_corrNaCl_only_IS.RData \
+    $PWD/db/HMDB_add_iso_corrNaCl_with_IS.RData \
+    $PWD/db/HMDB_add_iso_corrNaCl.RData \
+    $PWD/db/HMDB_with_info_relevance.RData \
+    $PWD/db/TheoreticalMZ_NegPos_incNaCl.txt
 	do
-		if ! [ -f ${pipelineFile} ]; then
-			show_help "${pipelineFile} does not exist."
+		if ! [ -f ${file} ]; then
+			show_help "${file} does not exist."
 		fi
 	done
 fi
 
-# Load parameters
-. $INDIR/settings.config
-
-
-#mkdir -p $LOGDIR
-mkdir -p $OUTDIR
-mkdir -p $OUTDIR/jobs
-mkdir -p $OUTDIR/logs
-mkdir -p $OUTDIR/logs/adductSums
-#mkdir -p $OUTDIR/logs/average_pklist
-mkdir -p $OUTDIR/logs/grouping_hmdb
-#mkdir -p $OUTDIR/logs/grouping_hmdb_done
-mkdir -p $OUTDIR/logs/grouping_rest
-#mkdir -p $OUTDIR/logs/hmdb_part
-#mkdir -p $OUTDIR/logs/hmdb_part_adductSums
-mkdir -p $OUTDIR/logs/pklist
-mkdir -p $OUTDIR/logs/samplePeaksFilled
-mkdir -p $OUTDIR/logs/samplePeaksFilled2
-mkdir -p $OUTDIR/logs/specpks
-#mkdir -p $OUTDIR/logs/specpks_all
-#mkdir -p $OUTDIR/logs/specpks_all_rest
-
-it=0
-find $INDIR -iname "*.mzXML" | sort | while read mzXML;
- do
-     echo "Processing file $mzXML"
-     it=$((it+1))
-     output=$(basename $mzXML .mzXML)".RData"
-
-     if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
-       echo "Rscript $SCRIPTS/R/1-generateBreaksFwhm.HPC.R $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R" > $OUTDIR/jobs/breaks.sh
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $OUTDIR/logs -e $OUTDIR/logs $OUTDIR/jobs/breaks.sh
-     fi
-
-     if [ ! -f $OUTDIR/pklist/$output ] ; then
-       echo "Rscript $SCRIPTS/R/2-DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R" > $OUTDIR/jobs/${output}.sh
-       qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${i}" -hold_jid "breaks" -m as -M $MAIL -o $OUTDIR/logs/pklist/${output}.o -e $OUTDIR/logs/pklist/${output}.e $OUTDIR/jobs/${output}.sh
-     fi
- done
-
-echo "Rscript $SCRIPTS/R/3-averageTechReplicates.R $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R" > $OUTDIR/jobs/average.sh
-qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $MAIL -o $OUTDIR/logs -e $OUTDIR/logs $OUTDIR/jobs/average.sh
-
-
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $MAIL -o $OUTDIR/logs -e $OUTDIR/logs $SCRIPTS/1-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL "negative" $thresh_neg "*_neg.RData" "1"
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $MAIL -o $OUTDIR/logs -e $OUTDIR/logs $SCRIPTS/1-queuePeakFinding.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL "positive" $thresh_pos "*_pos.RData" "1,2"
+# start
+qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -m as -M $MAIL -o $OUTDIR/logs/queue/1-queueStart -e $OUTDIR/logs/queue/1-queueStart $SCRIPTS/1-queueStart.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL
