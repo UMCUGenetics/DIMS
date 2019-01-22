@@ -13,8 +13,8 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   sampname <- strsplit(sampname, ".mzXML")[[1]][1]
   print(sampname)
 
-  library("xcms")
-  library("Cairo")
+  suppressPackageStartupMessages(library("xcms"))
+  suppressPackageStartupMessages(library("Cairo"))
   options(digits=16)
 
   ### process one sample at a time and find peaks FOR BOTH SCAN MODES! #

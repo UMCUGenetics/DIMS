@@ -16,7 +16,7 @@ run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
 
-  message(paste("File to group:", fileIn))
+  #message(paste("File to group:", fileIn))
 
   groupingRest(outdir, fileIn, scanmode)
 

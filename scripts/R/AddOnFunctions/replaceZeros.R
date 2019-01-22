@@ -18,18 +18,18 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   # width=1024
   # height=768
 
-  message(paste("file", file))
-  message(paste("scanmode", scanmode))
-  message(paste("resol", resol))
-  message(paste("outdir", outdir))
-  message(paste("thresh", thresh))
-  message(paste("scriptDir", scriptDir))
+  # message(paste("file", file))
+  # message(paste("scanmode", scanmode))
+  # message(paste("resol", resol))
+  # message(paste("outdir", outdir))
+  # message(paste("thresh", thresh))
+  # message(paste("scriptDir", scriptDir))
 
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
 
   name = as.vector(unlist(strsplit(file, "/", fixed=TRUE)))
   name = name[length(name)]
-  message(paste("File name: ", name))
+  # message(paste("File name: ", name))
 
   # load samplePeaks
   # load  outpgrlist
@@ -92,13 +92,13 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
 
   # Replace "Negative" by "negative" in ident.hires.noise
   final.outlist.idpat2 = ident.hires.noise.HPC(outpgrlist, allAdducts, scanmode=label2, noise.MZ, look4=look4.add2, resol=resol, slope=0, incpt=0, ppm.fixed=2, ppm.iso.fixed=2)
-  message(paste(sum(final.outlist.idpat2[ , "assi"] != ""), "assigned noise peaks"))
+  # message(paste(sum(final.outlist.idpat2[ , "assi"] != ""), "assigned noise peaks"))
   tmp <- final.outlist.idpat2[ , c("assi", "theormz")]
   colnames(tmp) <- c("assi_noise",  "theormz_noise")
 
   final.outlist.idpat3 <- cbind(outpgrlist, tmp)
   #############################################################################################
 
-  message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
+  # message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
   save(final.outlist.idpat3, file=paste(outdir, "/samplePeaksFilled/", name, sep=""))
 }
