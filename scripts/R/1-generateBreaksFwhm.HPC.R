@@ -60,7 +60,7 @@ run <- function(xmlfile, outdir, trim, resol, nrepl) {
 }
 
 
-message("\nStart generateBreaksFwhm.HPC.R")
+cat("Start generateBreaksFwhm.HPC.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -69,4 +69,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
 
-message("Ready generateBreaksFwhm.HPC.R")
+cat("Ready generateBreaksFwhm.HPC.R")

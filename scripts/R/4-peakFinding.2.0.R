@@ -38,7 +38,7 @@ run <- function(file, outdir, scanmode, thresh, resol, scripts) {
   }
 }
 
-message("\nStart peakFinding.2.0.R")
+cat("Start peakFinding.2.0.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -47,4 +47,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
 
-message("Ready peakFinding.2.0.R")
+cat("Ready peakFinding.2.0.R")

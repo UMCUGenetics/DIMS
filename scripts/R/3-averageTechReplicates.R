@@ -110,7 +110,7 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
   write.table(remove_neg, file=paste(outdir, "miss_infusions_neg.txt", sep="/"), row.names=FALSE, col.names=FALSE ,sep= "\t")
 }
 
-message("\nStart averageTechReplicates.R")
+cat("Start averageTechReplicates.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -119,4 +119,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]))
 
-message("Ready averageTechReplicates.R")
+cat("Ready averageTechReplicates.R")

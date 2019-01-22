@@ -21,7 +21,7 @@ run <- function(resultDir, scanmode, scripts) {
   }
 
   #if (is.null(notRun)){
-    message("Collecting samples!")
+    cat("Collecting samples!")
 
     # negative
     filepath =  paste(resultDir, "specpks", sep="/")
@@ -153,7 +153,7 @@ run <- function(resultDir, scanmode, scripts) {
   }
 }
 
-message("\nStart collectSamples.R")
+cat("Start collectSamples.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -162,4 +162,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3])
 
-message("Ready collectSamples.R")
+cat("Ready collectSamples.R")

@@ -117,7 +117,7 @@ run <- function(resultDir, scanmode, normalization, scripts) {
 
 }
 
-message("\nStart collectSamplesFilled.R")
+cat("Start collectSamplesFilled.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -126,4 +126,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4])
 
-message("Ready collectSamplesFilled.R")
+cat("Ready collectSamplesFilled.R")

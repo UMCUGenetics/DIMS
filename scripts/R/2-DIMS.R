@@ -61,7 +61,7 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
 
 }
 
-message("\nStart DIMS.R")
+cat("Start DIMS.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -70,4 +70,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]), as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
 
-message("Ready DIMS.R")
+cat("Ready DIMS.R")

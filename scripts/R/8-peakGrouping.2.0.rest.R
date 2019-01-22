@@ -22,7 +22,7 @@ run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
 
 }
 
-message("\nStart peakGrouping.2.0.rest.R")
+cat("Start peakGrouping.2.0.rest.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -31,4 +31,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3], as.numeric(cmd_args[4]), cmd_args[5])
 
-message("Ready peakGrouping.2.0.rest.R")
+cat("Ready peakGrouping.2.0.rest.R")
