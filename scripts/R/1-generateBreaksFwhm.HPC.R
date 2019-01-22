@@ -11,7 +11,7 @@ run <- function(xmlfile, outdir, trim, resol, nrepl) {
   posRes=NULL
   negRes=NULL
 
-  library("xcms")
+  suppressPackageStartupMessages(library("xcms"))
 
   dir.create(outdir, showWarnings = F)
 

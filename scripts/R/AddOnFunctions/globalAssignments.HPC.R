@@ -8,7 +8,7 @@ options(digits=16)
 
 #library(OrgMassSpecR)
 
-library(lattice)
+suppressPackageStartupMessages(library(lattice))
 # The following list was copied from Rdisop elements.R and corrected for C, H, O, Cl, S according to NIST
 Ba <- list(name= 'Ba', mass=130, isotope=list(mass=c(-0.093718, 0, -0.094958, 0, -0.095514, -0.094335, -0.095447, -0.094188, -0.094768),                                      abundance=c(0.00106, 0, 0.00101, 0, 0.02417, 0.06592, 0.07854, 0.1123, 0.717)))
 Br <- list(name= 'Br', mass=79,  isotope=list(mass=c(-0.0816639, 0, -0.083711),                                                                                               abundance=c(0.5069, 0, 0.4931)))

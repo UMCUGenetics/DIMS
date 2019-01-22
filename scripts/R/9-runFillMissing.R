@@ -11,7 +11,7 @@ run <- function(file, outdir, scanmode, thresh, resol, scripts) {
 # thresh=2000
 # outdir="./results"
 
-  message(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
+  #message(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
 
   source(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
   replaceZeros(file,scanmode,resol,outdir,thresh,scripts)
