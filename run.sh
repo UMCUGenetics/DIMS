@@ -155,5 +155,9 @@ fi
 
 mkdir -p $OUTDIR/logs/queue
 
+cp $INDIR/settings.config $OUTDIR/logs
+cp $INDIR/init.RData $OUTDIR/logs
+git rev-parse HEAD > $OUTDIR/logs/commit
+
 # start
 qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -m as -M $MAIL -o $OUTDIR/logs/queue/1-queueStart -e $OUTDIR/logs/queue/1-queueStart $SCRIPTS/1-queueStart.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL
