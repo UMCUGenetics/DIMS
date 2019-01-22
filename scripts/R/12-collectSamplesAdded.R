@@ -17,7 +17,7 @@ run <- function(resultDir, scanmode) {
   save(outlist.tot, file=paste(resultDir, "/adductSums_", scanmode, ".RData", sep=""))
 }
 
-message("\nStart collectSamplesAdded.R")
+cat("Start collectSamplesAdded.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -26,4 +26,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2])
 
-message("Ready collectSamplesAdded.R")
+cat("Ready collectSamplesAdded.R")

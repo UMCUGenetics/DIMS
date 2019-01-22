@@ -111,7 +111,7 @@ run <- function(resultDir, scanmode, ppm=2) {
 
 }
 
-message("\nStart collectSamplesGroupedHMDB.R")
+cat("Start collectSamplesGroupedHMDB.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -120,4 +120,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2])
 
-message("Ready collectSamplesGroupedHMDB.R")
+cat("Ready collectSamplesGroupedHMDB.R")

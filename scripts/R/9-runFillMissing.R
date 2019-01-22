@@ -17,7 +17,7 @@ run <- function(file, outdir, scanmode, thresh, resol, scripts) {
   replaceZeros(file,scanmode,resol,outdir,thresh,scripts)
 }
 
-message("\nStart runFillMissing.R")
+cat("Start runFillMissing.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
@@ -26,4 +26,4 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2], cmd_args[3],  as.numeric(cmd_args[4]), as.numeric(cmd_args[5]), cmd_args[6])
 
-message("Ready runFillMissing.R")
+cat("Ready runFillMissing.R")
