@@ -123,8 +123,6 @@ else
     if ! [ -f ${script} ]; then
      show_help "${script} does not exist."
     fi
-    mkdir -p $OUTDIR/logs/queue/$s
-    mkdir -p $OUTDIR/jobs/queue/$s
   done
 
   # R scripts
@@ -153,6 +151,9 @@ else
 		fi
 	done
 fi
+
+
+mkdir -p $OUTDIR/logs/queue
 
 # start
 qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -m as -M $MAIL -o $OUTDIR/logs/queue/1-queueStart -e $OUTDIR/logs/queue/1-queueStart $SCRIPTS/1-queueStart.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL

@@ -13,20 +13,18 @@ adducts=$9
 
 . $INDIR/settings.config
 
-it=0
 find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
-  it=$((it+1))
-  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing_${scanmode}_${it}.sh
-  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing_${scanmode}_${it}.sh
+  input=$(basename $rdata .RData)
+  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing_${scanmode}_${input}.sh
+  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing_${scanmode}_${input}.sh
  done
 
-it=0
 find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rdata2;
  do
-  it=$((it+1))
-  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata2 $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing2_${scanmode}_${it}.sh
-  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_${it}" -hold_jid "peakFilling_${scanmode}_*" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing2 -e $OUTDIR/logs/9-runFillMissing2 $OUTDIR/jobs/9-runFillMissing2_${scanmode}_${it}.sh
+  input=$(basename $rdata2 .RData)
+  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata2 $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing2_${scanmode}_${input}.sh
+  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_${input}" -hold_jid "peakFilling_${scanmode}_*" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing2_${scanmode}_${input}.sh
  done
 
 echo "Rscript $SCRIPTS/R/10-collectSamplesFilled.R $OUTDIR $scanmode $normalization $SCRIPTS/R" > $OUTDIR/jobs/10-collectSamplesFilled_${scanmode}.sh

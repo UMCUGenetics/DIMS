@@ -13,12 +13,11 @@ adducts=$9
 
 . $INDIR/settings.config
 
-it=0
 find "$OUTDIR/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
-   it=$((it+1))
-   echo "Rscript $SCRIPTS/R/8-peakGrouping.2.0.rest.R $file $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/8-peakGrouping.2.0_${scanmode}_${it}.sh
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/8-peakGrouping.2.0 -e $OUTDIR/logs/8-peakGrouping.2.0 $OUTDIR/jobs/8-peakGrouping.2.0_${scanmode}_${it}.sh
+   input=$(basename $file .RData)
+   echo "Rscript $SCRIPTS/R/8-peakGrouping.2.0.rest.R $file $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/8-peakGrouping.2.0.rest_${scanmode}_${input}.sh
+   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/8-peakGrouping.2.0.rest -e $OUTDIR/logs/8-peakGrouping.2.0.rest $OUTDIR/jobs/8-peakGrouping.2.0.rest_${scanmode}_${input}.sh
  done
 
 qsub -l h_rt=01:00:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $MAIL -o $OUTDIR/logs/queue/5-queueFillMissing -e $OUTDIR/logs/queue/5-queueFillMissing $SCRIPTS/5-queueFillMissing.sh $INDIR $OUTDIR $SCRIPTS $LOGDIR $MAIL $scanmode $thresh $label $adducts
