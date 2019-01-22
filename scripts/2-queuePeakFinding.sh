@@ -13,12 +13,11 @@ adducts=$9
 
 . $INDIR/settings.config
 
-it=0
 find "$OUTDIR/average_pklist" -iname $label | sort | while read sample;
  do
-   it=$((it+1))
-   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/4-peakFinding.2.0_${scanmode}_${it}.sh
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_${it}" -m as -M $MAIL -o $OUTDIR/logs/4-peakFinding.2.0 -e $OUTDIR/logs/4-peakFinding.2.0 $OUTDIR/jobs/4-peakFinding.2.0_${scanmode}_${it}.sh
+   input=$(basename $sample .RData)
+   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/4-peakFinding.2.0/${scanmode}_${input}.sh
+   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/4-peakFinding.2.0 -e $OUTDIR/logs/4-peakFinding.2.0 $OUTDIR/jobs/4-peakFinding.2.0/${scanmode}_${input}.sh
  done
 
 echo "Rscript $SCRIPTS/R/5-collectSamples.R $OUTDIR $scanmode $SCRIPTS/R" > $OUTDIR/jobs/5-collectSamples_${scanmode}.sh

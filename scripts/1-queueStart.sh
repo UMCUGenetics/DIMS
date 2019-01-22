@@ -11,16 +11,15 @@ MAIL=$5
 it=0
 find $INDIR -iname "*.mzXML" | sort | while read mzXML;
  do
-     echo "Processing file $mzXML"
      it=$((it+1))
-
+     input=$(basename $mzXML .mzXML)
      if [ $it == 1 ] && [ ! -f $OUTDIR/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
        echo "Rscript $SCRIPTS/R/1-generateBreaksFwhm.HPC.R $mzXML $OUTDIR $trim $resol $nrepl $SCRIPTS/R" > $OUTDIR/jobs/1-generateBreaksFwhm.HPC.sh
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $MAIL -o $OUTDIR/logs/1-generateBreaksFwhm.HPC -e $OUTDIR/logs/1-generateBreaksFwhm.HPC $OUTDIR/jobs/1-generateBreaksFwhm.HPC.sh
      fi
 
-     echo "Rscript $SCRIPTS/R/2-DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R" > $OUTDIR/jobs/2-DIMS/$(basename $mzXML .mzXML).sh
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${it}" -hold_jid "breaks" -m as -M $MAIL -o $OUTDIR/logs/2-DIMS -e $OUTDIR/logs/2-DIMS $OUTDIR/jobs/2-DIMS/$(basename $mzXML .mzXML).sh
+     echo "Rscript $SCRIPTS/R/2-DIMS.R $mzXML $OUTDIR $trim $dimsThresh $resol $SCRIPTS/R" > $OUTDIR/jobs/2-DIMS/${input}.sh
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${input}" -hold_jid "breaks" -m as -M $MAIL -o $OUTDIR/logs/2-DIMS -e $OUTDIR/logs/2-DIMS $OUTDIR/jobs/2-DIMS/${input}.sh
  done
 
 echo "Rscript $SCRIPTS/R/3-averageTechReplicates.R $INDIR $OUTDIR $nrepl $thresh2remove $dimsThresh $SCRIPTS/R" > $OUTDIR/jobs/3-averageTechReplicates.sh
