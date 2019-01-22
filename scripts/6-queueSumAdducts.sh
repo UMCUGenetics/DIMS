@@ -21,6 +21,6 @@ find "$OUTDIR/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read h
 done
 
 echo "Rscript $SCRIPTS/R/12-collectSamplesAdded.R $OUTDIR $scanmode $SCRIPTS/R" > $OUTDIR/jobs/12-collectSamplesAdded_${scanmode}.sh
-qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $MAIL -o $OUTDIR/logs/12-collectSamplesAdded -e $OUTDIR/logs/12-collectSamplesAdded $OUTDIR/jobs/12-collectSamplesAdded_${scanmode}.sh
+qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $MAIL -o $OUTDIR/logs/12-collectSamplesAdded -e $OUTDIR/logs/12-collectSamplesAdded $OUTDIR/jobs/12-collectSamplesAdded_${scanmode}.sh
 
 #qsub -l h_rt=00:05:00 -l h_vmem=500M -N "mail_$scanmode" -hold_jid "sumAdducts_$scanmode" -m as -M $MAIL -o $JOBS -e $ERRORS $SCRIPTS/18-mail.sh $MAIL
