@@ -24,6 +24,6 @@ findPeaks.Gauss.HPC <- function(plist, breaks.fwhm, int.factor, scale, resol, ou
 
   save(outlist.persample, file=paste(outdir, "specpks", paste(sampname, "_", scanmode, ".RData", sep=""), sep="/"))
 
-  message(paste("There were", values$spikes, "spikes!"))
+  cat(paste("There were", values$spikes, "spikes!"))
   #return(peaklist.all)
 }

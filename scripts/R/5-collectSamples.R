@@ -30,7 +30,7 @@ run <- function(resultDir, scanmode, scripts) {
     outlist.tot=NULL
     for (i in 1:length(files)) {
 
-      message(files[i])
+      cat(files[i])
       load(files[i])
 
       if (is.null(outlist.persample) || (dim(outlist.persample)[1]==0)){
@@ -140,7 +140,7 @@ run <- function(resultDir, scanmode, scripts) {
     # message(paste("Process", i+2-1,":", dim(outlist_part)[1]))
     save(outlist_part, file=paste(outdir, paste(scanmode, paste("hmdb",i+1,"RData", sep="."), sep="_"), sep="/"))
     check=check+dim(outlist_part)[1]
-    message(paste("Check", check==dim(outlist)[1]))
+    cat(paste("Check", check==dim(outlist)[1]))
 
     }
 

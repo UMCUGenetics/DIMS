@@ -9,7 +9,7 @@ run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
 
-  message(paste("File to group:", fileIn))
+  cat(paste("File to group:", fileIn))
 
   # load(paste(outdir, "repl.pattern.RData", sep="/"))
   # if (scanmode=="negative") {
