@@ -73,8 +73,8 @@ shift "$((OPTIND-1))"
 if [ -z ${NAME} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${VERBOSE} -gt 0 ] ; then set -x ; fi
 
-#BASE=/hpc/dbg_mz
-BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
+BASE=/hpc/dbg_mz
+#BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 INDIR=$BASE/raw_data/${NAME}
 OUTDIR=$BASE/processed/${NAME}
 SCRIPTS=$PWD/scripts
@@ -191,7 +191,6 @@ doScanmode() {
   label=$3
   adducts=$4
 
-  qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $MAIL -o $OUTDIR/logs/queue/2-queuePeakFinding -e $OUTDIR/logs/queue/2-queuePeakFinding $OUTDIR/jobs/2-queuePeakFinding_${scanmode}.sh
 
   # 2-queuePeakFinding.sh
 cat << EOF >> $OUTDIR/jobs/2-queuePeakFinding_${scanmode}.sh
@@ -281,6 +280,8 @@ echo "Rscript $SCRIPTS/R/12-collectSamplesAdded.R $OUTDIR $scanmode $SCRIPTS/R" 
 qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $MAIL -o $OUTDIR/logs/12-collectSamplesAdded -e $OUTDIR/logs/12-collectSamplesAdded $OUTDIR/jobs/12-collectSamplesAdded/${scanmode}.sh
 EOF
 
+
+  qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $MAIL -o $OUTDIR/logs/queue/2-queuePeakFinding -e $OUTDIR/logs/queue/2-queuePeakFinding $OUTDIR/jobs/2-queuePeakFinding_${scanmode}.sh
 }
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
