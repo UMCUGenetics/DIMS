@@ -72,8 +72,8 @@ shift "$((OPTIND-1))"
 if [ -z ${NAME} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${VERBOSE} -gt 0 ] ; then set -x ; fi
 
-#BASE=/hpc/dbg_mz
-BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
+BASE=/hpc/dbg_mz
+#BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 INDIR=$BASE/raw_data/${NAME}
 OUTDIR=$BASE/processed/${NAME}
 SCRIPTS=$PWD/scripts
