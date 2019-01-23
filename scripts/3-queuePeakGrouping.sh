@@ -16,8 +16,8 @@ adducts=$9
 find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    input=$(basename $hmdb .RData)
-   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/6-peakGrouping.2.0_${scanmode}_${input}.sh
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/6-peakGrouping.2.0 -e $OUTDIR/logs/6-peakGrouping.2.0 $OUTDIR/jobs/6-peakGrouping.2.0_${scanmode}_${input}.sh
+   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/6-peakGrouping.2.0/${scanmode}_${input}.sh
+   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/6-peakGrouping.2.0 -e $OUTDIR/logs/6-peakGrouping.2.0 $OUTDIR/jobs/6-peakGrouping.2.0/${scanmode}_${input}.sh
  done
 
 echo "Rscript $SCRIPTS/R/7-collectSamplesGroupedHMDB.R $OUTDIR $scanmode $SCRIPTS/R" > $OUTDIR/jobs/7-collectSamplesGroupedHMDB_${scanmode}.sh

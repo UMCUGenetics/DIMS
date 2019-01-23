@@ -16,8 +16,8 @@ adducts=$9
 find "$OUTDIR/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
     input=$(basename $hmdb .RData)
-    echo "Rscript $SCRIPTS/R/11-runSumAdducts.R $hmdb $OUTDIR $scanmode $adducts $SCRIPTS/R" > $OUTDIR/jobs/11-runSumAdducts_${scanmode}_${input}.sh
-    qsub -l h_rt=02:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/11-runSumAdducts -e $OUTDIR/logs/11-runSumAdducts $OUTDIR/jobs/11-runSumAdducts_${scanmode}_${input}.sh
+    echo "Rscript $SCRIPTS/R/11-runSumAdducts.R $hmdb $OUTDIR $scanmode $adducts $SCRIPTS/R" > $OUTDIR/jobs/11-runSumAdducts/${scanmode}_${input}.sh
+    qsub -l h_rt=02:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/11-runSumAdducts -e $OUTDIR/logs/11-runSumAdducts $OUTDIR/jobs/11-runSumAdducts/${scanmode}_${input}.sh
 done
 
 echo "Rscript $SCRIPTS/R/12-collectSamplesAdded.R $OUTDIR $scanmode $SCRIPTS/R" > $OUTDIR/jobs/12-collectSamplesAdded_${scanmode}.sh
