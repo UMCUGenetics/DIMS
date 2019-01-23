@@ -16,8 +16,8 @@ adducts=$9
 find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
   input=$(basename $rdata .RData)
-  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing_${scanmode}_${input}.sh
-  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing_${scanmode}_${input}.sh
+  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing/${scanmode}_${input}.sh
+  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing/${scanmode}_${input}.sh
  done
 
 find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rdata2;
