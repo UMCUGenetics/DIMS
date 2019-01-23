@@ -93,20 +93,20 @@ run <- function(resultDir, scanmode, ppm=2) {
       n_moved = n_moved + 1
     }
 
-    message(paste("Process", i+1-1,":", dim(outlist_i_min_1)[1]))
+    cat(paste("Process", i+1-1,":", dim(outlist_i_min_1)[1]))
     save(outlist_i_min_1, file=paste(outdir, paste(scanmode, paste("outlist_i_min_1",i,"RData", sep="."), sep="_"), sep="/"))
     check=check+dim(outlist_i_min_1)[1]
   }
 
   outlist_i_min_1=outlist_i
-  message(paste("Process", i+2-1,":", dim(outlist_i_min_1)[1]))
+  cat(paste("Process", i+2-1,":", dim(outlist_i_min_1)[1]))
   save(outlist_i_min_1, file=paste(outdir, paste(scanmode, paste("outlist_i_min_1",i+1,"RData", sep="."), sep="_"), sep="/"))
   check=check+dim(outlist_i_min_1)[1]
 
   if (check==dim(outlist)[1]){
-    message(paste("Check is oke!"))
+    cat(paste("Check is oke!"))
   } else {
-    message(paste("Check is failed!"))
+    cat(paste("Check is failed!"))
   }
 
 }

@@ -23,14 +23,14 @@ run <- function(xmlfile, outdir, trim, resol, nrepl) {
 
   trimLeft = round(x@scantime[length(x@scantime)*trim])
   trimRight = round(x@scantime[length(x@scantime)*(1-trim)])
-  message(paste("trimLeft", trimLeft, sep=" "))
-  message(paste("trimRight", trimRight, sep=" "))
+  cat(paste("trimLeft", trimLeft, sep=" "))
+  cat(paste("trimRight", trimRight, sep=" "))
 
   # Mass range m/z
   lowMZ = x@mzrange[1]
   highMZ = x@mzrange[2]
-  message(paste("lowMZ", lowMZ, sep=" "))
-  message(paste("highMZ", highMZ, sep=" "))
+  cat(paste("lowMZ", lowMZ, sep=" "))
+  cat(paste("highMZ", highMZ, sep=" "))
 
   # breaks.fwhm <- seq(from=lowMZ, to=highMZ, by=deltaMZ)
   # breaks has fixed distance between min and max of a bin.

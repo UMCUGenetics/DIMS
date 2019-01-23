@@ -17,10 +17,10 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
 
       for (j in 1:length(tmp2)){
         if (tmp2[j] %in% bad_samples){
-          message(tmp2[j])
-          message(paste("remove",tmp2[j]))
-          message(paste("remove i",i))
-          message(paste("remove j",j))
+          cat(tmp2[j])
+          cat(paste("remove",tmp2[j]))
+          cat(paste("remove i",i))
+          cat(paste("remove j",j))
 
           remove = c(remove, j)
         }
