@@ -85,7 +85,7 @@ do
   printf "\nAre you sure you want to restart the pipeline for this run, causing all existing files at ${Y}$OUTDIR${NC} to get deleted?"
   read -p " " yn
   case $yn in
-      [Yy]* ) rm -rf $OUTDIR && rm -rf $LOGDIR; break;;
+      [Yy]* ) rm -rf $OUTDIR; break;;
       [Nn]* ) exit;;
       * ) echo "Please answer yes or no.";;
   esac
