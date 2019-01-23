@@ -199,7 +199,7 @@ cat << EOF >> $OUTDIR/jobs/2-queuePeakFinding_${scanmode}.sh
 find "$OUTDIR/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
-   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R $sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/4-peakFinding.2.0/${scanmode}_\${input}.sh
+   echo "Rscript $SCRIPTS/R/4-peakFinding.2.0.R \$sample $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/4-peakFinding.2.0/${scanmode}_\${input}.sh
    qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $MAIL -o $OUTDIR/logs/4-peakFinding.2.0 -e $OUTDIR/logs/4-peakFinding.2.0 $OUTDIR/jobs/4-peakFinding.2.0/${scanmode}_\${input}.sh
  done
 
@@ -217,7 +217,7 @@ cat << EOF >> $OUTDIR/jobs/3-queuePeakGrouping_${scanmode}.sh
 find "$OUTDIR/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    input=\$(basename \$hmdb .RData)
-   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R $hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/6-peakGrouping.2.0/${scanmode}_\${input}.sh
+   echo "Rscript $SCRIPTS/R/6-peakGrouping.2.0.R \$hmdb $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/6-peakGrouping.2.0/${scanmode}_\${input}.sh
    qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}" -m as -M $MAIL -o $OUTDIR/logs/6-peakGrouping.2.0 -e $OUTDIR/logs/6-peakGrouping.2.0 $OUTDIR/jobs/6-peakGrouping.2.0/${scanmode}_\${input}.sh
  done
 
@@ -234,7 +234,7 @@ cat << EOF >> $OUTDIR/jobs/4-queuePeakGroupingRest_${scanmode}.sh
 find "$OUTDIR/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
    input=\$(basename \$file .RData)
-   echo "Rscript $SCRIPTS/R/8-peakGrouping.2.0.rest.R $file $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/8-peakGrouping.2.0.rest/${scanmode}_\${input}.sh
+   echo "Rscript $SCRIPTS/R/8-peakGrouping.2.0.rest.R \$file $OUTDIR $scanmode $resol $SCRIPTS/R" > $OUTDIR/jobs/8-peakGrouping.2.0.rest/${scanmode}_\${input}.sh
    qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_\${input}" -m as -M $MAIL -o $OUTDIR/logs/8-peakGrouping.2.0.rest -e $OUTDIR/logs/8-peakGrouping.2.0.rest $OUTDIR/jobs/8-peakGrouping.2.0.rest/${scanmode}_\${input}.sh
  done
 
@@ -247,15 +247,15 @@ cat << EOF >> $OUTDIR/jobs/5-queueFillMissing_${scanmode}.sh
 
 find "$OUTDIR/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
-  input=$(basename $rdata .RData)
-  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing/${scanmode}_${input}.sh
-  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_${input}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing/${scanmode}_${input}.sh
+  input=\$(basename \$rdata .RData)
+  echo "Rscript $SCRIPTS/R/9-runFillMissing.R \$rdata $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing/${scanmode}_\${input}.sh
+  qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_\${input}" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
 find "$OUTDIR/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rdata2;
  do
   input=\$(basename \$rdata2 .RData)
-  echo "Rscript $SCRIPTS/R/9-runFillMissing.R $rdata2 $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing/${scanmode}_\${input}.sh
+  echo "Rscript $SCRIPTS/R/9-runFillMissing.R \$rdata2 $OUTDIR $scanmode $thresh $resol $SCRIPTS/R" > $OUTDIR/jobs/9-runFillMissing/${scanmode}_\${input}.sh
   qsub -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_\${input}" -hold_jid "peakFilling_${scanmode}_*" -m as -M $MAIL -o $OUTDIR/logs/9-runFillMissing -e $OUTDIR/logs/9-runFillMissing $OUTDIR/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
@@ -272,7 +272,7 @@ cat << EOF >> $OUTDIR/jobs/6-queueSumAdducts_${scanmode}.sh
 find "$OUTDIR/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
     input=\$(basename \$hmdb .RData)
-    echo "Rscript $SCRIPTS/R/11-runSumAdducts.R $hmdb $OUTDIR $scanmode $adducts $SCRIPTS/R" > $OUTDIR/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+    echo "Rscript $SCRIPTS/R/11-runSumAdducts.R \$hmdb $OUTDIR $scanmode $adducts $SCRIPTS/R" > $OUTDIR/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
     qsub -l h_rt=02:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_\${input}" -m as -M $MAIL -o $OUTDIR/logs/11-runSumAdducts -e $OUTDIR/logs/11-runSumAdducts $OUTDIR/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
 done
 
