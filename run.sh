@@ -91,12 +91,6 @@ do
       * ) echo "Please answer yes or no.";;
   esac
 done
-declare -a scriptsSH=("1-queueStart" \
-                      "2-queuePeakFinding" \
-                      "3-queuePeakGrouping" \
-                      "4-queuePeakGroupingRest" \
-                      "5-queueFillMissing" \
-                      "6-queueSumAdducts" )
 
 declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "2-DIMS" \
@@ -117,15 +111,6 @@ if [ ! -d $INDIR ]; then
 	show_help "The input directory for run $NAME does not exist at
     $INDIR${NC}\n"
 else
-  # bash queueing scripts
-  for s in "${scriptsSH[@]}"
-  do
-    script=$SCRIPTS/${s}.sh
-    if ! [ -f ${script} ]; then
-     show_help "${script} does not exist."
-    fi
-  done
-
   # R scripts
   for s in "${scriptsR[@]}"
   do
