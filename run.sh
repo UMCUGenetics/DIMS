@@ -11,7 +11,7 @@ start=`date +%s`
 
 set -o pipefail
 set -e
-set -x
+#set -x
 
 R='\033[0;31m' # Red
 G='\033[0;32m' # Green
