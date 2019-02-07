@@ -90,9 +90,9 @@ done
 declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "2-DIMS" \
                      "3-averageTechReplicates" \
-                     "4-peakFinding.2.0" \
+                     "4-peakFinding" \
                      "5-collectSamples" \
-                     "6-peakGrouping.2.0" \
+                     "6-peakGrouping" \
                      "7-collectSamplesGroupedHMDB" \
                      "8-peakGrouping.rest" \
                      "9-runFillMissing" \
@@ -178,8 +178,8 @@ cat << EOF >> $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
-   echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding.2.0/${scanmode}_\${input}.sh
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding.2.0 -e $outdir/logs/4-peakFinding.2.0 $outdir/jobs/4-peakFinding.2.0/${scanmode}_\${input}.sh
+   echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
+   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $scripts" > $outdir/jobs/5-collectSamples/${scanmode}.sh
@@ -196,8 +196,8 @@ cat << EOF >> $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    input=\$(basename \$hmdb .RData)
-   echo "Rscript $scripts/6-peakGrouping.R \$hmdb $outdir $scanmode $resol $scripts" > $outdir/jobs/6-peakGrouping.2.0/${scanmode}_\${input}.sh
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/6-peakGrouping.2.0 -e $outdir/logs/6-peakGrouping.2.0 $outdir/jobs/6-peakGrouping.2.0/${scanmode}_\${input}.sh
+   echo "Rscript $scripts/6-peakGrouping.R \$hmdb $outdir $scanmode $resol $scripts" > $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
+   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/6-peakGrouping -e $outdir/logs/6-peakGrouping $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/7-collectSamplesGroupedHMDB.R $outdir $scanmode $scripts" > $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
