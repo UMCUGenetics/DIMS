@@ -26,14 +26,20 @@ putty = "\"C:/PuTTY/putty.exe\" -ssh melferink@hpcsubmit.op.umcutrecht.nl -pw co
 
 # raw data
 #root = "Z:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects/Projects 2018"
-root = "Z:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects/Projects 2018/Project 2018_006 Diagnosis_2017_DBS"
+#root = "Z:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects/Projects 2018/Project 2018_006 Diagnosis_2017_DBS"
+root = "/Users/nunen/Documents/GitHub/Dx_metabolomics"
+run = "run1"
 
 # experimental design (ME)
 #root2 = "C:/R_workspace_ME/Experimental_design"   C-drive storage is too low!
-root2="Z:/Metabolomics/DIMS_pipeline/R_workspace_ME/Experimental_design"
+#root2="Z:/Metabolomics/DIMS_pipeline/R_workspace_ME/Experimental_design"
+root2 = "/Users/nunen/Documents/GitHub/Dx_metabolomics"
 
-dims_dir = paste0("/hpc/shared/dbg_mz/", home, "/Direct-Infusion-Pipeline_2.1")
-hpc_pipeline = paste0(user, "@hpct02.op.umcutrecht.nl:", dims_dir)
+#dims_dir = paste0("/hpc/shared/dbg_mz/", home, "/Direct-Infusion-Pipeline_2.1")
+base = "/hpc/dbg_mz"
+pipeline_dir = paste(base, "development", "DEV_Dx_metabolomics", sep="/")
+input_dir = paste(base, "raw_data", run, sep="/")
+hpc_pipeline = paste0(user, "@hpct02.op.umcutrecht.nl:", input_dir)
 #hpc_pipeline = paste0(user, "@hpcs03.op.umcutrecht.nl:", dims_dir)
 #####################################################################################################################
 
@@ -47,63 +53,108 @@ ui <- fluidPage(theme = "style.css",
 
   singleton( tags$head(tags$script(src = "message-handler.js")) ),
   
-  # App title ----
-  titlePanel(tags$b("DIMS pipeline")),
-  
-  tags$br(),
-  
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-    
-    # Sidebar panel for inputs ----
-    sidebarPanel(
-
-        p(tags$b("1) Choose raw file location...")),
-        shinyDirButton("raw_file_location", "Browse...", "1) Choose raw file location..."),
-        tags$br(),tags$br(),
-
-        p(tags$b("2) Upload experimental design...")),
-        shinyFilesButton("experimental_design", "Browse...", "2) Upload experimental design...", multiple=FALSE),
-        tags$br(),tags$br(),
-        # 
-        # p(tags$b("4) Plot TICs")),
-        # actionButton("plot_tics", "Plot"),
-        # tags$br(),tags$br(),
-        # 
-        p(tags$b("4) Run")),
-        actionButton("run", "Run")
-        
+  fluidRow(
+    column(5, # left 
+      titlePanel("DIMS pipeline"),
+      
+      br(), br(),
+      fluidRow(
+        column(8, p(tags$b("1) Choose raw file location..."))),
+        column(4, shinyDirButton("raw_file_location", "Browse...", "1) Choose raw file location..."))
       ),
-    
-    # Main panel for displaying outputs ----
-    mainPanel(
-      useShinyjs(),
-      tabsetPanel(id ="main_tabs", type = "tabs",
-        tabPanel("Selection", fluidPage(tags$br(),
-                        verbatimTextOutput("location"),
-                        tags$br(),
-                           
-                        fluidRow(
-                          column(6, p(tags$b("3) Select samples to be processed..."))),
-                          column(3, actionButton("check_all", "Select / Deselect all"))
-                        ),
-                        tags$br(),
-                        fluidRow(
-                          column(3, checkboxGroupInput("inCheckboxGroup", "")),
-                          column(6, tableOutput("contents"))
-                        )
-              )),
-        # tabPanel("TICs", fluidPage(tags$br(),
-        #                            div(id = "myapp",
-        #                                uiOutput('images')
-        #                            )
-        # )),
-        tabPanel("Exported files", fluidPage(tags$br(),
-                        # tags$h5('Samples will be copied to HPC cluster and processed. This will take several hours! You will recieve an email when finished.'),
-                        # downloadButton("downloadData", "Download"),
-                        # tags$br(),
-                        tableOutput("samples")
-                        ))
+      
+      br(), 
+      fluidRow(
+        column(8, p(tags$b("2) Upload experimental design..."))),
+        column(4, shinyFilesButton("experimental_design", "Browse...", "2) Upload experimental design...", multiple=FALSE))
+      ),
+      
+      br(),
+      p(tags$b("4) Select parameters...")),
+        
+      fluidRow(
+        column(6, 
+          textInput("username", label = "HPC username", value = "")
+        ), 
+        column(6, 
+          passwordInput("password", label = "HPC password", value = "")
+        )
+      ),
+      fluidRow(
+        column(6,  
+         textInput("email", label = "UMC mail", value = ""),
+         selectInput("nrepl", "Technical replicates", list(3, 5)),
+         selectInput("normalization", "Normalization", list("none", "total_IS", "total_ident", "total")),
+         selectInput("thresh2remove", "Threshold to remove", list("1e+09 (plasma)", "5e+08 (blood spots)", "1e+08 (research (Mia))"))
+        ),
+        column(6,
+         numericInput("dims_thresh", "Threshold DIMS", 100, min = 1, max = 1000),
+         numericInput("thresh_pos", "Threshold positive", 2000, min = 20, max = 20000),
+         numericInput("thresh_neg", "Threshold negative", 2000, min = 20, max = 20000),
+         numericInput("trim", "Trim", 0.1, min = 0.01, max = 100)
+         # actionButton("plot_tics", "Plot"),
+        )
+      ),
+      br(),
+      fluidRow(
+        column(6, selectInput("version", "Pipeline version", list("Latest production", "Latest development"))),
+        column(6, textInput("run_name", label = "Run name", value = ""))
+      ),
+      fluidRow(
+        column(8, p(tags$b("5) Start the pipeline")),
+        column(4, actionButton("run", "Run", class = "btn-success")))
+      )
+    ),
+    column(7, # right
+      br(),
+      wellPanel(style = "overflow-y:scroll; max-height: 700px",
+        useShinyjs(),
+        #tabsetPanel(
+          #id ="main_tabs",
+          #type = "tabs",
+          #tabPanel(
+            #"Selection",
+            fluidPage(
+              br(),
+              verbatimTextOutput("location"),
+              
+              br(),   
+              fluidRow(
+                column(8, p(tags$b("3) Select samples to be processed..."))),
+                column(4, actionButton("check_all", "Select / Deselect all"))
+              ),
+              
+              br(),
+              fluidRow(
+                column(4, checkboxGroupInput("inCheckboxGroup", "")),
+                column(8, tableOutput("contents"))
+              )
+            #)
+          #)
+        ),
+        
+        #tabPanel(
+        #  "TICs", 
+        #  fluidPage(
+        #    br(),
+        #    div(
+        #      id = "myapp",
+        #      uiOutput('images')
+        #    )
+        #  )
+        #),
+        
+        tabPanel(
+          "Exported files",
+           fluidPage(
+            br(),
+            # tags$h5('Samples will be copied to HPC cluster and processed. This will take several hours! You will recieve an email when finished.'),
+            # downloadButton("downloadData", "Download"),
+            # br(),
+            tableOutput("samples")
+            
+          )
+        )
       )
     )
   )
@@ -117,7 +168,7 @@ server <- function(input, output, session) {
     
     # message(length(input$image1))
     # shinyjs::onclick("image1",  updateCheckboxGroupInput(session, inputId = "inCheckboxGroup", choices = as.list(x)))
-    shinyjs::onclick("image1",  session$sendCustomMessage(type = "testmessage", message = "Bingo!"))
+    # shinyjs::onclick("image1",  session$sendCustomMessage(type = "testmessage", message = "Bingo!"))
     
     # shinyjs::alert("Thank you!")
     # shinyjs::reset()
@@ -140,49 +191,51 @@ server <- function(input, output, session) {
 
     observeEvent(input$raw_file_location, {
 
-      path <<- paste(as.vector(unlist(input$raw_file_location$path))[-1], collapse = "/", sep="")
-      message(path)
+      path <<- paste(as.vector(unlist(input$raw_file_location['path']))[-1], collapse = "/", sep="")
+      #message(path)
       output$location = renderPrint(path)
 
     })
     
     observeEvent(input$experimental_design, {
 
-      df <<- read.csv(paste0(root2, paste(as.vector(unlist(input$experimental_design$files)), collapse = "/", sep="")),
-                     header = TRUE,
-                     sep = "\t",
-                     quote = "")
-
-      x=1:dim(df)[1]
-      names(x)=df$Sample_Name
-      updateTabsetPanel(session, "main_tabs", selected = "Selection")
-      updateCheckboxGroupInput(session, inputId = "inCheckboxGroup", choices = as.list(x)) # , selected = as.list(x)
-      
-      ###############################################################################################
-      ####################### experimental design ###################################################
-      ###############################################################################################
-      file.remove(paste0(getwd(), "/output/init.RData"))
-
-      sampleNames=as.vector(unlist(df$File_Name))
-      groupNames=unique(as.vector(unlist(df$Sample_Name)))
-      # groupNames=unique(unlist(lapply(strsplit(as.vector(unlist(tbl$Sample_Name)), ".", fixed = TRUE), function(x) x[1])))
-
-      # nsampgrps = number of individual biological samples
-      # nrepl = number of technical replicates per sample
-      nsampgrps = length(sampleNames)/nrepl
-      repl.pattern = NULL
-      if (nrepl == 3){
-        for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
-      } else if (nrepl == 5){
-        for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-4],sampleNames[x*nrepl-3],sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
+      if (!is.na(input$experimental_design['files'])) {
+        df <<- read.csv(paste0(root2, paste(as.vector(unlist(input$experimental_design['files'])), collapse = "/", sep="")),
+                       header = TRUE,
+                       sep = "\t",
+                       quote = "")
+  
+        x=1:dim(df)[1]
+        names(x)=df$Sample_Name
+        updateTabsetPanel(session, "main_tabs", selected = "Selection")
+        updateCheckboxGroupInput(session, inputId = "inCheckboxGroup", choices = as.list(x)) # , selected = as.list(x)
+        
+        ###############################################################################################
+        ####################### experimental design ###################################################
+        ###############################################################################################
+        file.remove(paste0(getwd(), "/output/init.RData"))
+  
+        sampleNames=as.vector(unlist(df$File_Name))
+        groupNames=unique(as.vector(unlist(df$Sample_Name)))
+        # groupNames=unique(unlist(lapply(strsplit(as.vector(unlist(tbl$Sample_Name)), ".", fixed = TRUE), function(x) x[1])))
+  
+        # nsampgrps = number of individual biological samples
+        # nrepl = number of technical replicates per sample
+        nsampgrps = length(sampleNames)/nrepl
+        repl.pattern = NULL
+        if (nrepl == 3){
+          for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
+        } else if (nrepl == 5){
+          for (x in 1:nsampgrps) { repl.pattern <- c(repl.pattern, list(c(sampleNames[x*nrepl-4],sampleNames[x*nrepl-3],sampleNames[x*nrepl-2],sampleNames[x*nrepl-1],sampleNames[x*nrepl])))}
+        }
+        
+        names(repl.pattern) = groupNames
+        
+        save(repl.pattern, file=paste(getwd(), "output/init.RData", sep="/")) 
+        ###############################################################################################
+        ###############################################################################################
+        ###############################################################################################
       }
-      
-      names(repl.pattern) = groupNames
-      
-      save(repl.pattern, file=paste(getwd(), "output/init.RData", sep="/")) 
-      ###############################################################################################
-      ###############################################################################################
-      ###############################################################################################
     })
 
     observeEvent(input$check_all, {
@@ -301,14 +354,19 @@ server <- function(input, output, session) {
     #   }
     # })
     
-    observeEvent(input$run, {
+    observeEvent(input$run, { # run button
       
       # path = "Z:/Metabolomics/Metabolomics Projects/Projects 2015/Research Metabolic/Project 2015_011_SinglePatients/RES_DBS_20180115_SPXI"
       
-      if (is.null(path)){
-        session$sendCustomMessage(type = "testmessage",
-                                  message = "Choose a file location first!")
-      } else {
+      # check input first 
+      
+      #if (is.na(input$raw_file_location['path'])) {
+        #session$sendCustomMessage(type = "testmessage", message = "Choose a file location!")
+      #} else if (is.na(input$experimental_design['files'])) {
+        #session$sendCustomMessage(type = "testmessage", message = "Choose an experimental design!")
+      #} else if (input$username == "") {
+        #session$sendCustomMessage(type = "testmessage", message = "Enter a username!")
+      #} else {
         
         dir.create("output", showWarnings = FALSE)
         dir.create("output/data", showWarnings = FALSE)
@@ -359,9 +417,9 @@ server <- function(input, output, session) {
          # file = paste(files, collapse = " ")
          file = files[i]
 
-         system("cmd.exe",
-                 input = paste(msconvert,  paste("\"", file, "\"", sep="" ), "-o", paste("\"", outputDir, "\"", sep="" ), "--mzXML"),
-                 ignore.stderr=FALSE)
+         #system("cmd.exe",
+         #        input = paste(msconvert,  paste("\"", file, "\"", sep="" ), "-o", paste("\"", outputDir, "\"", sep="" ), "--mzXML"),
+         #        ignore.stderr=FALSE)
         }
         ################################################################################################
 
@@ -370,43 +428,65 @@ server <- function(input, output, session) {
         mzXML = list.files(path = paste(getwd(), "output/data", sep="/"), pattern = "mzXML")
         index = which(samplesDesign %in% mzXML)
 
-        message(paste("Length selected:", length(samplesDesign)))
-        message(paste("Length mzXML files:", length(mzXML)))
-        message(paste("First name selcted:", samplesDesign[1]))
-        message(paste("First file name:", mzXML[1]))
-        message(paste("Length found:", length(index)))
+        #message(paste("Length selected:", length(samplesDesign)))
+        #message(paste("Length mzXML files:", length(mzXML)))
+        #message(paste("First name selected:", samplesDesign[1]))
+        #message(paste("First file name:", mzXML[1]))
+        #message(paste("Length found:", length(index)))
+        
+        if (input$thresh2remove == "1e+09 (plasma)") {
+          thresh2remove = 1000000000
+        } else if (input$thresh2remove == "5e+08 (blood spots)") {
+          thresh2remove = 500000000
+        } else {
+          thresh2remove = 100000000
+        }
+  
+        fileConn = file(paste(getwd(), "output/settings.config", sep = "/"))
+        parameters <- c(paste0("thresh_pos=", input$thresh_pos),
+                       paste0("thresh_neg=", input$thresh_neg),
+                       paste0("dims_thresh=", input$dims_thresh),
+                       paste0("trim=", input$trim),
+                       paste0("nrepl=", input$nrepl),
+                       paste0("normalization=", input$normalization),
+                       paste0("thresh2remove=", thresh2remove),
+                       paste0("email=", input$email)
+        )
+        writeLines(parameters, fileConn, sep = "\n")
+        close(fileConn)
 
         if (length(samplesDesign) != length(index)){
         # if (TRUE){
           session$sendCustomMessage(type = "testmessage",
                                     message = "Design and mzXML files differ!")
         } else {
-          message("Gaan!")
+          #message("Gaan!")
 
           # create results dir ################################################
-          script = paste0("#!/bin/bash\ncd ", dims_dir, "\nmkdir ./results")
-          message(script)
+          #script = paste0("#!/bin/bash\ncd ", input_dir, "\nmkdir ./results")
+          script = ""
+          #message(script)
 
-          fileConn = file(paste(getwd(), "output/putty_cmds_1.txt", sep = "/"))
-          writeLines(script, fileConn)
-          close(fileConn)
+          #fileConn = file(paste(getwd(), "output/putty_cmds_1.txt", sep = "/"))
+          #writeLines(script, fileConn)
+          #close(fileConn)
 
-          system("cmd.exe",
-                 input = paste0(putty, paste(getwd(), "output/putty_cmds_1.txt", sep="/")),
-                 ignore.stderr=FALSE)
+          #system("cmd.exe",
+          #       input = paste0(putty, paste(getwd(), "output/putty_cmds_1.txt", sep="/")),
+          #       ignore.stderr=FALSE)
           #####################################################################
 
           # copy init.RData ###################################################
-          system("cmd.exe",
-                 input = paste(pscp, paste(getwd(), "output/init.RData", sep="/"), paste(hpc_pipeline, "results", sep="/")),
-                 ignore.stderr=FALSE)
+          #system("cmd.exe",
+          #       input = paste(pscp, paste(getwd(), "output/init.RData", sep="/"), hpc_pipeline),
+          #       ignore.stderr=FALSE)
           #####################################################################
 
           # copy data files ###################################################
-          system("cmd.exe",
-                 # input = paste(pscp, paste(getwd(), "output\\data", sep="\\"), hpc_pipeline),
-                 input = paste(pscp, paste(getwd(), "output/data", sep="/"), hpc_pipeline),
-                 ignore.stderr=FALSE)
+          #system("cmd.exe",
+          #       # input = paste(pscp, paste(getwd(), "output\\data", sep="\\"), hpc_pipeline),
+          #       input = paste(pscp, paste(getwd(), "output/data", sep="/"), hpc_pipeline),
+          #       ignore.stderr=FALSE)
           #####################################################################
 
           # # qsub -M your@email.address -m e ...
@@ -426,17 +506,22 @@ server <- function(input, output, session) {
           # ###################################################################
 
           # start pipeline ####################################################
-          # script = paste0("#!/bin/bash\ncd ", dims_dir, "\nsh ./run_DIMS_pipeline_guixr.sh\nsleep 10s\nqstat -u ", user, "\nsleep 10s")
-          script = paste0("#!/bin/bash\ncd ", dims_dir, "\nsh ./run.sh\nsleep 10s\nqstat -u ", user, "\nsleep 10s")
-          message(script)
+          #script = paste0("#!/bin/bash\ncd ", dims_dir, "\nsh ./run_DIMS_pipeline_guixr.sh\nsleep 10s\nqstat -u ", user, "\nsleep 10s")
+          script = paste0("#!/bin/bash\ncd ", pipeline_dir, "\nsh ./run.sh -n ",input$run_name)
+          #message(script)
 
-          fileConn = file(paste(getwd(), "output/putty_cmds_2.txt", sep = "/"))
+          fileConn = file(paste(getwd(), "output/cmds_log.txt", sep = "/"))
           writeLines(script, fileConn)
           close(fileConn)
 
-          system("cmd.exe",
-                 input = paste0(putty, paste(getwd(), "output/putty_cmds_2.txt", sep="/")),
-                 ignore.stderr=FALSE)
+          #system("cmd.exe",
+          #       input = paste0(putty, paste(getwd(), "output/putty_cmds_2.txt", sep="/")),
+          #       ignore.stderr=FALSE)
+          
+          message("?")
+          fileConn = file(paste(getwd(), "output/settings.config", sep = "/"))
+          writeLines(paste0("thresh_pos=",input$thresh_pos), fileConn)
+          writeLines(paste0("thresh_neg=",input$thresh_neg), fileConn)
           #####################################################################
 
           updateTabsetPanel(session, "main_tabs", selected = "Exported files")
@@ -465,7 +550,7 @@ server <- function(input, output, session) {
           session$sendCustomMessage(type = "testmessage",
                                     message = "Samples will be processed @HPC cluster. This will take several hours! You will recieve an email when finished.")
         }
-      }
+      #}
     })
   })
 }
