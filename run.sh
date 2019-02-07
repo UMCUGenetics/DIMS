@@ -42,7 +42,7 @@ function show_help() {
 
   ${C}OPTIONAL ARGS:
     -r - restart the pipeline, removing any existing output for the entered run (default off)
-    -v - verbose logging (default off)
+    -v - verbose printing (default off)
     -h - show help${NC}
 
   ${G}EXAMPLE:
@@ -128,7 +128,7 @@ else
     $PWD/db/TheoreticalMZ_NegPos_incNaCl.txt
 	do
 		if ! [ -f ${file} ]; then
-			show_help "${file} does not exist."
+			show_help "${file} does not exist.\n"
 		fi
 	done
 fi
