@@ -46,7 +46,7 @@ function show_help() {
     -h - show help${NC}
 
   ${G}EXAMPLE:
-    sh run.sh -n run1 -m boop@umcutrecht.nl${NC}
+    sh run.sh -n run1${NC}
 
   "
   exit 1
@@ -61,7 +61,7 @@ do
 		;;
 	v) verbose=1 ;;
   r) restart=1 ;;
-  n) name=${optarg} ;;
+  n) name=${OPTARG} ;;
 	esac
 done
 
