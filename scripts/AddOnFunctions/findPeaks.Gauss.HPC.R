@@ -18,7 +18,7 @@ findPeaks.Gauss.HPC <- function(plist, breaks.fwhm, int.factor, scale, resol, ou
   outlist.persample=cbind("samplenr"=values$nr, "mzmed.pkt"=values$mean, "fq"=values$qual, "mzmin.pkt"=values$min, "mzmax.pkt"=values$max, "height.pkt"=values$area)
   #outlist.persample=cbind("samplenr"=sample.nr, "mzmed.pkt"=peak.mean, "fq"=peak.qual, "mzmin.pkt"=peak.min, "mzmax.pkt"=peak.max, "height.pkt"=peak.area)
   index=which(outlist.persample[,"height.pkt"]==0)
-  if (length(index)>0){
+  if (length(index)>0) {
     outlist.persample=outlist.persample[-index,]
   }
 
