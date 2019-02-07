@@ -74,7 +74,7 @@ base=/hpc/dbg_mz
 #BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 indir=$base/raw_data/${name}
 outdir=$base/processed/${name}
-scripts=$pwd/scripts
+scripts=$PWD/scripts
 
 while [[ ${restart} -gt 0 ]]
 do
@@ -121,11 +121,11 @@ else
   for file in \
 		$indir/settings.config \
 	  $indir/init.RData \
-	  $pwd/db/HMDB_add_iso_corrNaCl_only_IS.RData \
-    $pwd/db/HMDB_add_iso_corrNaCl_with_IS.RData \
-    $pwd/db/HMDB_add_iso_corrNaCl.RData \
-    $pwd/db/HMDB_with_info_relevance.RData \
-    $pwd/db/TheoreticalMZ_NegPos_incNaCl.txt
+	  $PWD/db/HMDB_add_iso_corrNaCl_only_IS.RData \
+    $PWD/db/HMDB_add_iso_corrNaCl_with_IS.RData \
+    $PWD/db/HMDB_add_iso_corrNaCl.RData \
+    $PWD/db/HMDB_with_info_relevance.RData \
+    $PWD/db/TheoreticalMZ_NegPos_incNaCl.txt
 	do
 		if ! [ -f ${file} ]; then
 			show_help "${file} does not exist."
