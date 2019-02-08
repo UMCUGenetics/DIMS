@@ -197,11 +197,11 @@ find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    input=\$(basename \$hmdb .RData)
    echo "Rscript $scripts/6-peakGrouping.R \$hmdb $outdir $scanmode $resol $scripts" > $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
-   qsub -l h_rt=01:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/6-peakGrouping -e $outdir/logs/6-peakGrouping $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
+   qsub -l h_rt=02:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/6-peakGrouping -e $outdir/logs/6-peakGrouping $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/7-collectSamplesGroupedHMDB.R $outdir $scanmode $scripts" > $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
-qsub -l h_rt=00:15:00 -l h_vmem=8G -N "collect1_$scanmode" -hold_jid "grouping_${scanmode}_*" -m as -M $email -o $outdir/logs/7-collectSamplesGroupedHMDB -e $outdir/logs/7-collectSamplesGroupedHMDB $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
+qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect1_$scanmode" -hold_jid "grouping_${scanmode}_*" -m as -M $email -o $outdir/logs/7-collectSamplesGroupedHMDB -e $outdir/logs/7-collectSamplesGroupedHMDB $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 
 qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueGroupingRest_$scanmode" -hold_jid "collect1_$scanmode" -m as -M $email -o $outdir/logs/queue/4-queuePeakGroupingRest -e $outdir/logs/queue/4-queuePeakGroupingRest $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
