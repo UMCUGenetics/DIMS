@@ -153,7 +153,7 @@ it=0
 find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
      it=\$((it+1))
-     input=$(basename \$mzXML .mzXML)
+     input=\$(basename \$mzXML .mzXML)
      if [ \$it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
@@ -274,10 +274,10 @@ find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
     echo "singularity run -B /hpc/dbg_mz/ /hpc/dbg_mz/development/proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+    qsub -l h_rt=00:30:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
