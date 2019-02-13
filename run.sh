@@ -74,7 +74,7 @@ base=/hpc/dbg_mz
 #BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 indir=$base/raw_data/${name}
 outdir=$base/processed/${name}
-scripts=$PWD/scripts
+scripts=$(dirname "$0")/scripts
 
 while [[ ${restart} -gt 0 ]]
 do
@@ -121,11 +121,11 @@ else
   for file in \
 		$indir/settings.config \
 	  $indir/init.RData \
-	  $PWD/db/HMDB_add_iso_corrNaCl_only_IS.RData \
-    $PWD/db/HMDB_add_iso_corrNaCl_with_IS.RData \
-    $PWD/db/HMDB_add_iso_corrNaCl.RData \
-    $PWD/db/HMDB_with_info_relevance.RData \
-    $PWD/db/TheoreticalMZ_NegPos_incNaCl.txt
+	  $(dirname "$0")/db/HMDB_add_iso_corrNaCl_only_IS.RData \
+    $(dirname "$0")/db/HMDB_add_iso_corrNaCl_with_IS.RData \
+    $(dirname "$0")/db/HMDB_add_iso_corrNaCl.RData \
+    $(dirname "$0")/db/HMDB_with_info_relevance.RData \
+    $(dirname "$0")/db/TheoreticalMZ_NegPos_incNaCl.txt
 	do
 		if ! [ -f ${file} ]; then
 			show_help "${file} does not exist.\n"
@@ -145,7 +145,9 @@ git rev-parse HEAD > $outdir/logs/commit
 . $indir/settings.config
 thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
 
+
 # 1-queueStart.sh
+cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
 it=0
 find $indir -iname "*.mzXML" | sort | while read mzXML;
  do
@@ -153,7 +155,7 @@ find $indir -iname "*.mzXML" | sort | while read mzXML;
      input=$(basename $mzXML .mzXML)
      if [ $it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R $mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -hold_jid "converstion_*" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
 
      echo "Rscript $scripts/2-DIMS.R $mzXML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/${input}.sh
@@ -162,6 +164,8 @@ find $indir -iname "*.mzXML" | sort | while read mzXML;
 
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
+
+EOF
 
 
 doScanmode() {
@@ -262,6 +266,17 @@ EOF
 
   qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 }
+
+# 0-queueConversion.sh
+find $indir/data -iname "*.raw" | sort | while read raw;
+  do
+    input=$(basename $raw .raw)
+    echo "singularity exec /hpc/dbg_mz/development/proteowizard wine msconvert $raw --mzXML -o converted" > $outdir/jobs/0-conversion/${input}.sh
+    qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+  done
+
+qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
