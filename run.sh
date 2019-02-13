@@ -149,7 +149,7 @@ thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scien
 # 1-queueStart.sh
 cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
 it=0
-find $indir -iname "*.mzXML" | sort | while read mzXML;
+find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
      it=$((it+1))
      input=$(basename $mzXML .mzXML)
@@ -164,7 +164,6 @@ find $indir -iname "*.mzXML" | sort | while read mzXML;
 
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
-
 EOF
 
 
@@ -268,10 +267,10 @@ EOF
 }
 
 # 0-queueConversion.sh
-find $indir/data -iname "*.raw" | sort | while read raw;
+find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
-    echo "singularity exec /hpc/dbg_mz/development/proteowizard wine msconvert $raw --mzXML -o converted" > $outdir/jobs/0-conversion/${input}.sh
+    echo "singularity exec /hpc/dbg_mz/development/proteowizard wine msconvert $raw --mzXML -o $outdir/data" > $outdir/jobs/0-conversion/${input}.sh
     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
