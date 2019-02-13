@@ -133,7 +133,8 @@ else
 	done
 fi
 
-
+mkdir -p $outdir/logs/0-conversion
+mkdir -p $outdir/jobs/0-conversion
 mkdir -p $outdir/logs/queue
 mkdir -p $outdir/jobs/queue
 
