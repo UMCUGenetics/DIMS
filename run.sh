@@ -156,7 +156,7 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
      input=$(basename $mzXML .mzXML)
      if [ $it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R $mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
-       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -hold_jid "converstion_*" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
+       qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
 
      echo "Rscript $scripts/2-DIMS.R $mzXML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/${input}.sh
@@ -183,7 +183,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
    echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
+   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -hold_jid "average" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $scripts" > $outdir/jobs/5-collectSamples/${scanmode}.sh
@@ -271,7 +271,7 @@ EOF
 find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
-    echo "singularity exec /hpc/dbg_mz/development/proteowizard wine msconvert $raw --mzXML -o $outdir/data" > $outdir/jobs/0-conversion/${input}.sh
+    echo "singularity run -B /hpc/dbg_mz/ /hpc/dbg_mz/development/proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
