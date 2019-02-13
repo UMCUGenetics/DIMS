@@ -74,7 +74,7 @@ base=/hpc/dbg_mz
 #BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
 indir=$base/raw_data/${name}
 outdir=$base/processed/${name}
-scripts=$(dirname "$0")/scripts
+scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
 
 while [[ ${restart} -gt 0 ]]
 do
@@ -168,6 +168,17 @@ qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $ema
 
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 EOF
+
+
+# 0-queueConversion.sh
+find $indir -iname "*.raw" | sort | while read raw;
+  do
+    input=$(basename $raw .raw)
+    echo "singularity run -B /hpc/dbg_mz/ /hpc/dbg_mz/development/proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
+    qsub -l h_rt=00:30:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+  done
+
+qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 
 
 doScanmode() {
@@ -268,17 +279,6 @@ EOF
 
 
 }
-
-# 0-queueConversion.sh
-find $indir -iname "*.raw" | sort | while read raw;
-  do
-    input=$(basename $raw .raw)
-    echo "singularity run -B /hpc/dbg_mz/ /hpc/dbg_mz/development/proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    qsub -l h_rt=00:30:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
-  done
-
-qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
-
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
