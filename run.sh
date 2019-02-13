@@ -152,19 +152,21 @@ cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
 it=0
 find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
-     it=$((it+1))
-     input=$(basename $mzXML .mzXML)
-     if [ $it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then # || [[ $it == 2 ]]
-       echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R $mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
+     it=\$((it+1))
+     input=$(basename \$mzXML .mzXML)
+     if [ \$it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then
+       echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
        qsub -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
 
-     echo "Rscript $scripts/2-DIMS.R $mzXML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/${input}.sh
-     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_${input}" -hold_jid "breaks" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/2-DIMS $outdir/jobs/2-DIMS/${input}.sh
+     echo "Rscript $scripts/2-DIMS.R \$mzXML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/\${input}.sh
+     qsub -l h_rt=00:10:00 -l h_vmem=4G -N "dims_\${input}" -hold_jid "breaks" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/2-DIMS $outdir/jobs/2-DIMS/\${input}.sh
  done
 
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
+
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 EOF
 
 
@@ -183,7 +185,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
    echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
-   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -hold_jid "average" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
+   qsub -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $scripts" > $outdir/jobs/5-collectSamples/${scanmode}.sh
@@ -264,7 +266,7 @@ qsub -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts
 EOF
 
 
-  qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
+
 }
 
 # 0-queueConversion.sh
@@ -272,7 +274,7 @@ find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
     echo "singularity run -B /hpc/dbg_mz/ /hpc/dbg_mz/development/proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+    qsub -l h_rt=00:10:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
 qsub -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
