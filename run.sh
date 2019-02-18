@@ -166,7 +166,8 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
 
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_${scanmode}" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_negative.sh
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_positive.sh
 EOF
 
 
@@ -182,6 +183,7 @@ qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m a
 
 
 doScanmode() {
+  echo "$1"
   scanmode=$1
   thresh=$2
   label=$3
