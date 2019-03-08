@@ -8,7 +8,8 @@ this.dir <- dirname(parent.frame(2)$ofile)
 setwd(this.dir)
 
 ### Connect to HPC
-ssh <- ssh_connect("nvanunen@hpcsubmit.op.umcutrecht.nl")
+ssh <- ssh_connect("nvanunen@hpcsubmit.op.umcutrecht.nl",
+                   keyfile="C:/Users/QExactive Plus/.ssh/hpc_nvanunen")
 print(ssh)
 
 ### Default mail

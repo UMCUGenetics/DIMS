@@ -147,9 +147,14 @@ function(input, output, session) {
           ### Copy over the log file that was created when starting the pipeline
           scp_upload(ssh, "0-queueConversion", to = hpcLogDir)
           
+          ### Remove tmp dir
+          unlink(tmpDir, recursive = TRUE)          
+          
           ### Done
           session$sendCustomMessage(type = "testmessage",
                                     message = "Samples will be processed @HPC cluster. This will take several hours! You will recieve an email when finished.")
+          message("Done")
+          
         }
       }
     })
