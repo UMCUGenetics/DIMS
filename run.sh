@@ -144,7 +144,7 @@ git rev-parse HEAD > $outdir/logs/commit
 
 
 . $indir/settings.config
-thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
+#thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
 
 
 # 1-queueStart.sh
