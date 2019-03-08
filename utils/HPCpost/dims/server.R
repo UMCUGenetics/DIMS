@@ -44,7 +44,7 @@ function(input, output, session) {
     
     ### Start check individual
     observeEvent(input$inCheckboxGroup, {
-      output$contents = renderTable(df[input$inCheckboxGroup,][1], 
+      output$contents = renderTable(df[input$inCheckboxGroup,], 
                                     striped = TRUE, 
                                     hover = TRUE, 
                                     colnames = FALSE)
@@ -126,10 +126,11 @@ function(input, output, session) {
           
           base = "/hpc/dbg_mz"
           hpcInputDir = paste(base, "raw_data", input$run_name, sep="/")
-          message(paste0("Files uploaded to: ", hpcInputDir))
+          hpcLogDir = paste(base, "processed", input$run_name, "logs", "queue", sep="/")
+          message(paste0("Files uploaded to: ", hpcInputDir, " (ignore the %)"))
           
           ### Create directory on HPC
-          ssh_exec_wait(ssh, paste0("mkdir ", hpcInputDir))
+          ssh_exec_wait(ssh, paste0("mkdir -p ", hpcInputDir))
           
           ### Copy over RAW data
           inputDir = paste(root, inputDirName, sep="/")
@@ -138,8 +139,15 @@ function(input, output, session) {
           ### Copy over other required files (init.RData, settings.config)
           scp_upload(ssh, list.files(tmpDir, full.names = TRUE), to = hpcInputDir)
           
-          #ssh_exec_wait(ssh, paste0("sh ",base,"/development/DEV_Dx_metabolomics/run.sh -n ", inputDirName), std_out = "test.txt", std_err="test.txt")
+          ### Start the pipeline
+          cmd = paste0("cd ", base, "/development/DEV_Dx_metabolomics && sh run.sh -n ", inputDirName)
+          message(cmd)
+          ssh_exec_wait(ssh, cmd, std_out = "0-queueConversion", std_err="0-queueConversion")
+        
+          ### Copy over the log file that was created when starting the pipeline
+          scp_upload(ssh, "0-queueConversion", to = hpcLogDir)
           
+          ### Done
           session$sendCustomMessage(type = "testmessage",
                                     message = "Samples will be processed @HPC cluster. This will take several hours! You will recieve an email when finished.")
         }
