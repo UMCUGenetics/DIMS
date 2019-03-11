@@ -37,7 +37,7 @@ fluidPage(
                     textInput("run_name", label = "Run Name", value = ""),
                     selectInput("data_type", "Data Type", list("Plasma", "Blood Spots", "Research")),
                     #selectInput("thresh2remove", "Threshold to remove", list("1e+09 (plasma)", "5e+08 (blood spots)", "1e+08 (research (Mia))")),
-                    numericInput("thresh2remove", "Threshold Remove", 1000000000),
+                    numericInput("thresh2remove", "Threshold Remove", 500000000),
                     numericInput("thresh_pos", "Threshold positive", 2000),
                     numericInput("thresh_neg", "Threshold negative", 2000)
              )

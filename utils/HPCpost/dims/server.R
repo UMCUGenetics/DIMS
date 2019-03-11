@@ -44,7 +44,7 @@ function(input, output, session) {
     
     ### Start check individual
     observeEvent(input$inCheckboxGroup, {
-      output$contents = renderTable(df[input$inCheckboxGroup,], 
+      output$contents = renderTable(df[input$inCheckboxGroup,][1], 
                                     striped = TRUE, 
                                     hover = TRUE, 
                                     colnames = FALSE)
