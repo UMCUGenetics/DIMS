@@ -3,11 +3,6 @@
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
 run <- function(resultDir, scanmode, normalization, scripts) {
-# resultDir="./results"
-# scanmode="positive"
-# scripts="./scripts"
-  message(normalization)
-
   object.files = list.files(paste(resultDir, "samplePeaksFilled", sep="/"), full.names=TRUE, pattern=scanmode)
 
   outlist.tot=NULL
