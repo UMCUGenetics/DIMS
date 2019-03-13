@@ -98,7 +98,7 @@ function(input, output, session) {
         repl.pattern=rval$pattern
         save(repl.pattern, file=paste(tmpDir, "init.RData", sep="/"))
         
-        # Check samples with design
+        ### Check samples with design
         samplesDesign = paste(as.vector(unlist(df[input$inCheckboxGroup, 1])), "raw", sep=".")
         raw = list.files(path = paste(root, inputDirName, sep="/"), pattern = "raw")
         index = which(samplesDesign %in% raw)
@@ -109,25 +109,26 @@ function(input, output, session) {
                                     message = "Design and mzXML files differ!")
         } else {
           
+          ### Create settings.config
           fileConn = file(paste(tmpDir, "settings.config", sep = "/"))
           parameters <- c(paste0("thresh_pos=", input$thresh_pos),
                           paste0("thresh_neg=", input$thresh_neg),
                           paste0("dims_thresh=", input$dims_thresh),
                           paste0("trim=", input$trim),
                           paste0("nrepl=", input$nrepl),
-                          paste0("normalization=", input$normalization),
+                          paste0('normalization="', input$normalization,'"'),
                           paste0("thresh2remove=", input$thresh2remove),
                           paste0("resol=", input$resol),
-                          paste0("email=", input$email)
+                          paste0('email="', input$email,'"')
           )
           
           writeLines(parameters, fileConn, sep = "\n")
           close(fileConn)
           
-          base = "/hpc/dbg_mz"
+          ### Create all the paths 
           hpcInputDir = paste(base, "raw_data", input$run_name, sep="/")
           hpcLogDir = paste(base, "processed", input$run_name, "logs", "queue", sep="/")
-          message(paste0("Files uploaded to: ", hpcInputDir, " (ignore the %)"))
+          message(paste0("Files uploading to: ", hpcInputDir, " (ignore the %)"))
           
           ### Create directory on HPC
           ssh_exec_wait(ssh, paste0("mkdir -p ", hpcInputDir))
@@ -136,11 +137,11 @@ function(input, output, session) {
           inputDir = paste(root, inputDirName, sep="/")
           scp_upload(ssh, list.files(inputDir, full.names = TRUE), to = hpcInputDir)
           
-          ### Copy over other required files (init.RData, settings.config)
+          ### Copy over the tmp files (eg. init.RData, settings.config)
           scp_upload(ssh, list.files(tmpDir, full.names = TRUE), to = hpcInputDir)
           
           ### Start the pipeline
-          cmd = paste0("cd ", base, "/development/DEV_Dx_metabolomics && sh run.sh -n ", inputDirName)
+          cmd = paste0("cd ", base, scriptDir, " && sh run.sh -n ", inputDirName)
           message(cmd)
           ssh_exec_wait(ssh, cmd, std_out = "0-queueConversion", std_err="0-queueConversion")
         
@@ -154,7 +155,7 @@ function(input, output, session) {
           session$sendCustomMessage(type = "testmessage",
                                     message = "Samples will be processed @HPC cluster. This will take several hours! You will recieve an email when finished.")
           message("Done")
-          
+          stopApp(returnValue = invisible())
         }
       }
     })
