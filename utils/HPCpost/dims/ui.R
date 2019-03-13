@@ -28,7 +28,7 @@ fluidPage(
              column(6,  
                     textInput("email", label = "UMC Email", value = mail),
                     numericInput("nrepl", "Technical replicates", 3),
-                    selectInput("normalization", "Normalization", list("none", "total_IS", "total_ident", "total")),
+                    selectInput("normalization", "Normalization", list("disabled", "total_IS", "total_ident", "total")),
                     numericInput("trim", "Trim", 0.1),
                     numericInput("resol", "Resolution", 140000),
                     numericInput("dims_thresh", "Threshold DIMS", 100)
