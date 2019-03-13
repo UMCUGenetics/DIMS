@@ -31,8 +31,6 @@ normalization_2.1 <- function(data, filename, groupNames, on="total", assi_label
     data.int = data[ ,c(assi,7:lastcol)]  # assi and samples columns
     data.assi = data.int
 
-  } else if (on=="none") {
-    return(data)
   }
 
   sum <- 0

@@ -6,6 +6,7 @@ run <- function(resultDir, scanmode, normalization, scripts) {
 # resultDir="./results"
 # scanmode="positive"
 # scripts="./scripts"
+  message(normalization)
 
   object.files = list.files(paste(resultDir, "samplePeaksFilled", sep="/"), full.names=TRUE, pattern=scanmode)
 
@@ -38,7 +39,9 @@ run <- function(resultDir, scanmode, normalization, scripts) {
     fileName = "Intensity_all_peaks_positive_norm"
   }
 
-  outlist.tot = normalization_2.1(outlist.tot, fileName, names(repl.pattern.filtered), on=normalization, assi_label="assi_HMDB")
+  if (normalization != "disabled") {
+    outlist.tot = normalization_2.1(outlist.tot, fileName, names(repl.pattern.filtered), on=normalization, assi_label="assi_HMDB")
+  }
 
   outlist.stats = statistics_z(outlist.tot, sortCol=NULL, adducts=FALSE)
 
