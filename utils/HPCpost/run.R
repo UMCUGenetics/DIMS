@@ -1,31 +1,13 @@
 library("shiny")
-suppressPackageStartupMessages(library("shinyjs"))
 library("shinyFiles")
-library("ssh")
+suppressPackageStartupMessages(library("shinyjs"))
 
-### Set workdir to this dir
-this.dir <- dirname(parent.frame(2)$ofile)
-setwd(this.dir)
+### Set workdir to location of this script
+setwd(dirname(parent.frame(2)$ofile))
 
-### Connect to HPC
-ssh <- ssh_connect("nvanunen@hpcsubmit.op.umcutrecht.nl", keyfile="C:/Users/QExactive Plus/.ssh/hpc_nvanunen")
-#ssh <- ssh_connect("nvanunen@hpcsubmit.op.umcutrecht.nl")
-print(ssh)
-
-### Default mail
-mail = "n.vanunen@umcutrecht.nl"
-
-### Root for raw data file selector  
-#root = "/Users/nunen/Documents/GitHub/Dx_metabolomics/raw_data"
-#root = "C:/Xcalibur/data/Research"
-root = "Y:/Metabolomics/DIMS_pipeline/R_workspace_NvU"
-
-### Root for experimental design file selector 
-#root2 = "Y:/Metabolomics/Research Metabolomic Diagnostics/Metabolomics Projects"
-root2 = root
-
-### Source functions
-source("./dims/HPCPostFunctions.R")
+### Source functions and config file
+source("dims/config.R")
+source("dims/HPCPostFunctions.R")
 df = NULL
 
 ### Recreate tmp dir 
