@@ -175,7 +175,7 @@ EOF
 find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
-    echo "singularity run -B /hpc/dbg_mz/ $proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
+    echo "singularity exec -B /hpc/dbg_mz/ /hpc/dbg_mz/$proteowizard $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
     qsub -l h_rt=00:30:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
