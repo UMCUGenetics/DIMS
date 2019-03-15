@@ -142,7 +142,7 @@ cp $indir/settings.config $outdir/logs
 cp $indir/init.RData $outdir/logs
 git rev-parse HEAD > $outdir/logs/commit
 
-
+dos2unix $indir/settings.config
 . $indir/settings.config
 #thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
 
