@@ -1,5 +1,5 @@
 optimizeGauss <- function(x,y,sigma,mu) {
-
+  
   f = function(p,x,y,sigma,mu) {
     curve = p*dnorm(x,mu,sigma)
     return((max(curve)-max(y))^2)

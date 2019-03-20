@@ -1,11 +1,11 @@
 mergeDuplicatedRows <- function(peaklist) {
-# peaklist = outlist.tot
-# resultDir = "./results"
-# scanmode = "positive"
-
+  # peaklist = outlist.tot
+  # resultDir = "./results"
+  # scanmode = "positive"
+  
   # peaklist_index=which(peaklist[,"mzmed.pgrp"]=="94.9984524624111")
   # peaklist[peaklist_index,]
-
+  
   collapse <- function(label,pklst,index){
     # label = "iso_HMDB"
     # pklst = peaklist
@@ -38,7 +38,7 @@ mergeDuplicatedRows <- function(peaklist) {
     
     collect = rbind(collect, tmp)
     remove = c(remove, peaklist_index)
-
+    
     index=index[-which(peaklist[index, "mzmed.pgrp"] == peaklist[index[1], "mzmed.pgrp"])]
   } 
   

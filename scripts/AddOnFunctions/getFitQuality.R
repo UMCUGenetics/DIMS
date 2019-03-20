@@ -1,7 +1,7 @@
 getFitQuality <- function(x,y,muFirst,muLast,resol,scale=NULL,sigma=NULL,sumFit=NULL){
   # muFirst=sort(c(p5[1],p5[3],p5[5],p5[7]))[1]
   # muLast=sort(c(p5[1],p5[3],p5[5],p5[7]))[4]
-
+  
   # muFirst=p2[1]
   # muLast=p2[1]
   # scale=p2[2]
@@ -45,16 +45,16 @@ getFitQuality <- function(x,y,muFirst,muLast,resol,scale=NULL,sigma=NULL,sumFit=
     #   
     # } else {
     
-      # x_int = x[tmp]
-      # y_int = y[tmp]
-      # sumFit_int = sumFit[tmp] 
-        
-      sumFit_int = sumFit
-      y_int = y
-      x_int = x
-      
-      # fq_new = mean(abs(sumFit_int - y_int)/sumFit_int)
-      fq_new = mean(abs(sumFit_int - y_int)/rep(max(sumFit_int)/2,length(sumFit_int)))
+    # x_int = x[tmp]
+    # y_int = y[tmp]
+    # sumFit_int = sumFit[tmp] 
+    
+    sumFit_int = sumFit
+    y_int = y
+    x_int = x
+    
+    # fq_new = mean(abs(sumFit_int - y_int)/sumFit_int)
+    fq_new = mean(abs(sumFit_int - y_int)/rep(max(sumFit_int)/2,length(sumFit_int)))
     # }    
   }
   

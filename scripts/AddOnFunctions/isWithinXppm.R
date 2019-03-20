@@ -1,10 +1,10 @@
 isWithinXppm <- function(mean, scale, sigma, area, x2, x, ppm=4, resol, plot) {
-#   mean=retVal$mean
-#   scale=retVal$scale
-#   sigma=retVal$sigma
-#   area=retVal$area
-#   ppm=3
-
+  #   mean=retVal$mean
+  #   scale=retVal$scale
+  #   sigma=retVal$sigma
+  #   area=retVal$area
+  #   ppm=3
+  
   # sort!!!!!!!!!!!!!!!!
   index = order(mean)
   mean = mean[index]

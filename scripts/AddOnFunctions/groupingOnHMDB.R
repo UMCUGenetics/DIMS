@@ -30,7 +30,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
     label = "Mpos"
     # HMDB_add_iso=HMDB_add_iso.Pos
   }
-
+  
   # First group on HMDB masses
   while (dim(HMDB_add_iso)[1] > 0) {  
     index = 1
@@ -38,7 +38,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
     
     mass = as.numeric(HMDB_add_iso[index,label])
     mtol = (mass*ppm)/10^6
-
+    
     mzmed = as.numeric(outlist.copy[,"mzmed.pkt"])
     selp = which((mzmed > (mass - mtol)) & (mzmed < (mass + mtol)))
     tmplist = outlist.copy[selp,,drop=FALSE]
@@ -73,15 +73,15 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
       index = which((mass.all > (mass - mtol)) & (mass.all < (mass + mtol)))
       # index = which(mass.all < (mass + 2*mtol))
       tmplist.mass = HMDB_add_iso[index,,drop=FALSE]
-
+      
       if (dim(tmplist.mass)[1]>0) {
-
+        
         index.iso = grep(" iso ", tmplist.mass[, "CompoundName"], fixed = TRUE)
         if (length(index.iso)>0){
           tmplist.mass.iso = tmplist.mass[index.iso,,drop=FALSE]
           tmplist.mass = tmplist.mass[-index.iso,,drop=FALSE]
         }
-
+        
         if (dim(tmplist.mass)[1]>0) {        
           index.adduct = grep(" [M", tmplist.mass[, "CompoundName"], fixed = TRUE)
           if (length(index.adduct)>0){
@@ -107,15 +107,15 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
               } else {
                 assi_HMDB = paste(assi_HMDB, as.character(paste(as.character(tmplist.mass.adduct[, "CompoundName"]), collapse = ";")), sep = ";")
                 HMDB_code = paste(HMDB_code, as.character(paste(as.character(rownames(tmplist.mass.adduct)), collapse = ";")), sep = ";")
-          }}}
+              }}}
           
           # isotopes
           if (!is.null(tmplist.mass.iso)) {
             if (dim(tmplist.mass.iso)[1]>0) {
               iso_HMDB = as.character(paste(as.character(tmplist.mass.iso[, "CompoundName"]), collapse = ";"))
-          }}
+            }}
           
-        # No pure compounts  
+          # No pure compounts  
         } else if (!is.null(tmplist.mass.adduct)) {
           
           theormz_HMDB = as.numeric(tmplist.mass.adduct[1,label])
@@ -129,15 +129,15 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
               } else {
                 assi_HMDB = paste(assi_HMDB, as.character(paste(as.character(tmplist.mass.adduct[, "CompoundName"]), collapse = ";")), sep = ";")
                 HMDB_code = paste(HMDB_code, as.character(paste(as.character(rownames(tmplist.mass.adduct)), collapse = ";")), sep = ";")
-          }}}
+              }}}
           
           # isotopes
           if (!is.null(tmplist.mass.iso)) {
             if (dim(tmplist.mass.iso)[1]>0) {
               iso_HMDB = as.character(paste(as.character(tmplist.mass.iso[, "CompoundName"]), collapse = ";"))
-          }}
+            }}
           
-        # only isotopes  
+          # only isotopes  
         } else if (!is.null(tmplist.mass.iso)) {
           
           if (dim(tmplist.mass.iso)[1]>0) {
@@ -145,8 +145,8 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
             iso_HMDB = as.character(paste(as.character(tmplist.mass.iso[, "CompoundName"]), collapse = ";"))
           }
         }  
-          
-          
+        
+        
         # if(grepl(" iso ", HMDB_add_iso[index, "CompoundName"])){
         #   
         #   ############# this will not work when run in parallel!!!!!!!#################################################################################################
@@ -169,7 +169,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
         #   theormz_HMDB = as.numeric(mass)
         # }
       }
-
+      
       outpgrlist = rbind(outpgrlist, cbind(data.frame(mzmed.pgrp, "fq.best"=fq.best.pgrp, "fq.worst"=fq.worst.pgrp, nrsamples, mzmin.pgrp, mzmax.pgrp),
                                            t(as.matrix(ints.allsamps)),
                                            data.frame(assi_HMDB, iso_HMDB, HMDB_code, theormz_HMDB)))
@@ -177,7 +177,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
     
     if (length(selp)>0) outlist.copy[selp, "height.pkt"] = -1
     HMDB_add_iso = HMDB_add_iso[-index,]
-
+    
     # n=n+1
   }
   
@@ -186,6 +186,6 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
   
   dir.create(paste(outdir, "grouping_hmdb_done", sep="/"), showWarnings = FALSE)
   save(outlist.copy, file=paste(paste(outdir, "grouping_hmdb_done", sep="/"), paste(paste(batch, scanmode, sep="_"), "RData", sep="."), sep="/"))
-
+  
   # message(Sys.time())
 }  

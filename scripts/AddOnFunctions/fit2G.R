@@ -15,15 +15,15 @@ fit2G_2 <- function(x,y,sig1,sig2,mu1,scale1,mu2,scale2,useBounds){
               as.numeric(scale1),
               as.numeric(mu1),
               as.numeric(scale1)),
-              f,control=list(maxit=10000),method="L-BFGS-B",lower=lower,upper=upper)
+            f,control=list(maxit=10000),method="L-BFGS-B",lower=lower,upper=upper)
     } else {
       optim(c(as.numeric(mu1),
               as.numeric(scale1),
               as.numeric(mu2),
               as.numeric(scale2)),
-              f,control=list(maxit=10000),method="L-BFGS-B",lower=lower,upper=upper)
+            f,control=list(maxit=10000),method="L-BFGS-B",lower=lower,upper=upper)
     }
-      
+    
   } else {
     if (is.null(mu2) && is.null(scale2) && is.null(sig2)){
       sig2=sig1
@@ -31,13 +31,13 @@ fit2G_2 <- function(x,y,sig1,sig2,mu1,scale1,mu2,scale2,useBounds){
               as.numeric(scale1),
               as.numeric(mu1),
               as.numeric(scale1)),
-              f,control=list(maxit=10000))
+            f,control=list(maxit=10000))
     } else{
       optim(c(as.numeric(mu1),
               as.numeric(scale1),
               as.numeric(mu2),
               as.numeric(scale2)),
-              f,control=list(maxit=10000))
+            f,control=list(maxit=10000))
     }  
   }
 }

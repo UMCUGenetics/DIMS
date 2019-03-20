@@ -1,16 +1,16 @@
 peak.grouping.Gauss.HPC <- function(outdir, fileIn, scanmode, resol, groupNames) {
-# fileIn="./results/specpks_all/positive_outlist_i_min_1.197.RData"
-
+  # fileIn="./results/specpks_all/positive_outlist_i_min_1.197.RData"
+  
   # ppm/2
   #range = 1.5e-06
   range = 2e-06  
   startcol=7
-
+  
   # outlist.copy <- read.table(file=fileIn, sep="\t", header=TRUE)
   load(fileIn)
   outlist.copy = outlist_i_min_1
   batch = strsplit(fileIn, ".",fixed = TRUE)[[1]][3]
-
+  
   outpgrlist = NULL
   
   while (max(as.numeric(outlist.copy[ , "height.pkt"])) > 0 ) {
@@ -53,34 +53,34 @@ peak.grouping.Gauss.HPC <- function(outdir, fileIn, scanmode, resol, groupNames)
     }
     outlist.copy[selp, "height.pkt"] = -1
   }
-
+  
   outpgrlist = as.data.frame(outpgrlist)  # ignore warnings of duplicate row names
   colnames(outpgrlist)[1:6] = c("mzmed.pgrp", "fq.best", "fq.worst", "nrsamples", "mzmin.pgrp", "mzmax.pgrp")
   
-#   # filtering ##################################################################################################################
-#   final.outlist=outpgrlist[,c("mzmed.pgrp", "fq.best", "fq.worst","nrsamples","mzmin.pgrp","mzmax.pgrp", sampleNames)]
-#   # NB: in centroided mode, data files contains many "-1.000" values, from peak finding. Set these to zero.
-#   final.outlist[final.outlist == -1] = 0
-#   
-#   # keep only peaks which occur in 3 out of 3 technical replicates in at least one sample in peak group list
-# #   peakFiltering(repl.pattern, final.outlist, nsampgrps, outdir, scanmode, startcol=7)
-# #   peakFiltering <- function(repl.pattern, final.outlist, nsampgrps, resultDir, scanmode, startcol){
-#   nsamp = length(repl.pattern)
-#   nsampgrps = length(repl.pattern[[1]])
-#   
-#   keep <- rep(0, nrow(final.outlist))
-#   for (p in 1:nrow(final.outlist)) {  
-#     for (g in 1:nsampgrps) {  # g <- 31
-#       if (keep[p] == 0 & sum(final.outlist[p, repl.pattern[[g]]] > 0) == length(repl.pattern[[g]]) ) { keep[p] <- 1 }
-#     }
-#   }
-#   
-#   tmp <- cbind(final.outlist, keep)
-#   final.outlist.filt <- tmp[keep == 1, ]
-# 
-#   # omit keep column
-#   final.outlist.filt <- final.outlist.filt[ , -ncol(final.outlist.filt)]
-
+  #   # filtering ##################################################################################################################
+  #   final.outlist=outpgrlist[,c("mzmed.pgrp", "fq.best", "fq.worst","nrsamples","mzmin.pgrp","mzmax.pgrp", sampleNames)]
+  #   # NB: in centroided mode, data files contains many "-1.000" values, from peak finding. Set these to zero.
+  #   final.outlist[final.outlist == -1] = 0
+  #   
+  #   # keep only peaks which occur in 3 out of 3 technical replicates in at least one sample in peak group list
+  # #   peakFiltering(repl.pattern, final.outlist, nsampgrps, outdir, scanmode, startcol=7)
+  # #   peakFiltering <- function(repl.pattern, final.outlist, nsampgrps, resultDir, scanmode, startcol){
+  #   nsamp = length(repl.pattern)
+  #   nsampgrps = length(repl.pattern[[1]])
+  #   
+  #   keep <- rep(0, nrow(final.outlist))
+  #   for (p in 1:nrow(final.outlist)) {  
+  #     for (g in 1:nsampgrps) {  # g <- 31
+  #       if (keep[p] == 0 & sum(final.outlist[p, repl.pattern[[g]]] > 0) == length(repl.pattern[[g]]) ) { keep[p] <- 1 }
+  #     }
+  #   }
+  #   
+  #   tmp <- cbind(final.outlist, keep)
+  #   final.outlist.filt <- tmp[keep == 1, ]
+  # 
+  #   # omit keep column
+  #   final.outlist.filt <- final.outlist.filt[ , -ncol(final.outlist.filt)]
+  
   #save(outpgrlist_part, file=paste(outdir, paste(scanmode, "_", mzstart, "_", mzend, ".RData", sep=""), sep="/"))
   # save(final.outlist.filt, file=paste(outdir, "peak_grouping", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
   save(outpgrlist, file=paste(outdir, "peak_grouping", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))

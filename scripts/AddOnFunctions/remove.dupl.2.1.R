@@ -1,8 +1,8 @@
 remove.dupl.2.1 <- function(peaklist) {
-# peaklist = outlist.tot
-# resultDir = "./results"  
-# scanmode = "positive"  
-
+  # peaklist = outlist.tot
+  # resultDir = "./results"  
+  # scanmode = "positive"  
+  
   # peaklist=peaklist[1:100000,]
   
   collect=NULL
@@ -21,7 +21,7 @@ remove.dupl.2.1 <- function(peaklist) {
     
     collect = rbind(collect, tmp)
     remove = c(remove, peaklist_index)
-
+    
     index=index[-which(index==index[1])]
   } 
   

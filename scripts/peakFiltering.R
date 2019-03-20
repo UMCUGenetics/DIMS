@@ -8,32 +8,32 @@ run <- function(indir, outdir, scanmode, thresh, resol, version, scripts) {
   # version=2.0
   # indir="./data"
   # scanmode="positive"
-
-# filtering moved to grouping! Only in 2.0
-
+  
+  # filtering moved to grouping! Only in 2.0
+  
   startcol=7
-
+  
   tmp=NULL
   rdata = list.files(paste(outdir, "peak_grouping", sep="/"), full.names=TRUE, pattern=paste(scanmode, "*", sep="_"))
-
+  
   for (i in 1:length(rdata)){
     load(rdata[i])
     tmp=rbind(tmp, outpgrlist)
     rm(outpgrlist)
   }
-
+  
   outpgrlist=tmp[order(as.numeric(tmp[,"mzmed.pgrp"])),]
-
+  
   # filtering moved to grouping! Only in 2.0
-
+  
   source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
-
+  
   outlist.single = remove.dupl(outpgrlist) # 4738 => 4735
   save(outlist.single, file=paste(outdir, paste("filtered_", scanmode, ".RData", sep=""), sep="/"))
-
+  
   dir.create(paste(outdir, "samplePeaks", sep="/"))
-
+  
   for (i in startcol:ncol(outlist.single)) {
     samplePeaks=outlist.single[,i]
     names(samplePeaks)=outlist.single[,"mzmed.pgrp"]

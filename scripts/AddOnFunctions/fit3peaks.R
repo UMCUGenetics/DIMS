@@ -4,7 +4,7 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   peak.area = NULL
   peak.scale = NULL
   peak.sigma = NULL
-
+  
   range1=c(index[1]-2,index[1]-1,index[1],index[1]+1,index[1]+2)
   range2=c(index[2]-2,index[2]-1,index[2],index[2]+1,index[2]+2)
   range3=c(index[3]-2,index[3]-1,index[3],index[3]+1,index[3]+2)
@@ -17,7 +17,7 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   if (length(remove)>0) {
     range2=range2[-remove]
   }
-
+  
   if (length(x)<range3[length(range3)]) range3=range3[-length(range3)]
   
   range1=checkOverlap(range1,range2)[[1]]
@@ -60,7 +60,7 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   sumFit2 = (p4[2]*dnorm(x2,p4[1],sigma1))+(p4[4]*dnorm(x2,p4[3],sigma2))+(p4[6]*dnorm(x2,p4[5],sigma3))
   sumFit = (p4[2]*dnorm(x,p4[1],sigma1))+(p4[4]*dnorm(x,p4[3],sigma2))+(p4[6]*dnorm(x,p4[5],sigma3))
   fq=getFitQuality(x,y,sort(c(p4[1],p4[3],p4[5]))[1],sort(c(p4[1],p4[3],p4[5]))[3],resol,sumFit=sumFit)$fq_new
-
+  
   if (plot & (fq < FQ)) lines(x2,p4[2]*dnorm(x2,p4[1],sigma1),col="yellow")
   if (plot & (fq < FQ)) abline(v = p4[1], col="yellow")
   fwhm = getFwhm(p4[1],resol)
@@ -80,7 +80,7 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   if (plot & (fq < FQ)) lines(c(p4[5] - 0.5*fwhm, p4[5] + 0.5*fwhm),c(half_max,half_max),col="orange")
   
   if (plot & (fq < FQ)) lines(x2,sumFit2,col="red")
-
+  
   h2=c(paste("mean =", p4[1], sep=" "),
        paste("mean =", p4[3], sep=" "),
        paste("mean =", p4[5], sep=" "),
@@ -89,18 +89,18 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   if (plot & (fq < FQ)) legend("topright", legend=h2)
   #########################################
   
-#   area1 = sum(p4[2]*dnorm(x2,p4[1],sigma1))
-#   area2 = sum(p4[4]*dnorm(x2,p4[3],sigma2))
-#   area3 = sum(p4[6]*dnorm(x2,p4[5],sigma3))
-
-#   area1 = max(p4[2]*dnorm(x2,p4[1],sigma1))
-#   area2 = max(p4[4]*dnorm(x2,p4[3],sigma2))
-#   area3 = max(p4[6]*dnorm(x2,p4[5],sigma3))
+  #   area1 = sum(p4[2]*dnorm(x2,p4[1],sigma1))
+  #   area2 = sum(p4[4]*dnorm(x2,p4[3],sigma2))
+  #   area3 = sum(p4[6]*dnorm(x2,p4[5],sigma3))
+  
+  #   area1 = max(p4[2]*dnorm(x2,p4[1],sigma1))
+  #   area2 = max(p4[4]*dnorm(x2,p4[3],sigma2))
+  #   area3 = max(p4[6]*dnorm(x2,p4[5],sigma3))
   
   area1 = getArea(p4[1],resol,p4[2],sigma1,int.factor)
   area2 = getArea(p4[3],resol,p4[4],sigma2,int.factor)
   area3 = getArea(p4[5],resol,p4[6],sigma3,int.factor)
-
+  
   peak.area = c(peak.area, area1)
   peak.area = c(peak.area, area2)
   peak.area = c(peak.area, area3)
@@ -118,5 +118,5 @@ fit3peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   peak.sigma = c(peak.sigma, sigma3)
   
   return(list("mean"=peak.mean, "scale"=peak.scale, "sigma"=peak.sigma, "area"=peak.area, "qual"=fq))
-
+  
 }
