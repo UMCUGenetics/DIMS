@@ -14,7 +14,7 @@ iden.code <- function(peaklist, db, ppm, theor_mass_label) {
     
     if(length(selp)!=0){
       for(i in 1:length(selp)){
-
+        
         if(grepl(" iso ", db[selp[i], "CompoundName"])){
           mainpeak <- strsplit(db[selp[i],"CompoundName"]," iso ")[[1]][1]
           

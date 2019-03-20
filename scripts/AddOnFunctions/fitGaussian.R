@@ -1,7 +1,7 @@
 fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,scanmode,int.factor,width,height) {
   # force=length(index)
   # useBounds=FALSE
-   
+  
   peak.mean = NULL
   peak.area = NULL
   peak.qual = NULL
@@ -13,26 +13,26 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
   
   # One local max
   if (force==1){
-
+    
     retVal = fit1Peak(x2,x,y,index,scale,resol,plot,FQ1,useBounds)
-
+    
     scale = 2
     
     if (retVal$mean[1]<x[1] | retVal$mean[1]>x[length(x)]) {   # <=== mean outside range
-
+      
       # do it again
       return(fitGaussian(x2,x,y,index,scale,resol,outdir,force=1,useBounds=TRUE,plot,scanmode,int.factor,width,height))
-        
+      
     } else { # <=== mean within range
-    
+      
       if (retVal$qual > FQ1){ # <=== bad fit
-          
+        
         # Try to fit two curves
-          
+        
         # diff(diff(x)) essentially computes the discrete analogue of the second derivative, so should be negative at local maxima.
         # The +1 below takes care of the fact that the result of diff is shorter than the input vector.
         new_index=which(diff(sign(diff(y)))==-2)+1
-          
+        
         if (length(new_index)!=2) {
           new_index = round(length(x)/3)
           new_index = c(new_index, 2*new_index)
@@ -40,13 +40,13 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         #length(new_index)  
         return(fitGaussian(x2,x,y,new_index,scale,resol,outdir,force=2,useBounds=FALSE,plot,scanmode,int.factor,width,height))
-          
+        
       } else { # <=== good fit
-          
+        
         peak.mean = c(peak.mean, retVal$mean)
         #peak.area = c(peak.area, sum(retVal$scale*dnorm(x2,retVal$mean,retVal$sigma)))
         # "Centroid mode"
-#         peak.area = c(peak.area, max(retVal$scale*dnorm(x2,retVal$mean,retVal$sigma)))
+        #         peak.area = c(peak.area, max(retVal$scale*dnorm(x2,retVal$mean,retVal$sigma)))
         peak.area = c(peak.area, getArea(retVal$mean,resol,retVal$scale,retVal$sigma,int.factor))
         peak.qual = retVal$qual
         peak.min = x[1]
@@ -54,12 +54,12 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
       }
     }
     
-  # Two local max  
+    # Two local max  
   } else if (force==2 & (length(x)>6)) {
     
     # fit two curves
     retVal = fit2peaks(x2,x,y,index,scale,resol,useBounds,plot,FQ,int.factor) # <=== fit 2 curves
-
+    
     if (retVal$mean[1]<x[1] | retVal$mean[1]>x[length(x)] |   # <=== one of means outside range
         retVal$mean[2]<x[1] | retVal$mean[2]>x[length(x)]) {
       
@@ -88,12 +88,12 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         peak.max = x[length(x)]
       }
     } else { # <=== all means within range
-          
+      
       if (retVal$qual > FQ) { # <=== bad fit 
-              
+        
         # Try to fit three curves
         new_index=which(diff(sign(diff(y)))==-2)+1
-              
+        
         if (length(new_index)!=3) {
           new_index = round(length(x)/4)
           new_index = c(new_index, 2*new_index, 3*new_index)
@@ -101,12 +101,12 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         #length(new_index)      
         return(fitGaussian(x2,x,y,new_index,scale,resol,outdir,force=3,useBounds=FALSE,plot,scanmode,int.factor,width,height))
-            
+        
       } else { # <======== good fit
         
         # check if means are within 3 ppm and sum if so  
         tmp = retVal$qual 
-          
+        
         nMeanNew = -1
         nMean = length(retVal$mean)
         while (nMean!=nMeanNew){
@@ -114,14 +114,14 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
           retVal = isWithinXppm(retVal$mean, retVal$scale, retVal$sigma, retVal$area, x2, x, ppm=4, resol, plot)
           nMeanNew = length(retVal$mean)
         }
-          
+        
         retVal$qual = tmp
         
         h2=NULL
-
+        
         for (i in 1:length(retVal$mean)){
           h2 = c(h2, paste("mean =", retVal$mean[i], sep=" "))
-            
+          
           peak.mean = c(peak.mean, retVal$mean[i])
           peak.area = c(peak.area, retVal$area[i])
         }
@@ -133,12 +133,12 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         if (plot) legend("topright", legend=h2)
       }  
     }
-
-  # Three local max  
+    
+    # Three local max  
   } else if (force==3 & (length(x)>6)){
     
     retVal = fit3peaks(x2,x,y,index,scale,resol,useBounds,plot,FQ,int.factor)
-
+    
     # outside range
     if (retVal$mean[1]<x[1] | retVal$mean[1]>x[length(x)] | # <=== one of means outside range
         retVal$mean[2]<x[1] | retVal$mean[2]>x[length(x)] |
@@ -149,8 +149,8 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         # do it again
         return(fitGaussian(x2,x,y,index,scale,resol,outdir,force,useBounds=TRUE,plot,scanmode,int.factor,width,height))
-      
-      # good fit
+        
+        # good fit
       } else {
         
         # check which mean is outside range
@@ -180,10 +180,10 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
           new_index = round(length(x)/5)
           new_index = c(new_index, 2*new_index, 3*new_index, 4*new_index)
         }
-
+        
         #length(new_index)
         return(fitGaussian(x2,x,y,new_index,scale,resol,outdir,force=4,useBounds=FALSE,plot,scanmode,int.factor,width,height))
-      
+        
       } else { # <======== good fit
         
         # check if means are within 3 ppm and sum if so  
@@ -198,14 +198,14 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         }
         
         retVal$qual = tmp
-
+        
         h2=NULL
-#         peak.mean=NULL
-#         peak.area=NULL
+        #         peak.mean=NULL
+        #         peak.area=NULL
         
         for (i in 1:length(retVal$mean)){
           h2 = c(h2, paste("mean =", retVal$mean[i], sep=" "))
-            
+          
           peak.mean = c(peak.mean, retVal$mean[i])
           peak.area = c(peak.area, retVal$area[i])
         }
@@ -215,15 +215,15 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         h2 = c(h2, paste("fq =", retVal$qual, sep=" "))
         if (plot) legend("topright", legend=h2)
-      
-        }  
+        
+      }  
     }
-
-  # Four local max  
+    
+    # Four local max  
   } else if (force==4 & (length(x)>6)){
     
     retVal = fit4peaks(x2,x,y,index,scale,resol,useBounds,plot,FQ,int.factor)
-
+    
     if (retVal$mean[1]<x[1] | retVal$mean[1]>x[length(x)] |
         retVal$mean[2]<x[1] | retVal$mean[2]>x[length(x)] |
         retVal$mean[3]<x[1] | retVal$mean[3]>x[length(x)] |
@@ -234,8 +234,8 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         # do it again
         return(fitGaussian(x2,x,y,index,scale,resol,outdir,force,useBounds=TRUE,plot,scanmode,int.factor,width,height))
-
-      # good fit
+        
+        # good fit
       } else {
         
         # check which mean is outside range
@@ -260,9 +260,9 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         # Generate 1 curve
         return(fitGaussian(x2,x,y,index,scale,resol,outdir,force=5,useBounds=FALSE,plot,scanmode,int.factor,width,height))
-      
+        
       } else { # <======== good fit
-
+        
         # check if means are within 3 ppm and sum if so  
         tmp = retVal$qual 
         
@@ -280,7 +280,7 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         
         for (i in 1:length(retVal$mean)){
           h2 = c(h2, paste("mean =", retVal$mean[i], sep=" "))
-            
+          
           peak.mean = c(peak.mean, retVal$mean[i])
           peak.area = c(peak.area, retVal$area[i])
         }
@@ -292,8 +292,8 @@ fitGaussian <- function(x2,x,y,index,scale,resol,outdir,force,useBounds,plot,sca
         if (plot) legend("topright", legend=h2)
       }  
     }
-
-  # More then four local max  
+    
+    # More then four local max  
   } else {
     
     scale=2

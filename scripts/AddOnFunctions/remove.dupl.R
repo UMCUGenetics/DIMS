@@ -1,11 +1,11 @@
 # remove duplicates, peak groups with mz within a few ppm
 # ppmdef should be 2 times bigger than during identification!!!
 remove.dupl <- function(peaklist, ppmdef=4, tolint=0.01) {
-
-#   peaklist = outpgrlist
-#   ppmdef = 2
-#   tolint = 0.01
-
+  
+  #   peaklist = outpgrlist
+  #   ppmdef = 2
+  #   tolint = 0.01
+  
   int.cols = 7:ncol(peaklist)
   
   p <- 1

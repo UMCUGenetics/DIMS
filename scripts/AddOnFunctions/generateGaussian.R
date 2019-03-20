@@ -1,5 +1,5 @@
 generateGaussian <- function(x,y,resol,plot,scanmode,int.factor,width,height) {
-
+  
   factor=1.5
   index = which(y==max(y))
   x=x[index]
@@ -9,9 +9,9 @@ generateGaussian <- function(x,y,resol,plot,scanmode,int.factor,width,height) {
   x.p = c(mu-factor*fwhm, x, mu+factor*fwhm)
   y.p = c(0, y, 0)
   
-#   if (plot) dir.create("./results/plots",showWarnings = FALSE)
-#   if (plot) dir.create("./results/plots/Gaussian_fit",showWarnings = FALSE)
-
+  #   if (plot) dir.create("./results/plots",showWarnings = FALSE)
+  #   if (plot) dir.create("./results/plots/Gaussian_fit",showWarnings = FALSE)
+  
   if (plot) {
     if (scanmode=="positive"){
       plot_label="pos_fit.png"
@@ -39,10 +39,10 @@ generateGaussian <- function(x,y,resol,plot,scanmode,int.factor,width,height) {
     dev.off()
   }
   
-#  area = sum(scale*dnorm(x2,mu,sigma))
-#  area = max(scale*dnorm(x2,mu,sigma))
+  #  area = sum(scale*dnorm(x2,mu,sigma))
+  #  area = max(scale*dnorm(x2,mu,sigma))
   area = getArea(mu,resol,scale,sigma,int.factor)
   
   return(list("mean"=mu, "area"=area, "min"=x2[1] , "max"=x2[length(x2)]))
-
+  
 }

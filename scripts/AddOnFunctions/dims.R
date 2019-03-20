@@ -1,5 +1,5 @@
 dims <- function(xmlfile,outdir,thresh,trim,resol){
-# thresh=dimsThresh
+  # thresh=dimsThresh
   
   trimLeft=NULL
   trimRight=NULL
@@ -14,7 +14,7 @@ dims <- function(xmlfile,outdir,thresh,trim,resol){
   if (is.null(x)){
     return(NULL)
   }
-
+  
   load(paste(outdir, "breaks.fwhm.RData", sep="/"))
   
   # Create empty placeholders for later use
@@ -42,10 +42,10 @@ dims <- function(xmlfile,outdir,thresh,trim,resol){
   ## This doesn't round the value for mz - is this an issue?
   yp <- cut(posY[,"mz"], breaks.fwhm, include.lowest=TRUE, right=TRUE, labels=FALSE)
   yn <- cut(negY[,"mz"], breaks.fwhm, include.lowest=TRUE, right=TRUE, labels=FALSE)
-
-#     Z <- seq(from=1, to=10, by=0.5)
-#     cut(Z, breaks = 1:10, include.lowest=TRUE, right=TRUE, labels=FALSE)
-
+  
+  #     Z <- seq(from=1, to=10, by=0.5)
+  #     cut(Z, breaks = 1:10, include.lowest=TRUE, right=TRUE, labels=FALSE)
+  
   # Empty the bins
   posBins<-bins
   negBins<-bins
@@ -53,27 +53,27 @@ dims <- function(xmlfile,outdir,thresh,trim,resol){
   # Get the list of intensity values for each bin, and add the
   # intensity values which are in the same bin
   if (nrow(posY) > 0) {
-#       ap <- aggregate(posY[,"intensity"],list(yp),sum)
-#       posBins[ap[,1]] <- posBins[ap[,1]] + ap[,2] / length(posTimes)
-     ap <- aggregate(posY[,"intensity"],list(yp), FUN = function(x){if (is.na(mean(x[which(x>thresh)]))){
-                                                                      0 
-                                                                    } else {
-                                                                      mean(x[which(x>thresh)])
-                                                                    }})
-     posBins[ap[,1]] <- ap[,2]
+    #       ap <- aggregate(posY[,"intensity"],list(yp),sum)
+    #       posBins[ap[,1]] <- posBins[ap[,1]] + ap[,2] / length(posTimes)
+    ap <- aggregate(posY[,"intensity"],list(yp), FUN = function(x){if (is.na(mean(x[which(x>thresh)]))){
+      0 
+    } else {
+      mean(x[which(x>thresh)])
+    }})
+    posBins[ap[,1]] <- ap[,2]
     
   }
   if (nrow(negY) > 0) {
-#       an <- aggregate(negY[,"intensity"],list(yn),sum)
-#       negBins[an[,1]] <- negBins[an[,1]] + an[,2] / length(negTimes)
-     an <- aggregate(negY[,"intensity"],list(yn), FUN = function(x){if (is.na(mean(x[which(x>thresh)]))){
-                                                                      0 
-                                                                    } else {
-                                                                      mean(x[which(x>thresh)])
-                                                                    }})
-     negBins[an[,1]] <- an[,2]
+    #       an <- aggregate(negY[,"intensity"],list(yn),sum)
+    #       negBins[an[,1]] <- negBins[an[,1]] + an[,2] / length(negTimes)
+    an <- aggregate(negY[,"intensity"],list(yn), FUN = function(x){if (is.na(mean(x[which(x>thresh)]))){
+      0 
+    } else {
+      mean(x[which(x>thresh)])
+    }})
+    negBins[an[,1]] <- an[,2]
   }
-
+  
   # Zero any values that are below the threshold
   posBins[posBins < thresh] <- 0
   negBins[negBins < thresh] <- 0
@@ -104,11 +104,11 @@ dims <- function(xmlfile,outdir,thresh,trim,resol){
   
   # omit rows with only zeros
   posResT <- t(posRes)
-#  sumsp <- apply(posResT,1,sum)
-#  posResT.nonzero <- posResT[(sumsp != 0), ] # <=============================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  #  sumsp <- apply(posResT,1,sum)
+  #  posResT.nonzero <- posResT[(sumsp != 0), ] # <=============================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   negResT <- t(negRes)
-#  sums <- apply(negResT,1,sum)
-#  negResT.nonzero <- negResT[(sums != 0), ] # <=============================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+  #  sums <- apply(negResT,1,sum)
+  #  negResT.nonzero <- negResT[(sums != 0), ] # <=============================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
   return(list("pos"=posResT,"neg"=negResT, "breaksFwhm"=breaks.fwhm))
 }

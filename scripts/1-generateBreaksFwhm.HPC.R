@@ -10,28 +10,28 @@ run <- function(xmlfile, outdir, trim, resol, nrepl) {
   bins=NULL
   posRes=NULL
   negRes=NULL
-
+  
   suppressPackageStartupMessages(library("xcms"))
-
+  
   dir.create(outdir, showWarnings = F)
-
+  
   x = NULL
   try({x = xcmsRaw(xmlfile)}, silent = TRUE)
   if (is.null(x)){
     return(NULL)
   }
-
+  
   trimLeft = round(x@scantime[length(x@scantime)*trim])
   trimRight = round(x@scantime[length(x@scantime)*(1-trim)])
   cat(paste("trimLeft", trimLeft, sep=" "))
   cat(paste("trimRight", trimRight, sep=" "))
-
+  
   # Mass range m/z
   lowMZ = x@mzrange[1]
   highMZ = x@mzrange[2]
   cat(paste("lowMZ", lowMZ, sep=" "))
   cat(paste("highMZ", highMZ, sep=" "))
-
+  
   # breaks.fwhm <- seq(from=lowMZ, to=highMZ, by=deltaMZ)
   # breaks has fixed distance between min and max of a bin.
   # better if this distance were a function of fwhm=f(mz)
@@ -48,14 +48,14 @@ run <- function(xmlfile, outdir, trim, resol, nrepl) {
     fwhmsegm <- startsegm/resol.mz
     breaks.fwhm <- c(breaks.fwhm, seq(from=(startsegm+fwhmsegm),to=endsegm, by=0.2*fwhmsegm))
     #breaks.fwhm <- c(breaks.fwhm, seq(from=(startsegm), to=endsegm, by=0.2*fwhmsegm))
-
+    
     # average the m/z instead of start value
     range = seq(from=(startsegm+fwhmsegm),to=endsegm, by=0.2*fwhmsegm)
     deltaMZ = range[2]-range[1]
     breaks.fwhm.avg <- c(breaks.fwhm.avg, range + 0.5 * deltaMZ)
-
+    
   }
-
+  
   save(breaks.fwhm,breaks.fwhm.avg,trimLeft,trimRight,file=paste(outdir, "breaks.fwhm.RData", sep="/"))
 }
 

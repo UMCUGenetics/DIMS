@@ -40,7 +40,7 @@ fit4peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   if (length(which(is.na(y[range2])))!=0) range2=range2[-which(is.na(y[range2]))]
   if (length(which(is.na(y[range3])))!=0) range3=range3[-which(is.na(y[range3]))]
   if (length(which(is.na(y[range4])))!=0) range4=range4[-which(is.na(y[range4]))]
-
+  
   mu1 = weighted.mean(x[range1],y[range1])
   sigma1 = getSD(x[range1],y[range1])
   fitP = fitG_2(x[range1],y[range1],sigma1,mu1,scale,useBounds)
@@ -108,16 +108,16 @@ fit4peaks <- function(x2,x,y,index,scale,resol,useBounds=FALSE,plot=FALSE,FQ,int
   
   if (plot & (fq < FQ)) legend("topright", legend=h2)
   #############################################
- 
-#   area1 = sum(p5[2]*dnorm(x2,p5[1],sigma1))
-#   area2 = sum(p5[4]*dnorm(x2,p5[3],sigma2))
-#   area3 = sum(p5[6]*dnorm(x2,p5[5],sigma3))
-#   area4 = sum(p5[8]*dnorm(x2,p5[7],sigma4))
-
-#   area1 = max(p5[2]*dnorm(x2,p5[1],sigma1))
-#   area2 = max(p5[4]*dnorm(x2,p5[3],sigma2))
-#   area3 = max(p5[6]*dnorm(x2,p5[5],sigma3))
-#   area4 = max(p5[8]*dnorm(x2,p5[7],sigma4))
+  
+  #   area1 = sum(p5[2]*dnorm(x2,p5[1],sigma1))
+  #   area2 = sum(p5[4]*dnorm(x2,p5[3],sigma2))
+  #   area3 = sum(p5[6]*dnorm(x2,p5[5],sigma3))
+  #   area4 = sum(p5[8]*dnorm(x2,p5[7],sigma4))
+  
+  #   area1 = max(p5[2]*dnorm(x2,p5[1],sigma1))
+  #   area2 = max(p5[4]*dnorm(x2,p5[3],sigma2))
+  #   area3 = max(p5[6]*dnorm(x2,p5[5],sigma3))
+  #   area4 = max(p5[8]*dnorm(x2,p5[7],sigma4))
   
   area1 = getArea(p5[1],resol,p5[2],sigma1,int.factor)
   area2 = getArea(p5[3],resol,p5[4],sigma2,int.factor)

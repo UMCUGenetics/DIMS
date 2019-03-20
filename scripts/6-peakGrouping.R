@@ -3,14 +3,14 @@
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
 run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
-
+  
   options(digits=16)
-
+  
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
-
+  
   cat(paste("File to group:", fileIn))
-
+  
   # load(paste(outdir, "repl.pattern.RData", sep="/"))
   # if (scanmode=="negative") {
   #   sampleNames=groupNames.neg
@@ -21,7 +21,7 @@ run <- function(fileIn, outdir, scanmode, resol, scriptDir) {
   # peak.grouping.Gauss.HPC(outdir, fileIn, scanmode, resol, sampleNames)
   # groupingAndIdent(outdir, fileIn, scanmode)
   groupingOnHMDB(outdir, fileIn, scanmode)
-
+  
 }
 
 cat("Start peakGrouping.2.0.R")
