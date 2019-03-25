@@ -1,15 +1,5 @@
 #!/usr/bin/Rscript
 
-thresh_pos=2000
-thresh_neg=2000
-dims_thresh=100
-dimsThresh=100
-trim=0.1
-nrepl=3
-normalization=disabled
-thresh2remove=500000000
-resol=140000
-
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
 run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
@@ -47,9 +37,6 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
     return(list("pattern"=repl.pattern))
   }
   
-  indir = "/Users/nunen/Documents/GitHub/DIMS/16_SinglePatients_XVI/logs"
-  outdir = "/Users/nunen/Documents/GitHub/DIMS/16_SinglePatients_XVI"
-  
   dir.create(paste(outdir, "average_pklist", sep="/"),showWarnings = F)
   
   # get repl.pattern
@@ -58,7 +45,6 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
   remove_neg=NULL
   remove_pos=NULL
   for (i in 1:length(repl.pattern)) {
-    i= 1
     techRepsArray.pos = NULL
     techRepsArray.neg = NULL
     
@@ -68,7 +54,6 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
     n_pos=0
     n_neg=0
     for (j in 1:length(tech_reps)){
-      j = 3
       load(paste(paste(outdir, "pklist/", sep="/"), tech_reps[j], ".RData", sep=""))
       message(sum(pklist$neg[,1]))
       message(sum(pklist$pos[,1]))
