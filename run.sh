@@ -166,20 +166,33 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
 
-qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_negative.sh
 qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_positive.sh
+qsub -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
 
+# 01-queueConversionCheck.sh
+cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
+for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e '0x800700' | awk -F ":" '{print $1}')
+do
+	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
+	if [ -f $outdir/jobs/0-conversion/\${script}.sh]; then
+    qsub -l h_rt=00:05:00 -l h_vmem=4G -N "conversion_\${script}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${script}.sh
+	fi
+done
+
+qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+EOF
 
 # 0-queueConversion.sh
 find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
     echo "singularity exec -B /hpc/dbg_mz/ /hpc/dbg_mz$proteowizard wine msconvert $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    qsub -l h_rt=00:30:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+    qsub -l h_rt=00:05:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+qsub -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+
 
 
 doScanmode() {
