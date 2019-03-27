@@ -178,7 +178,7 @@ do
 	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
 	if [ -f $outdir/jobs/0-conversion/\${script}.sh ]; then
     passed_check=false
-    find $outdir/jobs/0-conversion -type f -name '\${script}*' -delete # otherwise there'll be an endless loop
+    find $outdir/logs/0-conversion -type f -name '\${script}*' -delete # otherwise there'll be an endless loop
     qsub -l h_rt=00:05:00 -l h_vmem=4G -N "conversion_\${script}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${script}.sh
 	fi
 done
