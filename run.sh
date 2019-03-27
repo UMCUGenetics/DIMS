@@ -173,7 +173,7 @@ EOF
 # 01-queueConversionCheck.sh
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 passed_check=true
-for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'spectrum' | awk -F ":" '{print \$1}')
+for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'error in thread' | awk -F ":" '{print \$1}')
 do
 	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
 	if [ -f $outdir/jobs/0-conversion/\${script}.sh ]; then
