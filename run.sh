@@ -173,13 +173,12 @@ EOF
 # 01-queueConversionCheck.sh
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 passed_check=true
-for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e '0x800700' | awk -F ":" '{print \$1}')
+for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'spectrum' | awk -F ":" '{print \$1}')
 do
 	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
 	if [ -f $outdir/jobs/0-conversion/\${script}.sh ]; then
     passed_check=false
-    echo "find $outdir/logs/0-conversion -type f -name "*\${script}*" -delete"
-    find $outdir/logs/0-conversion -type f -name '*\${script}*' -delete # otherwise there'll be an endless loop
+    find $outdir/logs/0-conversion -type f -name "*\${script}*" -delete # otherwise there'll be an endless loop
     qsub -l h_rt=00:05:00 -l h_vmem=4G -N "conversion_\${script}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${script}.sh
 	fi
 done
