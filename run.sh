@@ -202,7 +202,7 @@ EOF
 find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
-    echo "singularity exec -B /hpc/dbg_mz/ /hpc/dbg_mz$proteowizard wine msconvert $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
+    echo "singularity exec -B /hpc/dbg_mz/ $proteowizard wine msconvert $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
     qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
@@ -229,7 +229,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
    qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $scripts" > $outdir/jobs/5-collectSamples/${scanmode}.sh
+echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
 
 qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
@@ -285,7 +285,7 @@ find "$outdir/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rd
   qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_\${input}" -hold_jid "peakFilling_${scanmode}_*" -m as -M $email -o $outdir/logs/9-runFillMissing -e $outdir/logs/9-runFillMissing $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
+echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts $db" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -hold_jid "peakFilling2_${scanmode}_*" -m as -M $email -o $outdir/logs/10-collectSamplesFilled -e $outdir/logs/10-collectSamplesFilled $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 
 qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
