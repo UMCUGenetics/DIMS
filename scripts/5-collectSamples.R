@@ -2,7 +2,7 @@
 
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
-run <- function(resultDir, scanmode, scripts) {
+run <- function(resultDir, scanmode, db) {
   
   ppm=2
   
@@ -57,7 +57,7 @@ run <- function(resultDir, scanmode, scripts) {
   save(outlist.tot, file=paste(outdir, paste(scanmode, "RData", sep="."), sep="/"))
   
   # cut HMDB ##########################################################################################################################################
-  load(paste(scripts, "../db/HMDB_add_iso_corrNaCl.RData", sep="/"))
+  load(db)
   outdir=paste(resultDir, "hmdb_part", sep="/")
   dir.create(outdir, showWarnings = FALSE)
   load(paste(resultDir, "breaks.fwhm.RData", sep="/"))
