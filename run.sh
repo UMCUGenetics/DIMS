@@ -175,13 +175,13 @@ cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 it=$((it + 1))
 echo "Try #\${i}";
 
-passed_check=true
+continue=true
 if [ "\$it" -lt 3 ]; then
   for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'error in thread' | awk -F ":" '{print \$1}')
   do
   	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${script}.sh ]; then
-      passed_check=false
+      continue=false
       find $outdir/logs/0-conversion -type f -name "*\${script}*" -delete # otherwise there'll be an endless loop
       qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${script}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${script}.sh
   	fi
@@ -190,7 +190,7 @@ else
   echo "Potential RAW -> mzXML conversion issue with run $name" | mail -s "DIMS issue $name" "$email"
 fi
 
-if [ "\$passed_check" = true ]; then
+if [ "\$continue" = true ]; then
   qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 else
   qsub it=\$it -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
