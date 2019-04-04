@@ -230,7 +230,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
 
 qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
