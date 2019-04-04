@@ -87,7 +87,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   # message(paste(sum(final.outlist.idpat[ , "iso_HMDB"] != ""), "assigned isomeres"))
   
   # Identify noise peaks
-  noise.MZ <- read.table(file=paste(scriptDir, "../db/TheoreticalMZ_NegPos_incNaCl.txt", sep="/"), sep="\t", header=TRUE, quote = "")
+  noise.MZ <- read.table(file="/hpc/dbg_mz/tools/db/TheoreticalMZ_NegPos_incNaCl.txt", sep="\t", header=TRUE, quote = "")
   noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
   
   # Replace "Negative" by "negative" in ident.hires.noise
