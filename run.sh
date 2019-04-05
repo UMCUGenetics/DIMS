@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# todo :
-# getting the same output as before;
-# mailing;
-# something that checks which steps have already been done when starting pipeline
-# figure out .Rprofile to never have to load libraries or point to where they are
-
-
-start=`date +%s`
-
 set -o pipefail
 set -e
 #set -x
@@ -24,7 +15,8 @@ NC='\033[0m' # No Color
 # Defaults
 verbose=0
 restart=0
-name=""
+indir=""
+outdir=""
 
 # Show usage information
 function show_help() {
@@ -35,10 +27,11 @@ function show_help() {
   fi
   printf "
   ${P}USAGE:
-    ${0} -n <run dir> [-r] [-v] [-h]
+    ${0} -i <input path> -o <output path> [-r] [-v] [-h]
 
   ${B}REQUIRED ARGS:
-    -n - name of input folder, eg run1 (required)${NC}
+    -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1 (required)
+    -o - full path output folder, eg. /hpc/dbg-mz/processed/run1 (required)${NC}
 
   ${C}OPTIONAL ARGS:
     -r - restart the pipeline, removing any existing output for the entered run (default off)
@@ -46,7 +39,7 @@ function show_help() {
     -h - show help${NC}
 
   ${G}EXAMPLE:
-    sh run.sh -n run1${NC}
+    sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1${NC}
 
   "
   exit 1
@@ -61,7 +54,9 @@ do
 		;;
 	v) verbose=1 ;;
   r) restart=1 ;;
-  n) name=${OPTARG} ;;
+  i) indir=${OPTARG} ;;
+  o) outdir=${OPTARG} ;;
+
 	esac
 done
 
@@ -70,10 +65,7 @@ shift "$((OPTIND-1))"
 if [ -z ${name} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${verbose} -gt 0 ] ; then set -x ; fi
 
-base=/hpc/dbg_mz
-#BASE=/Users/nunen/Documents/GitHub/Dx_metabolomics
-indir=$base/raw_data/${name}
-outdir=$base/processed/${name}
+name=$(basename outdir)
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
 
 while [[ ${restart} -gt 0 ]]
@@ -103,7 +95,7 @@ declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
 
 # Check existence input dir
 if [ ! -d $indir ]; then
-	show_help "The input directory for run $NAME does not exist at
+	show_help "The input directory $indir does not exist at
     $indir${NC}\n"
 else
   # R scripts
@@ -120,12 +112,7 @@ else
   # etc files
   for file in \
 		$indir/settings.config \
-	  $indir/init.RData \
-	  $(dirname "$0")/db/HMDB_add_iso_corrNaCl_only_IS.RData \
-    $(dirname "$0")/db/HMDB_add_iso_corrNaCl_with_IS.RData \
-    $(dirname "$0")/db/HMDB_add_iso_corrNaCl.RData \
-    $(dirname "$0")/db/HMDB_with_info_relevance.RData \
-    $(dirname "$0")/db/TheoreticalMZ_NegPos_incNaCl.txt
+	  $indir/init.RData 
 	do
 		if ! [ -f ${file} ]; then
 			show_help "${file} does not exist.\n"
@@ -141,6 +128,7 @@ mkdir -p $outdir/jobs/queue
 cp $indir/settings.config $outdir/logs
 cp $indir/init.RData $outdir/logs
 git rev-parse HEAD > $outdir/logs/commit
+`date +%s` >> $outdir/logs/commit
 
 dos2unix $indir/settings.config
 . $indir/settings.config
@@ -305,8 +293,6 @@ done
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 EOF
-
-
 
 }
 
