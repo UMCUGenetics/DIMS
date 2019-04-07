@@ -112,7 +112,7 @@ else
   # etc files
   for file in \
 		$indir/settings.config \
-	  $indir/init.RData 
+	  $indir/init.RData
 	do
 		if ! [ -f ${file} ]; then
 			show_help "${file} does not exist.\n"
@@ -165,14 +165,24 @@ echo "Try #\${i}";
 
 continue=true
 if [ "\$it" -lt 3 ]; then
+  # check if any of the error files contain 'error in thread'
   for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'error in thread' | awk -F ":" '{print \$1}')
   do
-  	script=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
-  	if [ -f $outdir/jobs/0-conversion/\${script}.sh ]; then
+  	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
+  	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
       continue=false
-      find $outdir/logs/0-conversion -type f -name "*\${script}*" -delete # otherwise there'll be an endless loop
-      qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${script}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${script}.sh
+      find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
+      qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
   	fi
+  done
+  #check if any of the output files are empty
+  for file in \$(ls $outdir/logs/0-conversion -lR | grep "\.o" | awk '{if (\$5 == 0) print \$9}' | cut -d '_' -f 1 --complement | cut -d '.' -f 1)
+  do
+    if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
+      continue=false
+      find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
+      qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
+    fi
   done
 else
   echo "Potential RAW -> mzXML conversion issue with run $name" | mail -s "DIMS issue $name" "$email"
