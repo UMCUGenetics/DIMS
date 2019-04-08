@@ -1,2 +1,2 @@
-# Dx_metabolomics
+# DIMS
 Repository for diagnostic pipeline metabolomics
