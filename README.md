@@ -20,7 +20,7 @@ git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
 
 ### Tools
-- In /tools, install the proteowizard docker with singularity.
+- In `/tools`, install the [Proteowizard Docker](https://hub.docker.com/r/chambm/pwiz-skyline-i-agree-to-the-vendor-licenses) with [Singularity](https://singularity.lbl.gov/).
 ```
 export SINGULARITY_CACHEDIR=/hpc/dbg_mz/tools/.singularity/
 export SINGULARITY_TMPDIR=/hpc/dbg_mz/tools/.singularity/tmp
@@ -30,7 +30,7 @@ export SINGULARITY_BINDPATH=/hpc/dbg_mz/tools
 export WINEDEBUG=-all
 singularity build --sandbox proteowizard_3.0.19056-6b6b0a2b4/ docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.19056-6b6b0a2b4
 ```
-- In /tools, put the required Human Metabolome Database (HMDB) .RData files under /db.
+- In `/tools`, put the required Human Metabolome Database (HMDB) .RData files under /db.
 
 ## Usage
 
