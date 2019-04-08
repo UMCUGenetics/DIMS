@@ -35,8 +35,9 @@ singularity build --sandbox proteowizard_3.0.19056-6b6b0a2b4/ docker://chambm/pw
 ## Usage
 
 You generally wanna use the DIMS pipeline in combination with the [DIMS GUI](https://github.com/UMCUGenetics/DIMS_GUI/), which is an R shiny program to transfer data to the HPC and start the pipeline. However, manually starting the pipeline is also possible.
-  ```
-run.sh -i <input path> -o <output path> [-r] [-v] [-h]
+```
+CMD:
+  sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
 
 REQUIRED ARGS:
   -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1
@@ -48,4 +49,5 @@ OPTIONAL ARGS:
   -h - show help
 
 EXAMPLE:
-  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$```
+  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$
+```
