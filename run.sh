@@ -45,7 +45,7 @@ function show_help() {
   exit 1
 }
 
-while getopts "h?vrqn:" opt
+while getopts "h?vrqi:o:" opt
 do
 	case "${opt}" in
 	h|\?)
@@ -62,7 +62,8 @@ done
 
 shift "$((OPTIND-1))"
 
-if [ -z ${name} ] ; then show_help "Required arguments were not given.\n" ; fi
+if [ -z ${indir} ] ; then show_help "Required arguments were not given.\n" ; fi
+if [ -z ${outdir} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${verbose} -gt 0 ] ; then set -x ; fi
 
 name=$(basename outdir)
@@ -128,7 +129,7 @@ mkdir -p $outdir/jobs/queue
 cp $indir/settings.config $outdir/logs
 cp $indir/init.RData $outdir/logs
 git rev-parse HEAD > $outdir/logs/commit
-`date +%s` >> $outdir/logs/commit
+echo `date +%s` >> $outdir/logs/commit
 
 dos2unix $indir/settings.config
 . $indir/settings.config
