@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -o pipefail
 set -e
@@ -138,6 +138,8 @@ dos2unix $indir/settings.config
 
 # 1-queueStart.sh
 cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
+#!/bin/sh
+
 it=0
 find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
@@ -161,6 +163,8 @@ EOF
 
 # 01-queueConversionCheck.sh
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
+#!/bin/sh
+
 it=$((it + 1))
 echo "Try #\${i}";
 
@@ -219,7 +223,7 @@ doScanmode() {
 
   # 2-queuePeakFinding.sh
 cat << EOF >> $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
@@ -229,7 +233,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
 
 qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
@@ -237,7 +241,7 @@ EOF
 
   # 3-queuePeakGrouping.sh
 cat << EOF >> $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
@@ -254,7 +258,7 @@ EOF
 
   # 4-queuePeakGroupingRest.sh
 cat << EOF >> $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
@@ -268,7 +272,7 @@ EOF
 
   # 5-queueFillMissing.sh
 cat << EOF >> $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
@@ -292,7 +296,7 @@ EOF
 
   # 6-queueSumAdducts.sh
 cat << EOF >> $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
@@ -302,10 +306,18 @@ find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read h
 done
 
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 EOF
 
 }
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
+
+# 7-queueExcelExport.sh
+cat << EOF >> $outdir/jobs/queue/7-queueSumAdducts.sh
+#!/bin/sh
+
+echo "Rscript $scripts/13-excelExport.R $outdir $scripts" > $outdir/jobs/13-excelExport.sh
+qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect*","queue*","grouping*","peak*","conversion*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
+EOF
