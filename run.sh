@@ -194,7 +194,7 @@ else
 fi
 
 if [ "\$continue" = true ]; then
-  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+  sbatch $outdir/jobs/queue/1-queueStart.sh
 else
   qsub -v it=\$it -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
 fi
@@ -314,10 +314,5 @@ EOF
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
 
-# 7-queueExcelExport.sh
-cat << EOF >> $outdir/jobs/queue/7-queueSumAdducts.sh
-#!/bin/sh
-
 echo "Rscript $scripts/13-excelExport.R $outdir $scripts" > $outdir/jobs/13-excelExport.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect*","queue*","grouping*","peak*","conversion*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
-EOF
