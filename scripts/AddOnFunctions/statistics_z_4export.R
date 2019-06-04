@@ -1,14 +1,8 @@
 statistics_z_4export <- function(peaklist, plotdir, patients, adducts, control_label, case_label){
   # peaklist=as.data.frame(peaklist)
-  
-  unlink(paste(getwd(), "results/xls", sep="/"), recursive = TRUE, force = TRUE)
-  # unlink(paste(getwd(), "results/plots", sep="/"), recursive = TRUE, force = TRUE)
-  unlink(paste(getwd(), "results/xls_fixed", sep="/"), recursive = TRUE, force = TRUE)
-  
-  dir.create(paste(getwd(), "results/plots", sep="/"), showWarnings = F)
-  dir.create(paste(getwd(), "results/plots/positive", sep="/"), showWarnings = F)
-  dir.create(paste(getwd(), "results/plots/negative", sep="/"), showWarnings = F)
-  dir.create(paste(getwd(), "results/plots/adducts", sep="/"), showWarnings = F)
+
+  dir.create(paste(getwd(), "plots", sep="/"), showWarnings = F)
+  dir.create(paste(getwd(), "plots/adducts", sep="/"), showWarnings = F)
   
   ########## Statistics: Z-score
   
@@ -22,7 +16,12 @@ statistics_z_4export <- function(peaklist, plotdir, patients, adducts, control_l
           (is.na(peaklist[i,"iso_HMDB"]) | peaklist[i,"iso_HMDB"]=="")) next
     }
 
-    plotBoxPlot(peaklist[i,,drop=FALSE], export=TRUE, control_label, case_label, paste(plotdir, "/", sprintf("%05d", i), "_box.png", sep=""), patients)
+    plotBoxPlot(peaklist = peaklist[i,,drop=FALSE], 
+                export = TRUE, 
+                control_label = control_label, 
+                case_label = case_label, 
+                plotdir = plotdir,
+                patients = patients)
 
     # plotZscorePlot(peaklist[i,,drop=FALSE], export=TRUE, control_label, case_label, paste(plotdir, "/", sprintf("%05d", i), ".png", sep=""), patients)
   }
@@ -55,10 +54,10 @@ statistics_z_4export <- function(peaklist, plotdir, patients, adducts, control_l
   if (length(int)>0) peaklist=peaklist[,-int]
   
   # Add index to find plots and sort on p.value
-  index = c(1:dim(peaklist)[1])
-  peaklist = cbind(peaklist, "index"=index)
+  #index = c(1:dim(peaklist)[1])
+  #peaklist = cbind(peaklist, "index"=index)
   
-  #peaklist = peaklist[order(peaklist[,sortCol]),]
+  peaklist = peaklist[order(peaklist[,"HMDB_code"]),]
   
   #   # Order on average Z-score
   #   tmp = peaklist[,grep("Zscore", colnames(peaklist))]

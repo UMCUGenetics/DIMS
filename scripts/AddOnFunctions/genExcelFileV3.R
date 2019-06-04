@@ -1,6 +1,7 @@
 genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, adducts) { 
   # peaklist = peaklist[c(start:end),]
   # imageNum=2
+  # subFile=paste(fileName, 1, sep="_")
   
   # Tip!!!
   # Use read.xlsx() in the openxlsx package. It has no dependency on rJava 
@@ -17,6 +18,7 @@ genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, addu
     .jcall("java/lang/System", method = "gc")
   }
   
+  # Frees Java Virtual Machine (JVM) memory
   xlcFreeMemory()
   
   filelist <- "AllPeakGroups"
@@ -24,8 +26,9 @@ genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, addu
   
   ###  insert first column
   addCol <- matrix(c(""), nrow=npeaks, ncol=1)
-  wbfile <- paste(subFile, "xlsx", sep=".") # 
+  wbfile <- paste0(getwd(), "/", subFile, ".xlsx")
   endRow <- npeaks+1
+  detach("package:xlsx", unload=TRUE)
   wb <- loadWorkbook(wbfile, create = TRUE)
   
   createSheet(wb, name = filelist)
@@ -43,13 +46,12 @@ genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, addu
   }
   
   ###Images
-  i = 1
   for (i in 1:npeaks) {
     
-    if ((i %% 100)==0){
-       message(i);
-       message(Sys.time());
-    }
+    # if ((i %% 100)==0){
+    #   message(i);
+    #   message(Sys.time());
+    # }
     
     if (!adducts){
       # only picture if identified
@@ -73,8 +75,12 @@ genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, addu
       # file_png <- paste(plotdir, "/", subName[2], sprintf("%05d", f), ".png", sep="")
       
       # Judith
-      file_png <- paste(plotdir, "/", sprintf("%05d", as.numeric(f)), subName[2], ".png", sep="")
+      #file_png <- paste(plotdir, "/", sprintf("%05d", as.numeric(f)), subName[2], ".png", sep="")
       
+      # hmdb 
+      file_png <- paste0(plotdir, "/", peaklist[i, "HMDB_code"], subName, ".png")
+      
+      # formloc_box = the excel sheet, column and row in one string
       formloc_box <- paste(filelist, "!$A$",j, sep="")
       name_box <- paste("B", i, runif(1, min=0.001), sep="")
       createName(wb, name = name_box , formula = formloc_box, overwrite=TRUE)

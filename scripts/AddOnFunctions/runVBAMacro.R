@@ -5,9 +5,8 @@ runVBAMacro <- function(dir, dir2, vb_script) {
   
 dir.create(dir2)
 files=list.files(dir)
+
 script_1 = paste("Option Explicit
-
-
 On Error Resume Next
 RunExcelMacro
 
@@ -19,7 +18,7 @@ Dim xlBook_persenal
 
 Set xlApp = CreateObject(\"Excel.Application\")
 xlApp.DisplayAlerts = FALSE
-Set xlBook_persenal = xlApp.Workbooks.Open(\"Z:\\Metabolomics\\DIMS_pipeline\\R_workspace_ME\\HPCxls\\src\\PERSONAL.XLSB\", 0, True)
+Set xlBook_persenal = xlApp.Workbooks.Open(\"C:\\Users\\awillem8\\AppData\\Roaming\\Microsoft\\Excel\\XLSTART\\PERSONAL.XLSB\", 0, True)
 Set xlBook = xlApp.Workbooks.Open(\"", dir, sep="") 
 
 script_2 = "\", 0, True)
