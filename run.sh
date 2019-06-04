@@ -173,7 +173,7 @@ if [ "\$it" -lt 3 ]; then
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
-      qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
+      qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
   	fi
   done
   #check if any of the output files are empty
@@ -182,7 +182,7 @@ if [ "\$it" -lt 3 ]; then
     if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
-      qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
+      qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
     fi
   done
 else
@@ -202,10 +202,10 @@ find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
     echo "singularity exec -B /hpc/dbg_mz/ $proteowizard wine msconvert $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    qsub -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+    qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -v it=0 -q all.q -P dbg_mz -l h_rt=00:02:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+qsub -v it=0 -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
 
 
 
@@ -225,7 +225,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
    echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
-   qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
+   qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
@@ -302,7 +302,7 @@ find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read h
 done
 
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 EOF
 
 }
