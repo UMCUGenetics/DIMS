@@ -298,11 +298,11 @@ find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read h
  do
     input=\$(basename \$hmdb .RData)
     echo "Rscript $scripts/11-runSumAdducts.R \$hmdb $outdir $scanmode $adducts $scripts" > $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
-    qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/11-runSumAdducts -e $outdir/logs/11-runSumAdducts $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+    qsub -q all.q -P dbg_mz -l h_rt=03:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/11-runSumAdducts -e $outdir/logs/11-runSumAdducts $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
 done
 
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 EOF
 
 }
