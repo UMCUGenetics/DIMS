@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2_test")
 
 cat("Start excelExport.R")
 cat("==> reading arguments:\n", sep = "")
