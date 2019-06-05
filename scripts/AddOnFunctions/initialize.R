@@ -1,4 +1,4 @@
-initialize <- function(outputfolder){
+initialize <- function(outputfolder, hmdb){
   
   # load("./results/repl.pattern.positive.RData")
   # repl.pattern.pos = repl.pattern.filtered
@@ -105,8 +105,8 @@ initialize <- function(outputfolder){
   
   #load("./db/HMDB_with_info_relevance.RData")
   #load("./db/HMDB_with_info_relevance_IS.RData")
-  load("/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData")
   # load("./db/HMDB_with_info_relevance_IS_C5OH.RData")
+  load(hmdb)
   
   outlist.adducts.stats=cbind("HMDB_code"=rownames(outlist.adducts.stats), outlist.adducts.stats)
   

@@ -12,13 +12,14 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
 project <- cmd_args[2] #"test"
 matrix <- cmd_args[3] #"DBS"
-scripts <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/scripts"
+hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
+scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 
 rundate <- Sys.Date()
 
 setwd(scripts)
-source("addOnFunctions/sourceDir.R")
-sourceDir("addOnFunctions")
+source("AddOnFunctions/sourceDir.R")
+sourceDir("AddOnFunctions")
 
 setwd(outdir)
 
@@ -30,7 +31,7 @@ control_label <- "C"
 case_label <- "P"
 
 # sum positive and negative adductsums
-outlist <- initialize(getwd())
+outlist <- initialize(outdir, hmdb)
 outlist_save_point <- outlist
 outlist <- outlist_save_point
 outlist <- outlist$adducts

@@ -66,7 +66,7 @@ if [ -z ${indir} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ -z ${outdir} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${verbose} -gt 0 ] ; then set -x ; fi
 
-name=$(basename outdir)
+name=$(basename $outdir)
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
 
 while [[ ${restart} -gt 0 ]]
@@ -314,5 +314,5 @@ EOF
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
 
-echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $scripts" > $outdir/jobs/13-excelExport.sh
+echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect*","queue*","grouping*","peak*","conversion*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
