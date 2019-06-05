@@ -28,7 +28,7 @@ genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, addu
   addCol <- matrix(c(""), nrow=npeaks, ncol=1)
   wbfile <- paste0(getwd(), "/", subFile, ".xlsx")
   endRow <- npeaks+1
-  detach("package:xlsx", unload=TRUE)
+  #detach("package:xlsx", unload=TRUE)
   wb <- loadWorkbook(wbfile, create = TRUE)
   
   createSheet(wb, name = filelist)
