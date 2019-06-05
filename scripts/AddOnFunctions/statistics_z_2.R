@@ -208,7 +208,7 @@ statistics_z_2 <- function(peaklist, outputfolder, control_label, case_label, so
   #   peaklist = peaklist[order(abs(tmp.p.avg), decreasing = TRUE),]
   
   # write.table(peaklist, file=filename, sep="\t")
-  write.table(peaklist, file=paste0(outputfolder, "allpgrps_stats.txt"), sep="/")
+  write.table(peaklist, file=paste0(outputfolder, "allpgrps_stats.txt", sep="/"))
   
   return(peaklist)
   
