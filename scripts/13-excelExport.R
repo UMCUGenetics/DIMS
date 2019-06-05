@@ -67,7 +67,7 @@ cat("Excel created")
 
 # INTERNE STANDAARDEN
 library('reshape2')
-load("init.RData")
+load("logs/init.RData")
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 
