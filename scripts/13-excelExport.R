@@ -23,6 +23,8 @@ sourceDir("AddOnFunctions")
 
 setwd(outdir)
 
+library("ggplot2")
+library('reshape2')
 
 plotdir <- "plots/adducts"
 sub <- 20000
@@ -66,7 +68,6 @@ cat("Excel created")
 #            dir2=paste("E:\\Metabolomics\\projects\\", dims_dir ,"\\results\\",sep=""), script)
 
 # INTERNE STANDAARDEN
-library('reshape2')
 load("logs/init.RData")
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
@@ -137,12 +138,6 @@ Pos_Contr$Project<-project
 #Save results
 save(Pos_Contr,file='Pos_Contr_test.RData')
 
-library(xlsx)
-library(ggplot2)
-library(cowplot)
-library(lubridate) #used for creating dates
-library(gridExtra)
-library(grid) # for textgrob
 
 # Barplot voor alle IS
 IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
