@@ -201,25 +201,29 @@ ggsave("plots/IS_line_sum.png", plot=IS_sum_plot, height=6, width=w, units="in")
 
 # Barplot voor Leucine voor alle data
 IS_now<-'2H3-Leucine (IS)' 
-p1<-ggplot(subset(IS_pos, HMDB.name %in% IS), aes(Sample,Intensity))+
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Positive mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-p2<-ggplot(subset(IS_neg, HMDB.name %in% IS), aes(Sample,Intensity))+
+p1<-ggplot(subset(IS_neg, HMDB.name %in% IS_now), aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(title='Negative mode',x='',y='Intensity')+
   theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
         legend.position='none')
-p3<-ggplot(subset(IS_summed, HMDB.name %in% IS), aes(Sample,Intensity))+
+p2<-ggplot(subset(IS_pos, HMDB.name %in% IS_now), aes(Sample,Intensity))+
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(title='Positive mode',x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
+        legend.position='none')
+p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(title='Adduct sums',x='',y='Intensity')+
   theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
         legend.position='none')
 
 w <- 3 + 0.2 * length(repl.pattern)
-p4<-plot_grid(p1,p2,p3,ncol=1,axis='rlbt',rel_heights=c(1,1,1))
-ggsave("plots/Leucine.png", plot=p4, height=6, width=w, units="in")
+#p4<-plot_grid(p1,p2,p3,ncol=1,axis='rlbt',rel_heights=c(1,1,1))
+#ggsave("plots/Leucine.png", plot=p4, height=6, width=w, units="in")
+
+ggsave("plots/Leucine_neg.png", plot=p1, height=6, width=w, units="in")
+ggsave("plots/Leucine_pos.png", plot=p2, height=6, width=w, units="in")
+ggsave("plots/Leucine_sum.png", plot=p3, height=6, width=w, units="in")
 
 
 cat("Ready excelExport.R")
