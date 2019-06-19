@@ -69,11 +69,14 @@ cat("Excel created")
 
 # INTERNE STANDAARDEN
 load("logs/init.RData")
+len <- length(repl.pattern)
+
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 
+
 # Retrieve IS summed adducts
-IS_summed <- IS[,1:(length(repl.pattern)+1)]
+IS_summed <- IS[,1:(len+1)]
 IS_summed$HMDB.name <- IS$name
 IS_summed <- melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
 colnames(IS_summed) <- c('HMDB.code','HMDB.name','Sample','Intensity')
@@ -107,6 +110,102 @@ IS_neg$Project <- project
 # Save results
 save(IS_pos,IS_neg,IS_summed, file='IS_results_test.RData')
 
+#load(paste0(outdir, "/IS_results_test.RData"))
+
+
+w <- 10 + 0.4 * len
+
+# Barplot voor alle IS
+IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Neg)") +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free_y')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+        legend.position='none')
+ggsave("plots/IS_bar_neg.png", plot=IS_neg_plot, height=w/2.5, width=w, units="in")
+
+IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Pos)") +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free_y')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+        legend.position='none')
+ggsave("plots/IS_bar_pos.png", plot=IS_pos_plot, height=w/2.5, width=w, units="in")
+
+IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Summed)") +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free_y')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+        legend.position='none')
+ggsave("plots/IS_bar_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="in")
+
+
+
+
+# Lineplot voor alle IS
+IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Neg)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))
+
+IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Pos)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))
+
+IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
+  ggtitle("Interne Standaard (Sum)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))
+
+w <- 8 + 0.2 * len
+ggsave("plots/IS_line_neg.png", plot=IS_neg_plot, height=w/2.5, width=w, units="in")
+ggsave("plots/IS_line_pos.png", plot=IS_pos_plot, height=w/2.5, width=w, units="in")
+ggsave("plots/IS_line_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="in")
+
+
+# Barplot voor Leucine voor alle data
+IS_now<-'2H3-Leucine (IS)' 
+p1<-ggplot(subset(IS_neg, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
+  ggtitle(paste0(IS_now, " (Neg)")) +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(title='Negative mode',x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+        legend.position='none')
+p2<-ggplot(subset(IS_pos, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
+  ggtitle(paste0(IS_now, " (Pos)")) +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(title='Positive mode',x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+        legend.position='none')
+p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
+  ggtitle(paste0(IS_now, " (Sum)")) +
+  geom_bar(aes(fill=HMDB.name),stat='identity')+
+  labs(title='Adduct sums',x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+        legend.position='none')
+
+w <- 3 + 0.2 * len
+#p4<-plot_grid(p1,p2,p3,ncol=1,axis='rlbt',rel_heights=c(1,1,1))
+#ggsave("plots/Leucine.png", plot=p4, height=6, width=w, units="in")
+
+ggsave("plots/Leucine_neg.png", plot=p1, height=w/2.5, width=w, units="in")
+ggsave("plots/Leucine_pos.png", plot=p2, height=w/2.5, width=w, units="in")
+ggsave("plots/Leucine_sum.png", plot=p3, height=w/2.5, width=w, units="in")
+
+
+
+
 ### POSITIVE CONTROLS
 #HMDB codes
 PA_codes <- c('HMDB00824','HMDB00783','HMDB00123')
@@ -138,92 +237,6 @@ Pos_Contr$Project<-project
 #Save results
 save(Pos_Contr,file='Pos_Contr_test.RData')
 
-
-# Barplot voor alle IS
-IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Neg)") +
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(x='',y='Intensity')+
-  facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-
-IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Pos)") +
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(x='',y='Intensity')+
-  facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-
-IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Summed)") +
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(x='',y='Intensity')+
-  facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-
-w <- 8 + 0.5 * length(repl.pattern)
-ggsave("plots/IS_bar_neg.png", plot=IS_neg_plot, height=6, width=w, units="in")
-ggsave("plots/IS_bar_pos.png", plot=IS_pos_plot, height=6, width=w, units="in")
-ggsave("plots/IS_bar_sum.png", plot=IS_sum_plot, height=6, width=w, units="in")
-
-
-
-# Lineplot voor alle IS
-IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Neg)") +
-  geom_point(aes(col=HMDB.name))+
-  geom_line(aes(col=HMDB.name, group=HMDB.name))+
-  labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10))
-
-IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Pos)") +
-  geom_point(aes(col=HMDB.name))+
-  geom_line(aes(col=HMDB.name, group=HMDB.name))+
-  labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10))
-
-IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
-  ggtitle("Interne Standaard (Sum)") +
-  geom_point(aes(col=HMDB.name))+
-  geom_line(aes(col=HMDB.name, group=HMDB.name))+
-  labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10))
-
-w <- 8 + 0.2 * length(repl.pattern)
-ggsave("plots/IS_line_neg.png", plot=IS_neg_plot, height=6, width=w, units="in")
-ggsave("plots/IS_line_pos.png", plot=IS_pos_plot, height=6, width=w, units="in")
-ggsave("plots/IS_line_sum.png", plot=IS_sum_plot, height=6, width=w, units="in")
-
-
-# Barplot voor Leucine voor alle data
-IS_now<-'2H3-Leucine (IS)' 
-p1<-ggplot(subset(IS_neg, HMDB.name %in% IS_now), aes(Sample,Intensity))+
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Negative mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-p2<-ggplot(subset(IS_pos, HMDB.name %in% IS_now), aes(Sample,Intensity))+
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Positive mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity))+
-  geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Adduct sums',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 0, size=10), 
-        legend.position='none')
-
-w <- 3 + 0.2 * length(repl.pattern)
-#p4<-plot_grid(p1,p2,p3,ncol=1,axis='rlbt',rel_heights=c(1,1,1))
-#ggsave("plots/Leucine.png", plot=p4, height=6, width=w, units="in")
-
-ggsave("plots/Leucine_neg.png", plot=p1, height=6, width=w, units="in")
-ggsave("plots/Leucine_pos.png", plot=p2, height=6, width=w, units="in")
-ggsave("plots/Leucine_sum.png", plot=p3, height=6, width=w, units="in")
 
 
 cat("Ready excelExport.R")

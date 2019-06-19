@@ -2,6 +2,7 @@ sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmo
   # theor.MZ = outlist_part
   # grpnames.long = groupNames
   # peaklist = outlist.tot
+  # adducts = c(1) for neg or c(1,2) for pos
   
   dir.create(paste(outdir, "adductSums", sep="/"), showWarnings = FALSE)
   
