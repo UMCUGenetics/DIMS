@@ -166,8 +166,8 @@ EOF
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 #!/bin/sh
 
-it=$((it + 1))
-echo "Try #\${i}";
+it=$((\${it} + 1))
+echo "Try #\${it}";
 
 continue=true
 if [ "\$it" -lt 3 ]; then
