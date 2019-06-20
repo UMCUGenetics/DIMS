@@ -166,8 +166,7 @@ EOF
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 #!/bin/sh
 
-it=$((\${it} + 1))
-echo "Try #\${it}";
+it=$((\$1 + 1))
 
 continue=true
 if [ "\$it" -lt 3 ]; then
@@ -197,7 +196,7 @@ fi
 if [ "\$continue" = true ]; then
   sbatch $outdir/jobs/queue/1-queueStart.sh
 else
-  qsub -v it=\$it -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh \$it
 fi
 
 EOF
@@ -210,7 +209,7 @@ find $indir -iname "*.raw" | sort | while read raw;
     qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -v it=0 -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 0
 
 
 
