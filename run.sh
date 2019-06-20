@@ -192,7 +192,7 @@ else
 fi
 
 if [ "\$continue" = true ]; then
-  sbatch $outdir/jobs/queue/1-queueStart.sh
+  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 else
   qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 1
 fi
