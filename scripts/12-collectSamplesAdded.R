@@ -26,4 +26,5 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 run(cmd_args[1], cmd_args[2])
 
+file.create(paste0(resultDir, "logs", "done", sep = "/"))
 cat("Ready collectSamplesAdded.R")

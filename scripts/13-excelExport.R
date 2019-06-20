@@ -48,24 +48,6 @@ outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
                                 control_label = control_label,
                                 case_label = case_label)
 
-unlink("xls", recursive = T)
-dir.create("xls", showWarnings = F)
-
-generateExcelFile(peaklist = outlist,
-                  plotdir = file.path(plotdir),
-                  imageNum = 1,
-                  fileName = paste("xls", "test", sep="/"),
-                  subName = "_box",
-                  sub = sub,
-                  adducts = adducts)
-
-cat("Excel created")
-
-# windows only:
-#source("../../R/runVBAMacro.R")
-#script <- paste("Wscript.exe E:\\Metabolomics\\projects\\", dims_dir ,"\\src\\run.vbs",sep="")
-#runVBAMacro(dir=paste("E:\\Metabolomics\\projects\\", dims_dir ,"\\xls\\",sep=""),
-#            dir2=paste("E:\\Metabolomics\\projects\\", dims_dir ,"\\results\\",sep=""), script)
 
 # INTERNE STANDAARDEN
 load("logs/init.RData")

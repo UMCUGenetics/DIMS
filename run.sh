@@ -91,7 +91,8 @@ declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "9-runFillMissing" \
                      "10-collectSamplesFilled" \
                      "11-runSumAdducts" \
-                     "12-collectSamplesAdded" )
+                     "12-collectSamplesAdded" \
+                     "13-excelExport" )
 
 
 # Check existence input dir
@@ -171,7 +172,7 @@ echo "Try #\${i}";
 continue=true
 if [ "\$it" -lt 3 ]; then
   # check if any of the error files contain 'error in thread'
-  for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'error in thread' | awk -F ":" '{print \$1}')
+  for filepath in \$(egrep 'exception|0x8007000' $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}')
   do
   	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
@@ -307,12 +308,13 @@ done
 
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-EOF
 
+if [ -f "$outdir/log/done" ]; then # if one of the scanmodes is already completed
+  echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
+  qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
+fi
+EOF
 }
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"
 doScanmode "positive" $thresh_pos "*_pos.RData" "1,2"
-
-echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
-qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect*","queue*","grouping*","peak*","conversion*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
