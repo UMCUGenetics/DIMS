@@ -167,7 +167,7 @@ cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 #!/bin/sh
 
 continue=true
-if [ "\$1" -eq 1 ]; then
+if [ "\$1" -lt 1 ]; then
   # check if any of the error files contain 'error in thread'
   for filepath in \$(egrep 'exception|0x8007000' $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}')
   do
