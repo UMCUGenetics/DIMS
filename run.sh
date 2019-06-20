@@ -166,10 +166,8 @@ EOF
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 #!/bin/sh
 
-it=$(("\${1}" + 1))
-
 continue=true
-if [ "\$it" -lt 3 ]; then
+if [ "\$1" -eq 1 ]; then
   # check if any of the error files contain 'error in thread'
   for filepath in \$(egrep 'exception|0x8007000' $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}')
   do
@@ -196,7 +194,7 @@ fi
 if [ "\$continue" = true ]; then
   sbatch $outdir/jobs/queue/1-queueStart.sh
 else
-  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh \$it
+  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 1
 fi
 
 EOF
