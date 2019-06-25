@@ -16,6 +16,8 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
   
   load(paste(outdir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
   outlist.copy = outlist.tot
+  grouped <- rep(0, length(outlist.copy))
+  outlist.copy <- cbind (outlist.copy, grouped)
   rm(outlist.tot)
   
   load(paste0(outdir, "/repl.pattern.", scanmode,".RData"))
@@ -175,7 +177,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
                                            data.frame(assi_HMDB, iso_HMDB, HMDB_code, theormz_HMDB)))
     }
     
-    if (length(selp)>0) outlist.copy[selp, "height.pkt"] = -1
+    if (length(selp)>0) outlist.copy[selp, "grouped"] = 1
     HMDB_add_iso = HMDB_add_iso[-index,]
     
     # n=n+1

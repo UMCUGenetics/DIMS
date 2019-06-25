@@ -26,7 +26,7 @@ run <- function(resultDir, scanmode, ppm=2) {
     #message(files[i])
     load(files[i])
     
-    index = c(index, which(outlist.copy[,"height.pkt"]==-1))
+    index = c(index, which(outlist.copy[,"grouped"]==1))
   }
   
   load(paste(resultDir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
