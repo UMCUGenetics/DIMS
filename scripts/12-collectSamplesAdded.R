@@ -15,8 +15,6 @@ run <- function(resultDir, scanmode) {
   }
 
   save(outlist.tot, file=paste0(resultDir, "/adductSums_", scanmode, ".RData"))
-
-  file.create(paste(resultDir, "logs", "done", sep = "/"))
 }
 
 cat("Start collectSamplesAdded.R")
