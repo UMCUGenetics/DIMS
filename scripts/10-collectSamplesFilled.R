@@ -2,7 +2,14 @@
 
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
-run <- function(resultDir, scanmode, normalization, scripts, db) {
+run <- function(resultDir, scanmode, normalization, scripts, db, z_score) {
+  #resultDir <- "/Users/nunen/Documents/Metab/processed/test_old"
+  #scanmode <- "negative"
+  #normalization <- "disabled"
+  #scripts <- "/Users/nunen/Documents/Metab/DIMS/scripts"
+  #db <- "/Users/nunen/Documents/Metab/DIMS/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData"
+  #z_score <- 0
+  
   object.files = list.files(paste(resultDir, "samplePeaksFilled", sep="/"), full.names=TRUE, pattern=scanmode)
   
   outlist.tot=NULL
@@ -38,29 +45,33 @@ run <- function(resultDir, scanmode, normalization, scripts, db) {
     outlist.tot = normalization_2.1(outlist.tot, fileName, names(repl.pattern.filtered), on=normalization, assi_label="assi_HMDB")
   }
   
-  outlist.stats = statistics_z(outlist.tot, sortCol=NULL, adducts=FALSE)
-  
-  nr.removed.samples=length(which(repl.pattern.filtered[]=="character(0)"))
-  order.index.int=order(colnames(outlist.stats)[8:(length(repl.pattern.filtered)-nr.removed.samples+7)])
-  outlist.stats.more = cbind(outlist.stats[,1:7],
-                             outlist.stats[,(length(repl.pattern.filtered)-nr.removed.samples+8):(length(repl.pattern.filtered)-nr.removed.samples+8+6)],
-                             outlist.stats[,8:(length(repl.pattern.filtered)-nr.removed.samples+7)][order.index.int],
-                             outlist.stats[,(length(repl.pattern.filtered)-nr.removed.samples+5+10):ncol(outlist.stats)])
-  
-  tmp.index=grep("_Zscore", colnames(outlist.stats.more), fixed = TRUE)
-  tmp.index.order=order(colnames(outlist.stats.more[,tmp.index]))
-  tmp = outlist.stats.more[,tmp.index[tmp.index.order]]
-  outlist.stats.more=outlist.stats.more[,-tmp.index]
-  outlist.stats.more=cbind(outlist.stats.more,tmp)
+  if (z_score == 1) {
+    outlist.stats = statistics_z(outlist.tot, sortCol=NULL, adducts=FALSE)
+    nr.removed.samples=length(which(repl.pattern.filtered[]=="character(0)"))
+    order.index.int=order(colnames(outlist.stats)[8:(length(repl.pattern.filtered)-nr.removed.samples+7)])
+    outlist.stats.more = cbind(outlist.stats[,1:7],
+                               outlist.stats[,(length(repl.pattern.filtered)-nr.removed.samples+8):(length(repl.pattern.filtered)-nr.removed.samples+8+6)],
+                               outlist.stats[,8:(length(repl.pattern.filtered)-nr.removed.samples+7)][order.index.int],
+                               outlist.stats[,(length(repl.pattern.filtered)-nr.removed.samples+5+10):ncol(outlist.stats)])
+    
+    tmp.index=grep("_Zscore", colnames(outlist.stats.more), fixed = TRUE)
+    tmp.index.order=order(colnames(outlist.stats.more[,tmp.index]))
+    tmp = outlist.stats.more[,tmp.index[tmp.index.order]]
+    outlist.stats.more=outlist.stats.more[,-tmp.index]
+    outlist.stats.more=cbind(outlist.stats.more,tmp)
+    outlist.tot = outlist.stats.more
+  }
   
   # filter identified compounds
-  index.1=which((outlist.stats.more[,"assi_HMDB"]!="") & (!is.na(outlist.stats.more[,"assi_HMDB"])))
-  index.2=which((outlist.stats.more[,"iso_HMDB"]!="") & (!is.na(outlist.stats.more[,"iso_HMDB"])))
+  index.1=which((outlist.tot[,"assi_HMDB"]!="") & (!is.na(outlist.tot[,"assi_HMDB"])))
+  index.2=which((outlist.tot[,"iso_HMDB"]!="") & (!is.na(outlist.tot[,"iso_HMDB"])))
   index=union(index.1,index.2)
-  outlist.ident = outlist.stats.more[index,]
-  outlist.not.ident = outlist.stats.more[-index,]
+  outlist.ident = outlist.tot[index,]
+  outlist.not.ident = outlist.tot[-index,]
   
-  outlist.ident$ppmdev=as.numeric(outlist.ident$ppmdev)
+  if (z_score == 1) {
+    outlist.ident$ppmdev=as.numeric(outlist.ident$ppmdev)
+  }
   # NAs in theormz_noise <======================================================================= uitzoeken!!!
   outlist.ident$theormz_noise[which(is.na(outlist.ident$theormz_noise))] = 0
   outlist.ident$theormz_noise=as.numeric(outlist.ident$theormz_noise)
@@ -122,6 +133,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5])
+run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5], cmd_args[6])
 
 cat("Ready collectSamplesFilled.R")

@@ -2,7 +2,7 @@
 
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
-run <- function(file, outdir, scanmode, adducts, scripts) {
+run <- function(file, outdir, scanmode, adducts, scripts, z_score) {
   
   load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
   
@@ -19,7 +19,7 @@ run <- function(file, outdir, scanmode, adducts, scripts) {
   outlist.tot=unique(outlist.ident)
   
   source(paste(scripts, "AddOnFunctions/sumAdducts.R", sep="/"))
-  sumAdducts(outlist.tot, outlist_part, names(repl.pattern.filtered), adducts, batch, scanmode, outdir)
+  sumAdducts(outlist.tot, outlist_part, names(repl.pattern.filtered), adducts, batch, scanmode, outdir, z_score)
 }
 
 cat("Start runSumAdducts.R")
@@ -29,6 +29,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5])
+run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5], cmd_args[6])
 
 cat("Ready runSumAdducts.R")

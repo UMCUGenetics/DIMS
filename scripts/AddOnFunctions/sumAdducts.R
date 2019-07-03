@@ -1,8 +1,12 @@
-sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmode, outdir){
-  # theor.MZ = outlist_part
-  # grpnames.long = groupNames
-  # peaklist = outlist.tot
-  # adducts = c(1) for neg or c(1,2) for pos
+sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmode, outdir, z_score){
+  #theor.MZ = outlist_part
+  #grpnames.long = names(repl.pattern.filtered)
+  #peaklist = outlist.ident
+  #adducts = c(1) #for neg or c(1,2) for pos
+  #batch <- 300
+  #outdir <- "/Users/nunen/Documents/Metab/processed/test_old"
+  #scanmode <- "negative"
+  #z_score <- 0
   
   dir.create(paste(outdir, "adductSums", sep="/"), showWarnings = FALSE)
   
@@ -48,15 +52,19 @@ sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmo
       
       # peaklist[metab, c("mzmed.pgrp", "HMDB_code", "C34.1")]
       # ints=peaklist[metab, c(7:(length(grpnames.long)+6))]
-      ints=peaklist[metab, c(15:(length(grpnames.long)+14))]
+      if (z_score == 1) {
+        ints=peaklist[metab, c(15:(length(grpnames.long)+14))]
+      } else {
+        ints=peaklist[metab, c(7:(length(grpnames.long)+6))]
+      }
       total=apply(ints, 2, sum)
       
-      if (sum(total)!=0){
+      if (sum(total)!=0) {
         # message(i)
         names = c(names, compound)
         adductsum<-rbind(adductsum,total)
         names_long = c(names_long, hmdb_names[i])
-      }  
+      }
     }
     
     # }
