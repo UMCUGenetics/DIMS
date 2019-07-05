@@ -310,7 +310,7 @@ if [ -f "$outdir/log/done" ]; then   # if one of the scanmodes is already queued
   echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
   qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
 else
-  touch $outdir/log/done
+  touch $outdir/logs/done
 fi
 EOF
 }
