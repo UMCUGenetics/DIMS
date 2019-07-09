@@ -1,5 +1,4 @@
-initialize <- function(outputfolder, hmdb){
-  
+initialize <- function(outputfolder, hmdb, z_score=0){
   # load("./results/repl.pattern.positive.RData")
   # repl.pattern.pos = repl.pattern.filtered
   # rm(repl.pattern.filtered)
@@ -56,61 +55,67 @@ initialize <- function(outputfolder, hmdb){
   outlist.adducts.HMDB=cbind(outlist.adducts.HMDB, "assi_HMDB"=rownames(outlist.adducts.HMDB))
   ###################################################################
   
-  control_label = "C"
-  case_label= "P"
+  if (z_score == 1) {
+    control_label = "C"
+    case_label= "P"
+    
+    # Get all patient IDs
+    tmp=colnames(outlist.adducts.HMDB)[7:length(colnames(outlist.adducts.HMDB))]
+    patients=tmp[grep("P", tmp, fixed = TRUE)]
+    
+    # Remove everything after .1 (P128.1 -> P128)
+    patients=unique(as.vector(unlist(lapply(strsplit(patients, ".", fixed = TRUE), function(x) x[1]))))
+    
+    # ToDo: If 2 P's in sample names!!!!!!!!!!!!!
+    # patients=sort(as.numeric(unique(as.vector(unlist(lapply(strsplit(patients, "_P", fixed = TRUE), function(x) x[2]))))))
+    
+    # Sort on patient ID (128, 135 ...)
+    patients=sort(as.numeric(unique(as.vector(unlist(lapply(strsplit(patients, "P", fixed = TRUE), function(x) x[2]))))))
+    
+    # Add Z-scores and create plots
+    outlist.adducts.stats = statistics_z_2(peaklist = as.data.frame(outlist.adducts.HMDB), #as.data.frame(adducts.neg.pos),
+                                         # plotdir = paste0(outputfolder, project, "/plots/adducts/"),
+                                         # filename = paste0(outputfolder, project, "/allpgrps_stats.txt"),
+                                         outputfolder = outputfolder,
+                                         control_label = control_label, 
+                                         case_label = case_label, 
+                                         sortCol = "mzmed.pgrp", 
+                                         patients = patients, 
+                                         plot = FALSE, 
+                                         adducts = TRUE)
+    
   
-  # Get all patient IDs
-  tmp=colnames(outlist.adducts.HMDB)[7:length(colnames(outlist.adducts.HMDB))]
-  patients=tmp[grep("P", tmp, fixed = TRUE)]
+    # Remove the empty columns that were added earlier ..
+    outlist.adducts.stats = outlist.adducts.stats[,-c(1:6)]
+    ###################################################################
+    
+    tmp=which(colnames(outlist.adducts.stats)=="HMDB_name")
+    order.index.int.adduct=order(colnames(outlist.adducts.stats)[1:(tmp-1)])
+    outlist.adducts.stats.sorted = cbind(outlist.adducts.stats[,order.index.int.adduct],outlist.adducts.stats[,tmp:(dim(outlist.adducts.stats)[2])]) 
+    
+    tmp.index=grep("_Zscore", colnames(outlist.adducts.stats.sorted), fixed = TRUE)
+    tmp.index.order=order(colnames(outlist.adducts.stats.sorted[,tmp.index]))
+    tmp = outlist.adducts.stats.sorted[,tmp.index[tmp.index.order]]
+    outlist.adducts.stats.sorted=outlist.adducts.stats.sorted[,-tmp.index]
+    outlist.adducts.stats.sorted=cbind(outlist.adducts.stats.sorted,tmp)
+    
+    outlist.adducts.stats=outlist.adducts.stats.sorted
+    rm(outlist.adducts.stats.sorted)
+    outlist.adducts = outlist.adducts.stats
+    ###################################################################
+  } else {
+    outlist.adducts = outlist.adducts.HMDB
+  }
   
-  # Remove everything after .1 (P128.1 -> P128)
-  patients=unique(as.vector(unlist(lapply(strsplit(patients, ".", fixed = TRUE), function(x) x[1]))))
-  
-  # ToDo: If 2 P's in sample names!!!!!!!!!!!!!
-  # patients=sort(as.numeric(unique(as.vector(unlist(lapply(strsplit(patients, "_P", fixed = TRUE), function(x) x[2]))))))
-  
-  # Sort on patient ID (128, 135 ...)
-  patients=sort(as.numeric(unique(as.vector(unlist(lapply(strsplit(patients, "P", fixed = TRUE), function(x) x[2]))))))
-  
-  # Add Z-scores and create plots
-  outlist.adducts.stats = statistics_z_2(peaklist = as.data.frame(outlist.adducts.HMDB), #as.data.frame(adducts.neg.pos),
-                                       # plotdir = paste0(outputfolder, project, "/plots/adducts/"),
-                                       # filename = paste0(outputfolder, project, "/allpgrps_stats.txt"),
-                                       outputfolder = outputfolder,
-                                       control_label = control_label, 
-                                       case_label = case_label, 
-                                       sortCol = "mzmed.pgrp", 
-                                       patients = patients, 
-                                       plot = FALSE, 
-                                       adducts = TRUE)
-  
-
-  # Remove the empty columns that were added earlier ..
-  outlist.adducts.stats = outlist.adducts.stats[,-c(1:6)]
-  ###################################################################
-  
-  tmp=which(colnames(outlist.adducts.stats)=="HMDB_name")
-  order.index.int.adduct=order(colnames(outlist.adducts.stats)[1:(tmp-1)])
-  outlist.adducts.stats.sorted = cbind(outlist.adducts.stats[,order.index.int.adduct],outlist.adducts.stats[,tmp:(dim(outlist.adducts.stats)[2])]) 
-  
-  tmp.index=grep("_Zscore", colnames(outlist.adducts.stats.sorted), fixed = TRUE)
-  tmp.index.order=order(colnames(outlist.adducts.stats.sorted[,tmp.index]))
-  tmp = outlist.adducts.stats.sorted[,tmp.index[tmp.index.order]]
-  outlist.adducts.stats.sorted=outlist.adducts.stats.sorted[,-tmp.index]
-  outlist.adducts.stats.sorted=cbind(outlist.adducts.stats.sorted,tmp)
-  
-  outlist.adducts.stats=outlist.adducts.stats.sorted
-  rm(outlist.adducts.stats.sorted)
-  ###################################################################
+  outlist.adducts=cbind("HMDB_code"=rownames(outlist.adducts), outlist.adducts)
   
   #load("./db/HMDB_with_info_relevance.RData")
   #load("./db/HMDB_with_info_relevance_IS.RData")
   # load("./db/HMDB_with_info_relevance_IS_C5OH.RData")
   load(hmdb)
   
-  outlist.adducts.stats=cbind("HMDB_code"=rownames(outlist.adducts.stats), outlist.adducts.stats)
   
-  outlist.adducts = outlist.adducts.stats
+  
   PeaksInList = which(rownames(outlist.adducts) %in% rownames(rlvnc))
   outlist.adducts = cbind(outlist.adducts[PeaksInList,],as.data.frame(rlvnc[rownames(outlist.adducts)[PeaksInList],]))
   

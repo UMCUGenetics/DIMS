@@ -29,6 +29,6 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5], cmd_args[6])
+run(cmd_args[1], cmd_args[2], cmd_args[3], cmd_args[4], cmd_args[5], as.numeric(cmd_args[6]))
 
 cat("Ready runSumAdducts.R")

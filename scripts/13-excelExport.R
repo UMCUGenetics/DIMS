@@ -14,6 +14,7 @@ project <- cmd_args[2] #"test"
 matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
+z_score = as.numeric(cmd_args[6])
 
 rundate <- Sys.Date()
 
@@ -33,21 +34,35 @@ control_label <- "C"
 case_label <- "P"
 
 # sum positive and negative adductsums
-outlist <- initialize(outdir, hmdb)
-outlist_save_point <- outlist
-outlist <- outlist_save_point
+outlist <- initialize(outdir, hmdb, z_score)
 outlist <- outlist$adducts
 outlist <- outlist[-grep("Exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
-#colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
-outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
-                                plotdir = plotdir,
-                                patients = getPatients(outlist),
-                                adducts = adducts,
-                                control_label = control_label,
-                                case_label = case_label)
+outlist <- outlist[order(outlist[,"HMDB_code"]),]
+outlist <- outlist[,-c(2,3,4,5,6,7)]
 
+#colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
+#outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
+#                                plotdir = plotdir,
+#                                patients = getPatients(outlist),
+#                                adducts = adducts,
+#                                control_label = control_label,
+#                                case_label = case_label)
+
+
+unlink("xls", recursive = T)
+dir.create("xls", showWarnings = F)
+
+generateExcelFile(peaklist = outlist,
+                  plotdir = file.path(plotdir),
+                  imageNum = 1,
+                  fileName = paste("xls", "test", sep="/"),
+                  subName = "_box",
+                  sub = sub,
+                  adducts = adducts)
+
+cat("Excel created")
 
 # INTERNE STANDAARDEN
 load("logs/init.RData")
