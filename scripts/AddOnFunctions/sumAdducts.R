@@ -1,12 +1,12 @@
 sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmode, outdir, z_score){
-  #theor.MZ = outlist_part
-  #grpnames.long = names(repl.pattern.filtered)
-  #peaklist = outlist.ident
-  #adducts = c(1) #for neg or c(1,2) for pos
-  #batch <- 300
-  #outdir <- "/Users/nunen/Documents/Metab/processed/test_old"
-  #scanmode <- "negative"
-  #z_score <- 0
+  theor.MZ = outlist_part
+  grpnames.long = names(repl.pattern.filtered)
+  peaklist = outlist.ident
+  adducts = c(1) #for neg or c(1,2) for pos
+  batch <- 300
+  outdir <- "/Users/nunen/Documents/Metab/processed/zebrafish"
+  scanmode <- "negative"
+  z_score <- 0
   
   dir.create(paste(outdir, "adductSums", sep="/"), showWarnings = FALSE)
   
