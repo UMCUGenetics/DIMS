@@ -15,17 +15,19 @@ matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score = as.numeric(cmd_args[6])
+plot = FALSE
 
 rundate <- Sys.Date()
 
 setwd(scripts)
 source("AddOnFunctions/sourceDir.R")
 sourceDir("AddOnFunctions")
-
 setwd(outdir)
 
 library("ggplot2")
 library('reshape2')
+library("openxlsx")
+library(dplyr)
 
 plotdir <- "plots/adducts"
 sub <- 20000
@@ -55,12 +57,10 @@ unlink("xls", recursive = T)
 dir.create("xls", showWarnings = F)
 
 generateExcelFile(peaklist = outlist,
-                  plotdir = file.path(plotdir),
-                  imageNum = 1,
-                  fileName = paste("xls", "test", sep="/"),
-                  subName = "_box",
+                  fileName = paste("xls", name, sep="/"),
                   sub = sub,
-                  adducts = adducts)
+                  plot = plot
+)
 
 cat("Excel created")
 

@@ -1,48 +1,58 @@
-genExcelFileV3 <- function(peaklist, imageNum=1, subFile, plotdir, subName, adducts) { 
-  # peaklist = peaklist[c(start:end),]
-  # imageNum=2
-  # subFile=paste(fileName, 1, sep="_")
-  
-  # Tip!!!
-  # Use read.xlsx() in the openxlsx package. It has no dependency on rJava 
-  
-  # options(java.parameters = "-Xmx4096m")
-  # options(java.parameters = "-Xmx8192m")
-  # options(java.parameters = "-Xmx2048m")
-  options(java.parameters = "-Xmx4g" )
-  library("rJava")
-  library("XLConnect")
-  
-  jgc <- function()
-  {
-    .jcall("java/lang/System", method = "gc")
-  }
-  
-  # Frees Java Virtual Machine (JVM) memory
-  xlcFreeMemory()
-  
+genExcelFileV3 <- function(peaklist, subFile, plot = TRUE) {
+  #peaklist <- outlist
+  #subFile <- 1
   filelist <- "AllPeakGroups"
-  npeaks = dim(peaklist)[1]
   
-  ###  insert first column
-  addCol <- matrix(c(""), nrow=npeaks, ncol=1)
   wbfile <- paste0(getwd(), "/", subFile, ".xlsx")
+  
+  npeaks = dim(peaklist)[1]
+  ncol = dim(peaklist)[2]
+  
   endRow <- npeaks+1
   #detach("package:xlsx", unload=TRUE)
-  wb <- loadWorkbook(wbfile, create = TRUE)
+  wb <- createWorkbook()
   
-  createSheet(wb, name = filelist)
-  setRowHeight(wb, sheet = filelist, row = 2:endRow, height = 75)
-  
-  printit = cbind("Intensity"=addCol, peaklist)
-  setColumnWidth(wb, sheet = filelist, column = 1, width = 5500)
+  addWorksheet(wb, filelist) 
 
+  if (plot) {
+    ###  insert first column
+    #intensities <- matrix(c(""), nrow=npeaks, ncol=1)
+    #writeData(wb, sheet = 1, cbind(intensities, peaklist))
+    writeData(wb, sheet = 1, peaklist)
+    setColWidths(wb, 1, cols = 1:ncol, widths = 20)
+    setRowHeights(wb, 1, rows = 1:npeaks, heights = 20)
+    
+    #setColWidths(wb, 1, cols = 1, widths = 35)
+    #setColWidths(wb, 1, cols = 2:ncol, widths = 20)
+    #setRowHeights(wb, 1, rows = 1:npeaks, heights = 150)
+    
+    bloop <- peaklist %>% select(-HMDB_name, -assi_HMDB,
+                                 -name, -relevance, -descr, 
+                                 -origin, -fluids, -tissue, 
+                                 -disease, -pathway)
+    ## create plot objects
+    for (i in 1:npeaks) {
+      bloop2 <- bloop %>% slice(i) %>% melt("HMDB_code")
+      names(bloop2) <- c("HMDB_code", "replicate", "intensity")
+      bloop2$intensity <- as.numeric(bloop2$intensity)
+      
+      p1 <- ggplot(bloop2, aes(replicate,intensity)) +
+        ggtitle(bloop2[1,1]) +
+        geom_bar(aes(fill=intensity),stat='identity') +
+        labs(x='',y='intensity') +
+        theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=3), 
+              legend.position='none')
+      #print(p1)
+      ggsave(paste0("plots/",bloop2[1,1],".png"), plot=p1) # height=w/2.5, width=w, units="in"
+      #insertPlot(wb, 1, width = dim(bloop2)[1]*0.5, height = 5, startRow = i+1, fileType = "png", units = "cm")
+    }
+  } else {
+    setColWidths(wb, 1, cols = 1:ncol, widths = 20)
+    setRowHeights(wb, 1, rows = 1:npeaks, heights = 20)
+    writeData(wb, sheet = 1, peaklist)
+  }
   
-  writeWorksheet(wb, printit, sheet = filelist)
-  saveWorkbook(wb)
-  rm(wb)
-  xlcFreeMemory()
-  # gc()
-  # jgc()
+  ## Save workbook
+  saveWorkbook(wb, wbfile, overwrite = TRUE)
   
 }
