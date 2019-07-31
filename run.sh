@@ -265,7 +265,7 @@ find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
    qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/8-peakGrouping.rest -e $outdir/logs/8-peakGrouping.rest $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
  done
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
