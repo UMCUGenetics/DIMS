@@ -71,6 +71,7 @@ len <- length(repl.pattern)
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 
+dir.create("plots", showWarnings = F)
 
 # Retrieve IS summed adducts
 IS_summed <- IS[,1:(len+1)]
@@ -92,6 +93,7 @@ colnames(IS_pos) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_pos$Matrix <- matrix
 IS_pos$Rundate <- rundate
 IS_pos$Project <- project
+IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
 
 # Retrieve IS negative mode
 load("adductSums_negative.RData")
@@ -103,6 +105,7 @@ colnames(IS_neg) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_neg$Matrix <- matrix
 IS_neg$Rundate <- rundate
 IS_neg$Project <- project
+IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 
 # Save results
 save(IS_pos,IS_neg,IS_summed, file='IS_results_test.RData')
@@ -110,7 +113,7 @@ save(IS_pos,IS_neg,IS_summed, file='IS_results_test.RData')
 #load(paste0(outdir, "/IS_results_test.RData"))
 
 
-w <- 10 + 0.4 * len
+w <- 9 + 0.35 * len
 
 # Barplot voor alle IS
 IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
@@ -119,7 +122,8 @@ IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
-        legend.position='none')
+        legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_neg.png", plot=IS_neg_plot, height=w/2.5, width=w, units="in")
 
 IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
@@ -128,7 +132,8 @@ IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
-        legend.position='none')
+        legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_pos.png", plot=IS_pos_plot, height=w/2.5, width=w, units="in")
 
 IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
@@ -137,7 +142,8 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
-        legend.position='none')
+        legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="in")
 
 
