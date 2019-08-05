@@ -169,7 +169,7 @@ cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 continue=true
 if [ "\$1" -lt 1 ]; then
   echo \"first check\"
-  find $indir/data -iname "*.raw" | sort | while read raw;
+  find $indir -iname "*.raw" | sort | while read raw;
   do
     file=\$(basename \$raw .raw)
     if [ ! -f $outdir/data/\${file}.mzXML ]; then
