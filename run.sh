@@ -321,10 +321,12 @@ done
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 
-if [ -f "$outdir/log/done" ]; then   # if one of the scanmodes is already queued
+if [ -f "$outdir/logs/done" ]; then   # if one of the scanmodes is already queued
+  echo other scanmode already queued
   echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
   qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
 else
+  echo other scanmode not queued yet
   touch $outdir/logs/done
 fi
 EOF
