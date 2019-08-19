@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -o pipefail
 set -e
@@ -66,7 +66,7 @@ if [ -z ${indir} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ -z ${outdir} ] ; then show_help "Required arguments were not given.\n" ; fi
 if [ ${verbose} -gt 0 ] ; then set -x ; fi
 
-name=$(basename outdir)
+name=$(basename $outdir)
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
 
 while [[ ${restart} -gt 0 ]]
@@ -91,7 +91,8 @@ declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "9-runFillMissing" \
                      "10-collectSamplesFilled" \
                      "11-runSumAdducts" \
-                     "12-collectSamplesAdded" )
+                     "12-collectSamplesAdded" \
+                     "13-excelExport" )
 
 
 # Check existence input dir
@@ -138,6 +139,8 @@ dos2unix $indir/settings.config
 
 # 1-queueStart.sh
 cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
+#!/bin/sh
+
 it=0
 find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
@@ -161,16 +164,27 @@ EOF
 
 # 01-queueConversionCheck.sh
 cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
-it=$((it + 1))
-echo "Try #\${i}";
+#!/bin/sh
 
 continue=true
-if [ "\$it" -lt 3 ]; then
+if [ "\$1" -lt 1 ]; then
+  echo first check
+  find $indir -iname "*.raw" | sort | while read raw;
+  do
+    file=\$(basename \$raw .raw)
+    if [ ! -f $outdir/data/\${file}.mzXML ]; then
+      echo \$file doesn't exist
+      continue=false
+      qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
+  	fi
+  done
+
   # check if any of the error files contain 'error in thread'
-  for filepath in \$(grep -m1 -r $outdir/logs/0-conversion -e 'error in thread' | awk -F ":" '{print \$1}')
+  for filepath in \$(egrep 'exception|0x8007000' $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}') | uniq
   do
   	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
+      echo error \${filepath}
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
@@ -180,6 +194,7 @@ if [ "\$it" -lt 3 ]; then
   for file in \$(ls $outdir/logs/0-conversion -lR | grep "\.o" | awk '{if (\$5 == 0) print \$9}' | cut -d '_' -f 1 --complement | cut -d '.' -f 1)
   do
     if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
+      echo output empty \${filepath}
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
@@ -190,9 +205,11 @@ else
 fi
 
 if [ "\$continue" = true ]; then
+  echo continue
   qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 else
-  qsub -v it=\$it -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+  echo redo conversion check
+  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/ -e $outdir/logs/queue/ $outdir/jobs/queue/01-queueConversionCheck.sh 1
 fi
 
 EOF
@@ -205,7 +222,7 @@ find $indir -iname "*.raw" | sort | while read raw;
     qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_${input}" -m as -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -v it=0 -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 0
 
 
 
@@ -219,7 +236,7 @@ doScanmode() {
 
   # 2-queuePeakFinding.sh
 cat << EOF >> $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
@@ -237,7 +254,7 @@ EOF
 
   # 3-queuePeakGrouping.sh
 cat << EOF >> $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
@@ -254,7 +271,7 @@ EOF
 
   # 4-queuePeakGroupingRest.sh
 cat << EOF >> $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
@@ -263,12 +280,12 @@ find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
    qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/8-peakGrouping.rest -e $outdir/logs/8-peakGrouping.rest $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
  done
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
 cat << EOF >> $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
@@ -284,7 +301,7 @@ find "$outdir/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rd
   qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_\${input}" -hold_jid "peakFilling_${scanmode}_*" -m as -M $email -o $outdir/logs/9-runFillMissing -e $outdir/logs/9-runFillMissing $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts $db" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
+echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts $db $z_score" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -hold_jid "peakFilling2_${scanmode}_*" -m as -M $email -o $outdir/logs/10-collectSamplesFilled -e $outdir/logs/10-collectSamplesFilled $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 
 qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
@@ -292,19 +309,27 @@ EOF
 
   # 6-queueSumAdducts.sh
 cat << EOF >> $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
-#!/bin/bash
+#!/bin/sh
 
 find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
     input=\$(basename \$hmdb .RData)
-    echo "Rscript $scripts/11-runSumAdducts.R \$hmdb $outdir $scanmode $adducts $scripts" > $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+    echo "Rscript $scripts/11-runSumAdducts.R \$hmdb $outdir $scanmode $adducts $scripts $z_score" > $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
     qsub -q all.q -P dbg_mz -l h_rt=03:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/11-runSumAdducts -e $outdir/logs/11-runSumAdducts $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
 done
 
 echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m ase -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-EOF
+qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 
+if [ -f "$outdir/logs/done" ]; then   # if one of the scanmodes is already queued
+  echo other scanmode already queued
+  echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts" > $outdir/jobs/13-excelExport.sh
+  qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
+else
+  echo other scanmode not queued yet
+  touch $outdir/logs/done
+fi
+EOF
 }
 
 doScanmode "negative" $thresh_neg "*_neg.RData" "1"

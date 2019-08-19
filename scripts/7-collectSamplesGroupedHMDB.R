@@ -2,9 +2,9 @@
 
 .libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
-run <- function(resultDir, scanmode, ppm=2) {
+run <- function(outdir, scanmode, ppm=2) {
   
-  # filepath =  paste(resultDir, "grouping_hmdb", sep="/")
+  # filepath =  paste(outdir, "grouping_hmdb", sep="/")
   # files = list.files(filepath,recursive=TRUE, full.names=TRUE, pattern=paste("*_",scanmode,".RData",sep=""))
   #
   # outlist.tot=NULL
@@ -16,27 +16,25 @@ run <- function(resultDir, scanmode, ppm=2) {
   #   outlist.tot = rbind(outlist.tot, outpgrlist)
   # }
   #
-  # save(outlist.tot, file=paste(resultDir, paste(paste("grouped_HMDB", scanmode, sep="_"), "RData", sep="."), sep="/"))
+  # save(outlist.tot, file=paste(outdir, paste(paste("grouped_HMDB", scanmode, sep="_"), "RData", sep="."), sep="/"))
   
-  filepath =  paste(resultDir, "grouping_hmdb_done", sep="/")
+  filepath =  paste(outdir, "grouping_hmdb_done", sep="/")
   files = list.files(filepath,recursive=TRUE, full.names=TRUE, pattern=paste("*_",scanmode,".RData",sep=""))
   
-  index = NULL
+  load(paste(outdir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/")) #outlist.tot
+  
+  # Make a list of indexes of peaks that have been identified, then remove these from the peaklist.
+  remove = NULL
   for (i in 1:length(files)) {
-    #message(files[i])
-    load(files[i])
-    
-    index = c(index, which(outlist.copy[,"grouped"]==1))
+    message(files[i])
+    load(files[i]) #outlist.grouped
+    remove = c(remove, which(outlist.tot[,"mzmed.pkt"] %in% outlist.grouped[,"mzmed.pkt"]))
   }
-  
-  load(paste(resultDir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
-  
-  remove = which(outlist.tot[,"mzmed.pkt"] %in% outlist.copy[index,"mzmed.pkt"])
   outlist.rest = outlist.tot[-remove,]
   
-  # save(outlist.rest, file=paste(resultDir, "specpks_all", paste(scanmode, "rest.RData", sep="_"), sep="/"))
+  # save(outlist.rest, file=paste(outdir, "specpks_all", paste(scanmode, "rest.RData", sep="_"), sep="/"))
   
-  outdir=paste(resultDir, "specpks_all_rest", sep="/")
+  outdir=paste(outdir, "specpks_all_rest", sep="/")
   dir.create(outdir, showWarnings = FALSE)
   
   # sort on mass

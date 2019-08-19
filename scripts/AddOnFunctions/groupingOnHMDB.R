@@ -1,9 +1,8 @@
 groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
-  # fileIn="./results/hmdb_part/negative_hmdb.14.RData"
-  # fileIn="/hpc/shared/dbg_mz/marcel/DIMSinDiagnostics/results/hmdb_part/positive_hmdb.187.RData"
-  # scanmode="negative"
-  # outdir="./results"
-  # ppm=2
+  #outdir <- "/Users/nunen/Documents/Metab/processed/test_old"
+  #fileIn <- "/Users/nunen/Documents/Metab/processed/test_old/hmdb_part/negative_hmdb.1.RData"
+  #scanmode <- "negative"
+  #ppm <- 2
   
   options(digits=16)
   load(fileIn) # outlist_part(HMDB_add_iso)
@@ -16,8 +15,6 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
   
   load(paste(outdir, "specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
   outlist.copy = outlist.tot
-  grouped <- rep(0, length(outlist.copy))
-  outlist.copy <- cbind (outlist.copy, grouped)
   rm(outlist.tot)
   
   load(paste0(outdir, "/repl.pattern.", scanmode,".RData"))
@@ -33,8 +30,10 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
     # HMDB_add_iso=HMDB_add_iso.Pos
   }
   
+  outlist.grouped <- NULL
+  
   # First group on HMDB masses
-  while (dim(HMDB_add_iso)[1] > 0) {  
+  while (dim(HMDB_add_iso)[1] > 0) { 
     index = 1
     # message(HMDB_add_iso[index,"CompoundName"])
     
@@ -44,6 +43,7 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
     mzmed = as.numeric(outlist.copy[,"mzmed.pkt"])
     selp = which((mzmed > (mass - mtol)) & (mzmed < (mass + mtol)))
     tmplist = outlist.copy[selp,,drop=FALSE]
+    outlist.grouped <- rbind(outlist.grouped, tmplist)
     
     nrsamples = length(selp)
     if (nrsamples > 0) {
@@ -177,17 +177,15 @@ groupingOnHMDB <- function(outdir, fileIn, scanmode, ppm=2) {
                                            data.frame(assi_HMDB, iso_HMDB, HMDB_code, theormz_HMDB)))
     }
     
-    if (length(selp)>0) outlist.copy[selp, "grouped"] = 1
     HMDB_add_iso = HMDB_add_iso[-index,]
     
-    # n=n+1
   }
   
   dir.create(paste(outdir, "grouping_hmdb", sep="/"), showWarnings = FALSE)
   save(outpgrlist, file=paste(paste(outdir, "grouping_hmdb", sep="/"), paste(paste(batch, scanmode, sep="_"), "RData", sep="."), sep="/"))
   
   dir.create(paste(outdir, "grouping_hmdb_done", sep="/"), showWarnings = FALSE)
-  save(outlist.copy, file=paste(paste(outdir, "grouping_hmdb_done", sep="/"), paste(paste(batch, scanmode, sep="_"), "RData", sep="."), sep="/"))
+  save(outlist.grouped, file=paste(paste(outdir, "grouping_hmdb_done", sep="/"), paste(paste(batch, scanmode, sep="_"), "RData", sep="."), sep="/"))
   
   # message(Sys.time())
 }  
