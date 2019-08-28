@@ -168,23 +168,23 @@ cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 
 continue=true
 if [ "\$1" -lt 1 ]; then
-  echo \"first check\"
+  echo "first check"
   find $indir -iname "*.raw" | sort | while read raw;
   do
     file=\$(basename \$raw .raw)
     if [ ! -f $outdir/data/\${file}.mzXML ]; then
-      echo \"\${file} doesn't exist\"
+      echo "\${file} doesn't exist"
       continue=false
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
   	fi
   done
 
   # check if any of the error files contain 'error in thread'
-  for filepath in \$(egrep \'exception|0x8007000\' $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}') | uniq
+  for filepath in \$(egrep \"exception|0x8007000\" $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}' | uniq)
   do
   	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
-      echo \"error \${filepath}\"
+      echo "error \${file}"
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
@@ -195,7 +195,7 @@ if [ "\$1" -lt 1 ]; then
   for file in \$(ls $outdir/logs/0-conversion -lR | grep "\.o" | awk '{if (\$5 == 0) print \$9}' | cut -d '_' -f 1 --complement | cut -d '.' -f 1)
   do
     if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
-      echo \"output empty \${file}\"
+      echo "output empty \${file}"
       continue=false
       find $outdir/logs/0-conversion -type f -name "*\${file}*" -delete # otherwise there'll be an endless loop
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
