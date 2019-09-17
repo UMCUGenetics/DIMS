@@ -180,7 +180,7 @@ if [ "\$1" -lt 1 ]; then
   done
 
   # check if any of the error files contain 'error in thread'
-  for filepath in \$(egrep \"exception|0x8007000\" $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}' | uniq)
+  for filepath in \$(egrep "(exception)|(0x8007000)" $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}' | uniq)
   do
   	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
