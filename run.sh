@@ -158,8 +158,8 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:30:00 -l h_vmem=5G -N "average" -hold_jid "dims_*" -m as -M $email -o $outdir/logs/3-averageTechReplicates -e $outdir/logs/3-averageTechReplicates $outdir/jobs/3-averageTechReplicates/average.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_positive.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_negative.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=500M -N "queueFinding_positive" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_positive.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=500M -N "queueFinding_negative" -hold_jid "average" -m as -M $email -o $outdir/logs/queue/2-queuePeakFinding -e $outdir/logs/queue/2-queuePeakFinding $outdir/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
 
 # 01-queueConversionCheck.sh
@@ -207,10 +207,10 @@ fi
 
 if [ "\$continue" = true ]; then
   echo continue
-  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
+  qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueStart" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/1-queueStart -e $outdir/logs/queue/1-queueStart $outdir/jobs/queue/1-queueStart.sh
 else
   echo redo conversion check
-  qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/ -e $outdir/logs/queue/ $outdir/jobs/queue/01-queueConversionCheck.sh 1
+  qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/ -e $outdir/logs/queue/ $outdir/jobs/queue/01-queueConversionCheck.sh 1
 fi
 
 EOF
@@ -223,7 +223,7 @@ find $indir -iname "*.raw" | sort | while read raw;
     qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_${input}" -m s -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 0
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueConversionCheck" -hold_jid "conversion_*" -m as -M $email -o $outdir/logs/queue/01-queueConversionCheck -e $outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 0
 
 
 
@@ -249,7 +249,7 @@ find "$outdir/average_pklist" -iname $label | sort | while read sample;
 echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "collect_$scanmode" -hold_jid "peakFinding_${scanmode}_*" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode" -hold_jid "collect_$scanmode" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
 
@@ -267,7 +267,7 @@ find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
 echo "Rscript $scripts/7-collectSamplesGroupedHMDB.R $outdir $scanmode $scripts" > $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect1_$scanmode" -hold_jid "grouping_${scanmode}_*" -m as -M $email -o $outdir/logs/7-collectSamplesGroupedHMDB -e $outdir/logs/7-collectSamplesGroupedHMDB $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueGroupingRest_$scanmode" -hold_jid "collect1_$scanmode" -m as -M $email -o $outdir/logs/queue/4-queuePeakGroupingRest -e $outdir/logs/queue/4-queuePeakGroupingRest $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGroupingRest_$scanmode" -hold_jid "collect1_$scanmode" -m as -M $email -o $outdir/logs/queue/4-queuePeakGroupingRest -e $outdir/logs/queue/4-queuePeakGroupingRest $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
 
   # 4-queuePeakGroupingRest.sh
@@ -281,7 +281,7 @@ find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
    qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_\${input}" -m as -M $email -o $outdir/logs/8-peakGrouping.rest -e $outdir/logs/8-peakGrouping.rest $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
  done
 
-qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:20:00 -l h_vmem=8G -N "queueFillMissing_$scanmode" -hold_jid "grouping2_${scanmode}_*" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
@@ -305,7 +305,7 @@ find "$outdir/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rd
 echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts $db $z_score" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -hold_jid "peakFilling2_${scanmode}_*" -m as -M $email -o $outdir/logs/10-collectSamplesFilled -e $outdir/logs/10-collectSamplesFilled $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
   # 6-queueSumAdducts.sh
