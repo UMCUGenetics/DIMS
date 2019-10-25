@@ -1,13 +1,13 @@
 #!/usr/bin/Rscript
 
-.libPaths(new="/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2_test")
+.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2_test")
 
 cat("Start excelExport.R")
 cat("==> reading arguments:\n", sep = "")
 
 cmd_args = commandArgs(trailingOnly = TRUE)
 
-for (arg in cmd_args) cat("  ", arg, "\n", sep="")
+for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
 project <- cmd_args[2] #"test"
@@ -57,7 +57,7 @@ unlink("xls", recursive = T)
 dir.create("xls", showWarnings = F)
 
 generateExcelFile(peaklist = outlist,
-                  fileName = paste("xls", name, sep="/"),
+                  fileName = paste("xls", project, sep="/"),
                   sub = sub,
                   plot = plot
 )
@@ -82,6 +82,7 @@ IS_summed$Intensity <- as.numeric(IS_summed$Intensity)
 IS_summed$Matrix <- matrix
 IS_summed$Rundate <- rundate
 IS_summed$Project <- project
+IS_summed$Intensity <- as.numeric(as.character(IS_pos$Intensity))
 
 # Retrieve IS positive mode
 load("adductSums_positive.RData")

@@ -136,6 +136,7 @@ dos2unix $indir/settings.config
 . $indir/settings.config
 #thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
 
+module load R/3.2.2
 
 # 1-queueStart.sh
 cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
