@@ -22,6 +22,7 @@ rundate <- Sys.Date()
 setwd(scripts)
 source("AddOnFunctions/initialize.R")
 source("AddOnFunctions/statistics_z_4export.R")
+source("AddOnFunctions/statistics_z_2.R")
 setwd(outdir)
 
 library("ggplot2")
