@@ -1,6 +1,5 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2_test")
 
 cat("Start excelExport.R")
 cat("==> reading arguments:\n", sep = "")
@@ -16,6 +15,7 @@ hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score = as.numeric(cmd_args[6])
 plot = FALSE
+plot = TRUE
 
 rundate <- Sys.Date()
 
@@ -25,9 +25,9 @@ sourceDir("AddOnFunctions")
 setwd(outdir)
 
 library("ggplot2")
-library('reshape2')
+library("reshape2")
 library("openxlsx")
-library(dplyr)
+library("dplyr")
 
 plotdir <- "plots/adducts"
 sub <- 20000
@@ -44,23 +44,58 @@ outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[order(outlist[,"HMDB_code"]),]
 outlist <- outlist[,-c(2,3,4,5,6,7)]
 
-#colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
-#outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
-#                                plotdir = plotdir,
-#                                patients = getPatients(outlist),
-#                                adducts = adducts,
-#                                control_label = control_label,
-#                                case_label = case_label)
+colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
+outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
+                                plotdir = plotdir,
+                                patients = getPatients(outlist),
+                                adducts = adducts,
+                                control_label = control_label,
+                                case_label = case_label)
 
 
 unlink("xls", recursive = T)
 dir.create("xls", showWarnings = F)
 
-generateExcelFile(peaklist = outlist,
-                  fileName = paste("xls", project, sep="/"),
-                  sub = sub,
-                  plot = plot
-)
+DT = outlist
+imagesize_multiplier = 2
+path_plots = paste0(outdir, "/xls")
+
+
+plotdir <- paste(outdir,"plots","adducts", sep = "/")
+filelist <- "AllPeakGroups"
+
+
+wb <- createWorkbook("SinglePatient")
+addWorksheet(wb, filelist)
+
+temp_png <- NULL
+for (irow in nrow(DT):1) {
+  H_code <- DT[irow, "HMDB_code"]
+  file_png <- paste(plotdir, "/", H_code, "_box.png", sep="")
+  #message(paste(irow, file_png))
+  if (is.null(temp_png)) {
+    temp_png <- readPng(file_png)
+    img_dim <- dim(temp_png)[c(1,2)]
+    cell_dim <- img_dim*imagesize_multiplier
+    setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
+  }
+
+  insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
+  if (irow %% 100 == 0) {
+    cat(paste("\nat row:",irow))
+  }
+}
+
+setRowHeights(wb, filelist, rows = c(1:nrow(DT)+1), heights = cell_dim[1]/4)
+writeData(wb, sheet = 1, DT, startCol = 2)
+
+saveWorkbook(wb,
+             paste0(outdir,"/",Sys.Date(),".xlsx"),
+             overwrite = TRUE)
+message(paste0(outdir,"/",Sys.Date(),".xlsx"))
+rm(wb)
+
+
 
 cat("Excel created")
 
@@ -122,7 +157,7 @@ IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_neg.png", plot=IS_neg_plot, height=w/2.5, width=w, units="in")
@@ -132,7 +167,7 @@ IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_pos.png", plot=IS_pos_plot, height=w/2.5, width=w, units="in")
@@ -142,7 +177,7 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ggsave("plots/IS_bar_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="in")
@@ -179,24 +214,24 @@ ggsave("plots/IS_line_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="
 
 
 # Barplot voor Leucine voor alle data
-IS_now<-'2H3-Leucine (IS)' 
+IS_now<-'2H3-Leucine (IS)'
 p1<-ggplot(subset(IS_neg, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
   ggtitle(paste0(IS_now, " (Neg)")) +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(title='Negative mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
         legend.position='none')
 p2<-ggplot(subset(IS_pos, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
   ggtitle(paste0(IS_now, " (Pos)")) +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(title='Positive mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
         legend.position='none')
 p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
   ggtitle(paste0(IS_now, " (Sum)")) +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(title='Adduct sums',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10), 
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
         legend.position='none')
 
 w <- 3 + 0.2 * len
