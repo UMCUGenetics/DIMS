@@ -23,12 +23,14 @@ setwd(scripts)
 source("AddOnFunctions/initialize.R")
 source("AddOnFunctions/statistics_z_4export.R")
 source("AddOnFunctions/statistics_z_2.R")
+source("AddOnFunctions/plotBoxPlot.R")
+source("AddOnFunctions/getPatients.R")
 setwd(outdir)
 
 library("ggplot2")
 library("reshape2")
 library("openxlsx")
-library("dplyr")
+library("loder")
 
 plotdir <- "plots/adducts"
 sub <- 20000
