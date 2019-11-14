@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 
+.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.5.1")
 
 cat("Start excelExport.R")
 cat("==> reading arguments:\n", sep = "")
@@ -14,14 +15,13 @@ matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score = as.numeric(cmd_args[6])
-plot = FALSE
 plot = TRUE
 
 rundate <- Sys.Date()
 
 setwd(scripts)
-source("AddOnFunctions/sourceDir.R")
-sourceDir("AddOnFunctions")
+source("AddOnFunctions/initialize.R")
+source("AddOnFunctions/statistics_z_4export.R")
 setwd(outdir)
 
 library("ggplot2")
