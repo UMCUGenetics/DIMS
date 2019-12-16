@@ -309,6 +309,13 @@ qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode" -h
 qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode" -hold_jid "collect2_$scanmode" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
+# 14-cleanup.sh
+cat << EOF >> $outdir/jobs/14-cleanup.sh
+#!/bin/sh
+chmod 777 -R $indir
+chmod 777 -R $outdir
+EOF
+
   # 6-queueSumAdducts.sh
 cat << EOF >> $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 #!/bin/sh
@@ -327,6 +334,7 @@ if [ -f "$outdir/logs/done" ]; then   # if one of the scanmodes is already queue
   echo other scanmode already queued
   echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts $z_score" > $outdir/jobs/13-excelExport.sh
   qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
+  qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "cleanup" -hold_jid "excelExport" -m as -M $email -o $outdir/logs/14-cleanup -e $outdir/logs/14-cleanup $outdir/jobs/14-cleanup.sh
 else
   echo other scanmode not queued yet
   touch $outdir/logs/done

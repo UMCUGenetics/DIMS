@@ -15,7 +15,7 @@ matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score = as.numeric(cmd_args[6])
-plot = TRUE
+plot <- TRUE
 
 rundate <- Sys.Date()
 
@@ -56,12 +56,11 @@ outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
                                 case_label = case_label)
 
 
-unlink("xls", recursive = T)
-dir.create("xls", showWarnings = F)
+#unlink("xls", recursive = T)
+#dir.create("xls", showWarnings = F)
 
 DT = outlist
 imagesize_multiplier = 2
-path_plots = paste0(outdir, "/xls")
 
 
 plotdir <- paste(outdir,"plots","adducts", sep = "/")
@@ -108,8 +107,9 @@ len <- length(repl.pattern)
 
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
+message(IS_codes)
 
-dir.create("plots", showWarnings = F)
+#dir.create("plots", showWarnings = F)
 
 # Retrieve IS summed adducts
 IS_summed <- IS[,1:(len+1)]
