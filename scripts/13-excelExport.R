@@ -45,7 +45,7 @@ outlist <- outlist[-grep("Exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[order(outlist[,"HMDB_code"]),]
-outlist <- outlist[,-c(2,3,4,5,6,7)]
+#outlist <- outlist[,-c(2,3,4,5,6,7)]
 
 colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
 outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
