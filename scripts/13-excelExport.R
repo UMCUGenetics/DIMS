@@ -14,7 +14,7 @@ project <- cmd_args[2] #"test"
 matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
-z_score = as.numeric(cmd_args[6])
+z_score <- as.numeric(cmd_args[6])
 plot <- TRUE
 
 rundate <- Sys.Date()

@@ -331,8 +331,8 @@ echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $o
 qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode" -hold_jid "sumAdducts_${scanmode}_*" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 
 if [ -f "$outdir/logs/done" ]; then   # if one of the scanmodes is already queued
-  echo other scanmode already queued
-  echo "Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts $z_score" > $outdir/jobs/13-excelExport.sh
+  echo other scanmode already queued - queue next step
+  echo "module load R/3.5.1 && Rscript $scripts/13-excelExport.R $outdir $name $matrix $db2 $scripts $z_score" > $outdir/jobs/13-excelExport.sh
   qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "excelExport" -hold_jid "collect3_*" -m ase -M $email -o $outdir/logs/13-excelExport -e $outdir/logs/13-excelExport $outdir/jobs/13-excelExport.sh
   qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "cleanup" -hold_jid "excelExport" -m as -M $email -o $outdir/logs/14-cleanup -e $outdir/logs/14-cleanup $outdir/jobs/14-cleanup.sh
 else
