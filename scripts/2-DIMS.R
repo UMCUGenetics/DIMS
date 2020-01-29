@@ -10,7 +10,7 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   
   sampname <- strsplit(xmlfile, "/")[[1]]
   sampname <- sampname[length(sampname)]
-  sampname <- strsplit(sampname, ".mzXML")[[1]][1]
+  sampname <- strsplit(sampname, ".mzML")[[1]][1]
   print(sampname)
   
   suppressPackageStartupMessages(library("xcms"))

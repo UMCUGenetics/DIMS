@@ -86,7 +86,7 @@ dims <- function(xmlfile,outdir,thresh,trim,resol){
   posRes = t(posRes)
   negRes = t(negRes)
   
-  label=gsub(".+/(.+)\\.mzXML$", "\\1", xmlfile, ignore.case=TRUE)
+  label=gsub(".+/(.+)\\.mzML$", "\\1", xmlfile, ignore.case=TRUE)
   
   # Add in file names as row names
   rownames(posRes) = label
