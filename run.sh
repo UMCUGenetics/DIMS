@@ -132,8 +132,8 @@ cp $indir/init.RData $outdir/logs
 git rev-parse HEAD > $outdir/logs/commit
 echo `date +%s` >> $outdir/logs/commit
 
-dos2unix -n $indir/settings.config_new
-mv -f $indir/settings.config_new $indir/settings.config
+dos2unix -n $indir/settings.config $indir/settings.config_tmp
+mv -f $indir/settings.config_tmp $indir/settings.config
 . $indir/settings.config
 #thresh2remove=$(printf "%.0f" $thresh2remove) # to convert to decimal from scientific notation
 
