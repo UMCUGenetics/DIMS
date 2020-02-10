@@ -154,7 +154,7 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
      input=\$(basename \$mzXML .mzXML)
      if [ \$it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
-       srun --account==dbg_mz --time=5 --mem=1000 --job-name="breaks" --mail-type=END --mail-user=$email --output=$outdir/logs/1-generateBreaksFwhm.HPC --error=$outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
+       srun --account==dbg_mz --time=5 --mem=1000 --job-name="breaks" --mail-user=$email --output=$outdir/logs/1-generateBreaksFwhm.HPC --error=$outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
      fi
 
      exit 1
