@@ -228,8 +228,10 @@ find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
     echo "singularity exec -B ~/wineprefix64:/wineprefix64,/hpc/dbg_mz $proteowizard.sif wine msconvert $raw --output=$outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
-    sbatch --parsable --account==dbg_mz --time=3 --mem=4000 --job-name="conversion_${input}" --mail-type=s --mail-user=$email --output=$outdir/logs/0-conversion --error=$outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
+    srun --account==dbg_mz --time=3 --mem=4000 --job-name="conversion_${input}" --mail-type=FAIL --mail-user=$email --output=$outdir/logs/0-conversion --error=$outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
+
+exit 3
 
 sbatch --parsable --account==dbg_mz --time=10 --mem=1000 --job-name="queueConversionCheck" -hold_jid "conversion_*" --mail-type=END --mail-user=$email --output=$outdir/logs/queue/01-queueConversionCheck --error=$outdir/logs/queue/01-queueConversionCheck $outdir/jobs/queue/01-queueConversionCheck.sh 0
 
