@@ -174,7 +174,7 @@ if [ "\$1" -lt 1 ]; then
   find $indir -iname "*.raw" | sort | while read raw;
   do
     file=\$(basename \$raw .raw)
-    if [ ! -f $outdir/data/\${file}.mzXML ]; then
+    if [ ! -s $outdir/data/\${file}.mzXML ]; then
       echo "\${file} doesn't exist"
       continue=false
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
