@@ -9,12 +9,12 @@ cmd_args = commandArgs(trailingOnly = TRUE)
 
 for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 
-outdir <- "/Users/nunen/Documents/Metab/processed/test"
-project <- "test"
-matrix <- "DBS"
-hmdb <- "/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData"
-scripts <- "/Users/nunen/Documents/Metab/DIMS/scripts"
-z_score <- 0
+outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
+project <- cmd_args[2] #"test"
+matrix <- cmd_args[3] #"DBS"
+hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData"
+scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
+z_score <- as.numeric(cmd_args[6])
 plot <- TRUE
 
 rundate <- Sys.Date()
