@@ -16,6 +16,7 @@ hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_releva
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score <- as.numeric(cmd_args[6])
 plot <- TRUE
+init <- "logs/init.RData"
 
 rundate <- Sys.Date()
 
@@ -109,7 +110,7 @@ rm(wb)
 cat("Excel created")
 
 # INTERNE STANDAARDEN
-load("init.RData")
+load(init)
 len <- length(repl.pattern)
 
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
