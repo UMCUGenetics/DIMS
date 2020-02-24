@@ -71,31 +71,36 @@ filelist <- "AllPeakGroups"
 wb <- createWorkbook("SinglePatient")
 addWorksheet(wb, filelist)
 
-temp_png <- NULL
-for (irow in nrow(DT):1) {
-  H_code <- DT[irow, "HMDB_code"]
-  file_png <- paste(plotdir, "/", H_code, "_box.png", sep="")
-  #message(paste(irow, file_png))
-  if (is.null(temp_png)) {
-    temp_png <- readPng(file_png)
-    img_dim <- dim(temp_png)[c(1,2)]
-    cell_dim <- img_dim*imagesize_multiplier
-    setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
+if (z_score == 1) {
+  temp_png <- NULL
+  for (irow in nrow(DT):1) {
+    H_code <- DT[irow, "HMDB_code"]
+    file_png <- paste(plotdir, "/", H_code, "_box.png", sep="")
+    #message(paste(irow, file_png))
+    if (is.null(temp_png)) {
+      temp_png <- readPng(file_png)
+      img_dim <- dim(temp_png)[c(1,2)]
+      cell_dim <- img_dim*imagesize_multiplier
+      setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
+    }
+  
+    insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
+    if (irow %% 100 == 0) {
+      cat(paste("\nat row:",irow))
+    }
   }
-
-  insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
-  if (irow %% 100 == 0) {
-    cat(paste("\nat row:",irow))
-  }
+  setRowHeights(wb, filelist, rows = c(1:nrow(DT)+1), heights = cell_dim[1]/4)
+  writeData(wb, sheet = 1, DT, startCol = 2)
+} else {
+  writeData(wb, sheet = 1, DT, startCol = 1)
 }
 
-setRowHeights(wb, filelist, rows = c(1:nrow(DT)+1), heights = cell_dim[1]/4)
-writeData(wb, sheet = 1, DT, startCol = 2)
 
+xlsx_name <- paste0(outdir,"/",project,".xlsx")
 saveWorkbook(wb,
-             paste0(outdir,"/",Sys.Date(),".xlsx"),
+             xlsx_name,
              overwrite = TRUE)
-message(paste0(outdir,"/",Sys.Date(),".xlsx"))
+cat(xlsx_name)
 rm(wb)
 
 
@@ -108,9 +113,7 @@ len <- length(repl.pattern)
 
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
-message(IS_codes)
-
-#dir.create("plots", showWarnings = F)
+cat(IS_codes)
 
 # Retrieve IS summed adducts
 IS_summed <- IS[,1:(len+1)]
