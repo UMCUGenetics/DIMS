@@ -44,7 +44,7 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
   
   remove_neg=NULL
   remove_pos=NULL
-  cat("Pklist sum threshold to remove technical replicate:", thresh2remove,"\n")
+  cat("\nPklist sum threshold to remove technical replicate:", thresh2remove)
   for (i in 1:length(repl.pattern)) {
     techRepsArray.pos = NULL
     techRepsArray.neg = NULL
@@ -56,7 +56,7 @@ run <- function(indir, outdir, nrepl, thresh2remove, dimsThresh) {
     n_neg=0
     for (j in 1:length(tech_reps)){
       load(paste(paste(outdir, "pklist/", sep="/"), tech_reps[j], ".RData", sep=""))
-      cat("Parsing", tech_reps[j], "\n")
+      cat("\n\nParsing", tech_reps[j])
       # load(paste(paste(outdir, "pklist/", sep="/"), "RES_PL_20170220_0146", ".RData", sep=""))
       
       cat(paste("\n\tNeg pklist sum",sum(pklist$neg[,1])))
