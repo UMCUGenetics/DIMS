@@ -48,13 +48,14 @@ outlist <- outlist[order(outlist[,"HMDB_code"]),]
 #outlist <- outlist[,-c(2,3,4,5,6,7)]
 
 colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
-outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
-                                plotdir = plotdir,
-                                patients = getPatients(outlist),
-                                adducts = adducts,
-                                control_label = control_label,
-                                case_label = case_label)
-
+if (z_score == 1) {
+  outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
+                                  plotdir = plotdir,
+                                  patients = getPatients(outlist),
+                                  adducts = adducts,
+                                  control_label = control_label,
+                                  case_label = case_label)
+}
 
 #unlink("xls", recursive = T)
 #dir.create("xls", showWarnings = F)
