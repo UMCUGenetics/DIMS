@@ -3,10 +3,10 @@
 # run it from the input dir that contains sampleNames.txt
 # to make init.RData in the same dir
 
-df <- read.csv("sampleNames.txt", sep="\t")
+df <- read.csv("/Users/nunen/Documents/Metab/raw_data/sampleNames_2020_003.txt", sep="\t")
 
 args <- commandArgs(trailingOnly=TRUE)
-nrepl <- as.numeric(args[1])
+nrepl <- 5 #as.numeric(args[1])
 
 sampleNames <- trimws(as.vector(unlist(df[1])))
 nsampgrps <- length(sampleNames)/nrepl

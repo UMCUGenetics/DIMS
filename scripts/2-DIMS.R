@@ -4,8 +4,7 @@
 
 run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   
-  dir.create(outdir,showWarnings = F)
-  dir.create(paste(outdir, "pklist", sep="/"),showWarnings = F)
+  dir.create(paste(outdir, "pklist", sep = "/"), showWarnings = F)
   #dir.create(paste(outdir, "QC", sep="/"),showWarnings = F)
   
   sampname <- strsplit(xmlfile, "/")[[1]]
@@ -56,8 +55,10 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   # ################################################################################
   
   # Aggregate with dims scipt
+  cat("making pklist...\n")
   pklist = dims(xmlfile, outdir, dimsThresh, trim, resol)
-  if (!file.exists(paste(paste(outdir, "pklist", sep="/"),"/",sampname, ".RData", sep=""))) save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""))
+  cat("pklist created\n")
+  save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""))
   
 }
 
