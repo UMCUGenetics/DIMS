@@ -146,7 +146,6 @@ cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
 it=0
 find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
-     it=\$((it+1))
      input=\$(basename \$mzXML .mzXML)
      if [ \$it < 3 ] && [ ! -s $outdir/breaks.fwhm.RData ] ; then
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
@@ -155,6 +154,8 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
 
      echo "Rscript $scripts/2-DIMS.R \$mzXML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/\${input}.sh
      qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=4G -N "dims_\${input}" -hold_jid "breaks" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/2-DIMS $outdir/jobs/2-DIMS/\${input}.sh
+
+     it=\$((it+1))
  done
 
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
