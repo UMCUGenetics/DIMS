@@ -8,9 +8,9 @@ df <- read.csv("sampleNames.txt", sep="\t")
 args <- commandArgs(trailingOnly=TRUE)
 nrepl <- as.numeric(args[1])
 
-sampleNames <- trimws(as.vector(unlist(df$File_Name)))
+sampleNames <- trimws(as.vector(unlist(df[1])))
 nsampgrps <- length(sampleNames)/nrepl
-groupNames <- trimws(as.vector(unlist(df$Sample_Name)))
+groupNames <- trimws(as.vector(unlist(df[2])))
 groupNames <- gsub('[^-.[:alnum:]]','_',groupNames)
 groupNamesUnique <- unique(groupNames)
 groupNamesNotUnique <- groupNames[duplicated(groupNames)]
