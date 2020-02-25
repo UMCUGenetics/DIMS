@@ -3,7 +3,7 @@
 # run it from the input dir that contains sampleNames.txt
 # to make init.RData in the same dir
 
-df <- read.csv("sampleNames.txt")
+df <- read.csv("sampleNames.txt", sep="\t")
 
 args <- commandArgs(trailingOnly=TRUE)
 nrepl <- as.numeric(args[1])
