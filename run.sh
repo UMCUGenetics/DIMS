@@ -148,7 +148,7 @@ find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
  do
      it=\$((it+1))
      input=\$(basename \$mzXML .mzXML)
-     if [ \$it == 1 ] && [ ! -f $outdir/breaks.fwhm.RData ] ; then
+     if [ \$it < 3 ] && [ ! -s $outdir/breaks.fwhm.RData ] ; then
        echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
        qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
