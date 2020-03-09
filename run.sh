@@ -154,8 +154,8 @@ find $outdir/data -iname "*.mzML" | sort | while read mzML;
        qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
 
-     echo "Rscript $scripts/2-DIMS.R \$mzML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/\${input}.sh
-     qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=4G -N "dims_\${input}" -hold_jid "breaks" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/2-DIMS $outdir/jobs/2-DIMS/\${input}.sh
+     echo "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript $scripts/2-DIMS.R \$mzML $outdir $trim $dims_thresh $resol $scripts" > $outdir/jobs/2-DIMS/\${input}.sh
+     qsub -q all.q -P dbg_mz -l h_rt=00:15:00 -l h_vmem=4G -N "dims_\${input}" -hold_jid "breaks" -m as -M $email -o $outdir/logs/2-DIMS -e $outdir/logs/2-DIMS $outdir/jobs/2-DIMS/\${input}.sh
  done
 
 echo "Rscript $scripts/3-averageTechReplicates.R $indir $outdir $nrepl $thresh2remove $dims_thresh $scripts" > $outdir/jobs/3-averageTechReplicates/average.sh
