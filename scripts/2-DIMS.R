@@ -57,7 +57,7 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   
   # Aggregate with dims scipt
   pklist = dims(xmlfile, outdir, dimsThresh, trim, resol)
-  if (!file.exists(paste(paste(outdir, "pklist", sep="/"),"/",sampname, ".RData", sep=""))) save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""))
+  if (!file.exists(paste(paste(outdir, "pklist", sep="/"),"/",sampname, ".RData", sep=""))) save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""), version=2)
   
 }
 
