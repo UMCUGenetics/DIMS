@@ -122,6 +122,7 @@ else
 	done
 fi
 
+mkdir -p $outdir/data
 mkdir -p $outdir/logs/0-conversion
 mkdir -p $outdir/jobs/0-conversion
 mkdir -p $outdir/logs/queue
@@ -144,11 +145,11 @@ cat << EOF >> $outdir/jobs/queue/1-queueStart.sh
 #!/bin/sh
 
 it=0
-find $outdir/data -iname "*.mzXML" | sort | while read mzXML;
+find $outdir/data -iname "*.mzML" | sort | while read mzML;
  do
-     input=\$(basename \$mzXML .mzXML)
+     input=\$(basename \$mzML .mzML)
      if [ \$it -lt 3 ] && [ ! -s $outdir/breaks.fwhm.RData ] ; then
-       echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzXML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
+       echo "Rscript $scripts/1-generateBreaksFwhm.HPC.R \$mzML $outdir $trim $resol $nrepl $scripts" > $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
        qsub -q all.q -P dbg_mz -l h_rt=00:05:00 -l h_vmem=1G -N "breaks" -m as -M $email -o $outdir/logs/1-generateBreaksFwhm.HPC -e $outdir/logs/1-generateBreaksFwhm.HPC $outdir/jobs/1-generateBreaksFwhm.HPC/breaks.sh
      fi
 
@@ -170,20 +171,22 @@ cat << EOF >> $outdir/jobs/queue/01-queueConversionCheck.sh
 #!/bin/sh
 
 continue=true
-if [ "\$1" -lt 1 ]; then
+if [ "\$1" -lt 1 ]; then # first check
   echo "first check"
+
+  # check if all mzML exist
   find $indir -iname "*.raw" | sort | while read raw;
   do
     file=\$(basename \$raw .raw)
-    if [ ! -s $outdir/data/\${file}.mzXML ]; then
+    if [ ! -s $outdir/data/\${file}.mzML ]; then
       echo "\${file} doesn't exist or is empty"
       continue=false
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
   	fi
   done
 
-  # check if any of the error files contain 'error in thread'
-  for filepath in \$(egrep "(exception)|(0x8007000)" $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}' | uniq)
+  # check if any of the error files contain the word 'ERROR'
+  for filepath in \$(egrep "ERROR" $outdir/logs/0-conversion -r | awk -F ":" '{print \$1}' | uniq)
   do
   	file=\$(basename "\${filepath%.*}" | cut -d '_' -f 1 --complement)
   	if [ -f $outdir/jobs/0-conversion/\${file}.sh ]; then
@@ -204,8 +207,8 @@ if [ "\$1" -lt 1 ]; then
       qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_\${file}" -m asb -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/\${file}.sh
     fi
   done
-else
-  echo "Potential RAW -> mzXML conversion issue with run $name" | mail -s "DIMS issue $name" "$email"
+else # second check
+  echo "Potential RAW -> mzML conversion issue with run $name" | mail -s "DIMS issue $name" "$email"
 fi
 
 if [ "\$continue" = true ]; then
@@ -222,7 +225,7 @@ EOF
 find $indir -iname "*.raw" | sort | while read raw;
   do
     input=$(basename $raw .raw)
-    echo "singularity exec -B ~/wineprefix64:/wineprefix64,/hpc/dbg_mz $proteowizard.sif wine msconvert $raw -o $outdir/data --mzXML" > $outdir/jobs/0-conversion/${input}.sh
+    echo "source /hpc/dbg_mz/tools/mono/etc/profile && mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=$raw -o=$outdir/data -z -p" > $outdir/jobs/0-conversion/${input}.sh
     qsub -q all.q -P dbg_mz -l h_rt=00:03:00 -l h_vmem=4G -N "conversion_${input}" -m s -M $email -o $outdir/logs/0-conversion -e $outdir/logs/0-conversion $outdir/jobs/0-conversion/${input}.sh
   done
 
