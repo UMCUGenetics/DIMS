@@ -318,6 +318,8 @@ cat << EOF >> $outdir/jobs/14-cleanup.sh
 #!/bin/sh
 chmod 777 -R $indir
 chmod 777 -R $outdir
+
+echo "$outdir" | mail -s "DIMS run $name - FINISHED" $email
 EOF
 
   # 6-queueSumAdducts.sh
