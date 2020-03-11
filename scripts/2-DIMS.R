@@ -58,7 +58,7 @@ run <- function(xmlfile, outdir, trim, dimsThresh, resol, scripts) {
   cat("making pklist...\n")
   pklist = dims(xmlfile, outdir, dimsThresh, trim, resol)
   cat("pklist created\n")
-  save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""))
+  save(pklist, file=paste(paste(outdir, "pklist", sep="/"),"/", sampname, ".RData", sep=""), version = 2)
 
 }
 
