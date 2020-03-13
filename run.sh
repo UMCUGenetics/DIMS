@@ -247,14 +247,14 @@ cat << EOF >> $outdir/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 find "$outdir/average_pklist" -iname $label | sort | while read sample;
  do
    input=\$(basename \$sample .RData)
-   echo "Rscript $scripts/4-peakFinding.R \$sample $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
+   echo "Rscript $scripts/4-peakFinding.R \$sample $outdir ${scanmode} $thresh $resol $scripts" > $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
    qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "peakFinding_${scanmode}_\${input}_${name}" -m as -M $email -o $outdir/logs/4-peakFinding -e $outdir/logs/4-peakFinding $outdir/jobs/4-peakFinding/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/5-collectSamples.R $outdir $scanmode $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "collect_$scanmode_${name}" -hold_jid "peakFinding_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
+echo "Rscript $scripts/5-collectSamples.R $outdir ${scanmode} $db" > $outdir/jobs/5-collectSamples/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "collect_${scanmode}_${name}" -hold_jid "peakFinding_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/5-collectSamples -e $outdir/logs/5-collectSamples $outdir/jobs/5-collectSamples/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_$scanmode_${name}" -hold_jid "collect_$scanmode_${name}" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGrouping_${scanmode}_${name}" -hold_jid "collect_${scanmode}_${name}" -m as -M $email -o $outdir/logs/queue/3-queuePeakGrouping -e $outdir/logs/queue/3-queuePeakGrouping $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
 
@@ -265,14 +265,14 @@ cat << EOF >> $outdir/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 find "$outdir/hmdb_part" -iname "${scanmode}_*" | sort | while read hmdb;
  do
    input=\$(basename \$hmdb .RData)
-   echo "Rscript $scripts/6-peakGrouping.R \$hmdb $outdir $scanmode $resol $scripts" > $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
+   echo "Rscript $scripts/6-peakGrouping.R \$hmdb $outdir ${scanmode} $resol $scripts" > $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
    qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "grouping_${scanmode}_\${input}_${name}" -m as -M $email -o $outdir/logs/6-peakGrouping -e $outdir/logs/6-peakGrouping $outdir/jobs/6-peakGrouping/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/7-collectSamplesGroupedHMDB.R $outdir $scanmode $scripts" > $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect1_$scanmode_${name}" -hold_jid "grouping_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/7-collectSamplesGroupedHMDB -e $outdir/logs/7-collectSamplesGroupedHMDB $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
+echo "Rscript $scripts/7-collectSamplesGroupedHMDB.R $outdir ${scanmode} $scripts" > $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect1_${scanmode}_${name}" -hold_jid "grouping_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/7-collectSamplesGroupedHMDB -e $outdir/logs/7-collectSamplesGroupedHMDB $outdir/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGroupingRest_$scanmode_${name}" -hold_jid "collect1_$scanmode_${name}" -m as -M $email -o $outdir/logs/queue/4-queuePeakGroupingRest -e $outdir/logs/queue/4-queuePeakGroupingRest $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueGroupingRest_${scanmode}_${name}" -hold_jid "collect1_${scanmode}_${name}" -m as -M $email -o $outdir/logs/queue/4-queuePeakGroupingRest -e $outdir/logs/queue/4-queuePeakGroupingRest $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
 
   # 4-queuePeakGroupingRest.sh
@@ -282,11 +282,11 @@ cat << EOF >> $outdir/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 find "$outdir/specpks_all_rest" -iname "${scanmode}_*" | sort | while read file;
  do
    input=\$(basename \$file .RData)
-   echo "Rscript $scripts/8-peakGrouping.rest.R \$file $outdir $scanmode $resol $scripts" > $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
+   echo "Rscript $scripts/8-peakGrouping.rest.R \$file $outdir ${scanmode} $resol $scripts" > $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
    qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "grouping2_${scanmode}_\${input}_${name}" -m as -M $email -o $outdir/logs/8-peakGrouping.rest -e $outdir/logs/8-peakGrouping.rest $outdir/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
  done
 
-qsub -q all.q -P dbg_mz -l h_rt=00:20:00 -l h_vmem=8G -N "queueFillMissing_$scanmode_${name}" -hold_jid "grouping2_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:20:00 -l h_vmem=8G -N "queueFillMissing_${scanmode}_${name}" -hold_jid "grouping2_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/queue/5-queueFillMissing -e $outdir/logs/queue/5-queueFillMissing $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
@@ -296,21 +296,21 @@ cat << EOF >> $outdir/jobs/queue/5-queueFillMissing_${scanmode}.sh
 find "$outdir/grouping_rest" -iname "${scanmode}_*" | sort | while read rdata;
  do
   input=\$(basename \$rdata .RData)
-  echo "Rscript $scripts/9-runFillMissing.R \$rdata $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
+  echo "Rscript $scripts/9-runFillMissing.R \$rdata $outdir ${scanmode} $thresh $resol $scripts" > $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
   qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling_${scanmode}_\${input}_${name}" -m as -M $email -o $outdir/logs/9-runFillMissing -e $outdir/logs/9-runFillMissing $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
 find "$outdir/grouping_hmdb" -iname "*_${scanmode}.RData" | sort | while read rdata2;
  do
   input=\$(basename \$rdata2 .RData)
-  echo "Rscript $scripts/9-runFillMissing.R \$rdata2 $outdir $scanmode $thresh $resol $scripts" > $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
+  echo "Rscript $scripts/9-runFillMissing.R \$rdata2 $outdir ${scanmode} $thresh $resol $scripts" > $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
   qsub -q all.q -P dbg_mz -l h_rt=02:00:00 -l h_vmem=8G -N "peakFilling2_${scanmode}_\${input}_${name}" -hold_jid "peakFilling_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/9-runFillMissing -e $outdir/logs/9-runFillMissing $outdir/jobs/9-runFillMissing/${scanmode}_\${input}.sh
  done
 
-echo "Rscript $scripts/10-collectSamplesFilled.R $outdir $scanmode $normalization $scripts $db $z_score" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_$scanmode_${name}" -hold_jid "peakFilling2_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/10-collectSamplesFilled -e $outdir/logs/10-collectSamplesFilled $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
+echo "Rscript $scripts/10-collectSamplesFilled.R $outdir ${scanmode} $normalization $scripts $db $z_score" > $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=01:00:00 -l h_vmem=8G -N "collect2_${scanmode}_${name}" -hold_jid "peakFilling2_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/10-collectSamplesFilled -e $outdir/logs/10-collectSamplesFilled $outdir/jobs/10-collectSamplesFilled/${scanmode}.sh
 
-qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_$scanmode_${name}" -hold_jid "collect2_$scanmode_${name}" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:10:00 -l h_vmem=1G -N "queueSumAdducts_${scanmode}_${name}" -hold_jid "collect2_${scanmode}_${name}" -m as -M $email -o $outdir/logs/queue/6-queueSumAdducts -e $outdir/logs/queue/6-queueSumAdducts $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
 # 14-cleanup.sh
@@ -329,12 +329,12 @@ cat << EOF >> $outdir/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 find "$outdir/hmdb_part_adductSums" -iname "${scanmode}_*" | sort | while read hmdb;
  do
     input=\$(basename \$hmdb .RData)
-    echo "Rscript $scripts/11-runSumAdducts.R \$hmdb $outdir $scanmode $adducts $scripts $z_score" > $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+    echo "Rscript $scripts/11-runSumAdducts.R \$hmdb $outdir ${scanmode} $adducts $scripts $z_score" > $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
     qsub -q all.q -P dbg_mz -l h_rt=03:00:00 -l h_vmem=8G -N "sumAdducts_${scanmode}_\${input}_${name}" -m as -M $email -o $outdir/logs/11-runSumAdducts -e $outdir/logs/11-runSumAdducts $outdir/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
 done
 
-echo "Rscript $scripts/12-collectSamplesAdded.R $outdir $scanmode $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
-qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_$scanmode_${name}" -hold_jid "sumAdducts_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
+echo "Rscript $scripts/12-collectSamplesAdded.R $outdir ${scanmode} $scripts" > $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
+qsub -q all.q -P dbg_mz -l h_rt=00:30:00 -l h_vmem=8G -N "collect3_${scanmode}_${name}" -hold_jid "sumAdducts_${scanmode}_*_${name}" -m as -M $email -o $outdir/logs/12-collectSamplesAdded -e $outdir/logs/12-collectSamplesAdded $outdir/jobs/12-collectSamplesAdded/${scanmode}.sh
 
 if [ -f "$outdir/logs/done" ]; then   # if one of the scanmodes is already queued
   echo other scanmode already queued - queue next step
