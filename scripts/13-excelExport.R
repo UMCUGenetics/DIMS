@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.5.1")
+.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2")
 
 cat("Start excelExport.R")
 cat("==> reading arguments:\n", sep = "")
@@ -12,10 +12,11 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
 project <- cmd_args[2] #"test"
 matrix <- cmd_args[3] #"DBS"
-hmdb <- cmd_args[4] #HMDB_with_info_relevance_IS_C5OH.RData
+hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData"
 scripts <- cmd_args[5] #"/Users/nunen/Documents/Metab/DIMS/scripts"
 z_score <- as.numeric(cmd_args[6])
 plot <- TRUE
+init <- "logs/init.RData"
 
 rundate <- Sys.Date()
 
@@ -45,21 +46,20 @@ outlist <- outlist[-grep("Exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("exogenous", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
 outlist <- outlist[order(outlist[,"HMDB_code"]),]
-#outlist <- outlist[,-c(2,3,4,5,6,7)]
 
 colnames(outlist) <- gsub('PLRD_','',colnames(outlist))
-outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
-                                plotdir = plotdir,
-                                patients = getPatients(outlist),
-                                adducts = adducts,
-                                control_label = control_label,
-                                case_label = case_label)
-
+if (z_score == 1) {
+  outlist <- statistics_z_4export(peaklist = as.data.frame(outlist),
+                                  plotdir = plotdir,
+                                  patients = getPatients(outlist),
+                                  adducts = adducts,
+                                  control_label = control_label,
+                                  case_label = case_label)
+}
 
 #unlink("xls", recursive = T)
 #dir.create("xls", showWarnings = F)
 
-DT = outlist
 imagesize_multiplier = 2
 
 
@@ -70,31 +70,39 @@ filelist <- "AllPeakGroups"
 wb <- createWorkbook("SinglePatient")
 addWorksheet(wb, filelist)
 
-temp_png <- NULL
-for (irow in nrow(DT):1) {
-  H_code <- DT[irow, "HMDB_code"]
-  file_png <- paste(plotdir, "/", H_code, "_box.png", sep="")
-  #message(paste(irow, file_png))
-  if (is.null(temp_png)) {
-    temp_png <- readPng(file_png)
-    img_dim <- dim(temp_png)[c(1,2)]
-    cell_dim <- img_dim*imagesize_multiplier
-    setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
+if (z_score == 1) {
+  temp_png <- NULL
+  for (irow in nrow(outlist):1) {
+    H_code <- outlist[irow, "HMDB_code"]
+    file_png <- paste(plotdir, "/", H_code, "_box.png", sep="")
+    #message(paste(irow, file_png))
+    if (is.null(temp_png)) {
+      temp_png <- readPng(file_png)
+      img_dim <- dim(temp_png)[c(1,2)]
+      cell_dim <- img_dim*imagesize_multiplier
+      setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
+    }
+  
+    insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
+    if (irow %% 100 == 0) {
+      cat(paste("\nat row:",irow))
+    }
   }
-
-  insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
-  if (irow %% 100 == 0) {
-    cat(paste("\nat row:",irow))
-  }
+  setRowHeights(wb, filelist, rows = c(1:nrow(outlist)+1), heights = cell_dim[1]/4)
+  writeData(wb, sheet = 1, outlist, startCol = 2)
+} else {
+  outlist <- outlist[,-c(2,3,4,5,6,7)]
+  writeData(wb, sheet = 1, outlist, startCol = 1)
+  setRowHeights(wb, filelist, rows = c(1:nrow(outlist)), heights = 18)
+  setColWidths(wb, filelist, cols = c(1:ncol(outlist)), widths = "auto")
 }
 
-setRowHeights(wb, filelist, rows = c(1:nrow(DT)+1), heights = cell_dim[1]/4)
-writeData(wb, sheet = 1, DT, startCol = 2)
 
+xlsx_name <- paste0(outdir,"/",project,".xlsx")
 saveWorkbook(wb,
-             paste0(outdir,"/",Sys.Date(),".xlsx"),
+             xlsx_name,
              overwrite = TRUE)
-message(paste0(outdir,"/",Sys.Date(),".xlsx"))
+cat(xlsx_name)
 rm(wb)
 
 
@@ -102,14 +110,12 @@ rm(wb)
 cat("Excel created")
 
 # INTERNE STANDAARDEN
-load("logs/init.RData")
+load(init)
 len <- length(repl.pattern)
 
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
-message(IS_codes)
-
-#dir.create("plots", showWarnings = F)
+cat(IS_codes,"\n")
 
 # Retrieve IS summed adducts
 IS_summed <- IS[,1:(len+1)]
@@ -120,7 +126,7 @@ IS_summed$Intensity <- as.numeric(IS_summed$Intensity)
 IS_summed$Matrix <- matrix
 IS_summed$Rundate <- rundate
 IS_summed$Project <- project
-IS_summed$Intensity <- as.numeric(as.character(IS_pos$Intensity))
+IS_summed$Intensity <- as.numeric(as.character(IS_summed$Intensity))
 
 # Retrieve IS positive mode
 load("adductSums_positive.RData")
@@ -246,39 +252,38 @@ ggsave("plots/Leucine_pos.png", plot=p2, height=w/2.5, width=w, units="in")
 ggsave("plots/Leucine_sum.png", plot=p3, height=w/2.5, width=w, units="in")
 
 
-
-
-### POSITIVE CONTROLS
-#HMDB codes
-PA_codes <- c('HMDB00824','HMDB00783','HMDB00123')
-PKU_codes <- c('HMDB00159')
-LPI_codes <- c('HMDB00904','HMDB00641','HMDB00182')
-
-PA_data<-outlist[PA_codes,c('HMDB_code','name','P1002.1_Zscore')]
-PA_data<-melt(PA_data, id.vars=c('HMDB_code','name'))
-colnames(PA_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
-
-PKU_data<-outlist[PKU_codes,c('HMDB_code','name','P1003.1_Zscore')]
-PKU_data<-melt(PKU_data, id.vars=c('HMDB_code','name'))
-colnames(PKU_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
-
-LPI_data<-outlist[LPI_codes,c('HMDB_code','name','P1005.1_Zscore')]
-LPI_data<-melt(LPI_data, id.vars=c('HMDB_code','name'))
-colnames(LPI_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
-
-Pos_Contr<-rbind(PA_data, PKU_data, LPI_data)
-
-Pos_Contr<-rbind(PA_data)
-
-
-Pos_Contr$Zscore<-as.numeric(Pos_Contr$Zscore)
-Pos_Contr$Matrix<-matrix
-Pos_Contr$Rundate<-rundate
-Pos_Contr$Project<-project
-
-#Save results
-save(Pos_Contr,file='Pos_Contr_test.RData')
-
+if (z_score == 1) {
+  ### POSITIVE CONTROLS
+  #HMDB codes
+  PA_codes <- c('HMDB00824','HMDB00783','HMDB00123')
+  PKU_codes <- c('HMDB00159')
+  LPI_codes <- c('HMDB00904','HMDB00641','HMDB00182')
+  
+  PA_data<-outlist[PA_codes,c('HMDB_code','name','P1002.1_Zscore')]
+  PA_data<-melt(PA_data, id.vars=c('HMDB_code','name'))
+  colnames(PA_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
+  
+  PKU_data<-outlist[PKU_codes,c('HMDB_code','name','P1003.1_Zscore')]
+  PKU_data<-melt(PKU_data, id.vars=c('HMDB_code','name'))
+  colnames(PKU_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
+  
+  LPI_data<-outlist[LPI_codes,c('HMDB_code','name','P1005.1_Zscore')]
+  LPI_data<-melt(LPI_data, id.vars=c('HMDB_code','name'))
+  colnames(LPI_data)<-c('HMDB.code','HMDB.name','Sample','Zscore')
+  
+  Pos_Contr<-rbind(PA_data, PKU_data, LPI_data)
+  
+  Pos_Contr<-rbind(PA_data)
+  
+  
+  Pos_Contr$Zscore<-as.numeric(Pos_Contr$Zscore)
+  Pos_Contr$Matrix<-matrix
+  Pos_Contr$Rundate<-rundate
+  Pos_Contr$Project<-project
+  
+  #Save results
+  save(Pos_Contr,file='Pos_Contr_test.RData')
+}
 
 
 cat("Ready excelExport.R")
