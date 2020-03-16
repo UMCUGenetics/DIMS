@@ -1,5 +1,4 @@
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 set -o pipefail
 set -e
@@ -153,8 +152,8 @@ find ${indir} -iname "*.raw" | sort | while read raw; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
   source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/${input}.sh
-  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/${input}.out --error=${outdir}/logs/0-conversion/${input}.error ${outdir}/jobs/0-conversion/${input}.sh`
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
+  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.out --error=${outdir}/logs/0-conversion/\${input}.error ${outdir}/jobs/0-conversion/\${input}.sh`
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -181,7 +180,7 @@ find ${outdir}/data -iname "*.mzML" | sort | while read mzML; do
 done
 job_ids=\${job_ids::-1}
 
-echo "#!/bin/sh\n\n Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh}2remove ${dims_thresh} ${scripts}" > ${outdir}/jobs/3-averageTechReplicates/average.sh
+echo "#!/bin/sh\n\n Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}" > ${outdir}/jobs/3-averageTechReplicates/average.sh
 sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates --error=${outdir}/logs/3-averageTechReplicates ${outdir}/jobs/3-averageTechReplicates/average.sh
 
 exit 2
@@ -190,7 +189,7 @@ exit 2
 #sbatch --parsable --account==dbg_mz --time=10 --mem=500 --job-name="queueFinding_negative" -hold_jid "average" --mail-type=END --mail-user=${email} --output=${outdir}/logs/queue/2-queuePeakFinding --error=${outdir}/logs/queue/2-queuePeakFinding ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
 
-sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error ${outdir}/jobs/queue/0-queueConversion.sh
+sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error --mail-user=${email} --mail-type=TIME_LIMIT_80,FAIL ${outdir}/jobs/queue/0-queueConversion.sh
 
 doScanmode() {
   echo "$1"
@@ -305,5 +304,5 @@ fi
 EOF
 }
 
-doScanmode "negative" ${thresh}_neg "*_neg.RData" "1"
-doScanmode "positive" ${thresh}_pos "*_pos.RData" "1,2"
+doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
+doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
