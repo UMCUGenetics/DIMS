@@ -346,7 +346,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} $adducts ${scripts} $z_score
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
-  sbatch --parsable -t=180 --mem=8G -o=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o -e=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+  sbatch --parsable -t=3:00:00 --mem=8G -o=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o -e=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
