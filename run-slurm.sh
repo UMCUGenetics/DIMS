@@ -126,6 +126,7 @@ mkdir -p ${outdir}/logs/0-conversion
 mkdir -p ${outdir}/jobs/0-conversion
 mkdir -p ${outdir}/logs/queue
 mkdir -p ${outdir}/jobs/queue
+mkdir -p ${outdir}/data
 
 cp ${indir}/settings.config ${outdir}/logs
 cp ${indir}/init.RData ${outdir}/logs
@@ -150,9 +151,7 @@ cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 job_ids=""
 find ${indir} -iname "*.raw" | sort | while read raw; do
   input=\$(basename \$raw .raw)
-  echo "#!/bin/sh
-  source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
+  printf "#!/bin/sh\n source /hpc/dbg_mz/tools/mono/etc/profile\nmono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
   cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.out --error=${outdir}/logs/0-conversion/\${input}.error ${outdir}/jobs/0-conversion/\${input}.sh`
   job_ids+="\${cur_id}:"
 done
