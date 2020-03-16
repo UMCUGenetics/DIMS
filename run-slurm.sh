@@ -153,7 +153,8 @@ for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
   source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p
+  " > ${outdir}/jobs/0-conversion/\${input}.sh
   cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.out --error=${outdir}/logs/0-conversion/\${input}.error ${outdir}/jobs/0-conversion/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
@@ -172,17 +173,26 @@ job_ids=""
 find ${outdir}/data -iname "*.mzML" | sort | while read mzML ; do
   input=\$(basename \$mzML .mzML)
   if [ ! -v break_id ] ; then
-   echo "#!/bin/sh\n\n Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}" > ${outdir}/jobs/1-generateBreaksFwhm.sh
-   break_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.out --error=${outdir}/logs/1-generateBreaksFwhm.error ${outdir}/jobs/1-generateBreaksFwhm.sh)
+    # 1-generateBreaksFwhm.HPC.R
+    echo "#!/bin/sh
+    Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
+    " > ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh
+    break_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.out --error=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.error ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
   fi
 
-  echo "#!/bin/sh\n\n /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}" > ${outdir}/jobs/2-DIMS/\${input}.sh
+  # 2-DIMS.R
+  echo "#!/bin/sh
+  /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
+  " > ${outdir}/jobs/2-DIMS/\${input}.sh
   cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.out --error=${outdir}/logs/2-DIMS/\${input}.out ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
 
-echo "#!/bin/sh\n\n Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}" > ${outdir}/jobs/3-averageTechReplicates/average.sh
+# 3-averageTechReplicates.R
+echo "#!/bin/sh
+Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
+" > ${outdir}/jobs/3-averageTechReplicates/average.sh
 sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates --error=${outdir}/logs/3-averageTechReplicates ${outdir}/jobs/3-averageTechReplicates/average.sh
 
 exit 2
