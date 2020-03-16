@@ -151,8 +151,10 @@ cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 job_ids=""
 find ${indir} -iname "*.raw" | sort | while read raw; do
   input=\$(basename \$raw .raw)
-  printf "#!/bin/sh\n source /hpc/dbg_mz/tools/mono/etc/profile\nmono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
-  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.out --error=${outdir}/logs/0-conversion/\${input}.error ${outdir}/jobs/0-conversion/\${input}.sh`
+  echo "#!/bin/sh
+  source /hpc/dbg_mz/tools/mono/etc/profile
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/\${input}.sh
+  cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.out --error=${outdir}/logs/0-conversion/\${input}.error ${outdir}/jobs/0-conversion/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -170,11 +172,11 @@ find ${outdir}/data -iname "*.mzML" | sort | while read mzML; do
   input=\$(basename \$mzML .mzML)
   if [ ! -v break_id ] ; then
    echo "#!/bin/sh\n\n Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}" > ${outdir}/jobs/1-generateBreaksFwhm.sh
-   break_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.out --error=${outdir}/logs/1-generateBreaksFwhm.error ${outdir}/jobs/1-generateBreaksFwhm.sh`
+   break_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.out --error=${outdir}/logs/1-generateBreaksFwhm.error ${outdir}/jobs/1-generateBreaksFwhm.sh)
   fi
 
   echo "#!/bin/sh\n\n /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}" > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.out --error=${outdir}/logs/2-DIMS/\${input}.out ${outdir}/jobs/2-DIMS/\${input}.sh`
+  cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.out --error=${outdir}/logs/2-DIMS/\${input}.out ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
