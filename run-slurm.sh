@@ -170,7 +170,8 @@ cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-find ${outdir}/data -iname "*.mzML" | sort | while read mzML ; do
+
+for mzML in ${outdir}/data/*.mzML ; do
   input=\$(basename \$mzML .mzML)
   if [ ! -v break_id ] ; then
     # 1-generateBreaksFwhm.HPC.R
@@ -184,7 +185,7 @@ find ${outdir}/data -iname "*.mzML" | sort | while read mzML ; do
   echo "#!/bin/sh
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.out --error=${outdir}/logs/2-DIMS/\${input}.out ${outdir}/jobs/2-DIMS/\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.out --error=${outdir}/logs/2-DIMS/\${input}.out ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
