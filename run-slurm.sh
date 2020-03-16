@@ -149,7 +149,7 @@ cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-find ${indir} -iname "*.raw" | sort | while read raw; do
+for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
   source /hpc/dbg_mz/tools/mono/etc/profile
@@ -158,6 +158,7 @@ find ${indir} -iname "*.raw" | sort | while read raw; do
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
+echo \${job_ids}
 
 sbatch --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.out --error=${outdir}/logs/queue/1-queueStart.error ${outdir}/jobs/queue/1-queueStart.sh
 EOF
@@ -168,7 +169,7 @@ cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-find ${outdir}/data -iname "*.mzML" | sort | while read mzML; do
+find ${outdir}/data -iname "*.mzML" | sort | while read mzML ; do
   input=\$(basename \$mzML .mzML)
   if [ ! -v break_id ] ; then
    echo "#!/bin/sh\n\n Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}" > ${outdir}/jobs/1-generateBreaksFwhm.sh
@@ -189,8 +190,6 @@ exit 2
 #sbatch --parsable --account==dbg_mz --time=10 --mem=500 --job-name="queueFinding_positive" -hold_jid "average" --mail-type=END --mail-user=${email} --output=${outdir}/logs/queue/2-queuePeakFinding --error=${outdir}/logs/queue/2-queuePeakFinding ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
 #sbatch --parsable --account==dbg_mz --time=10 --mem=500 --job-name="queueFinding_negative" -hold_jid "average" --mail-type=END --mail-user=${email} --output=${outdir}/logs/queue/2-queuePeakFinding --error=${outdir}/logs/queue/2-queuePeakFinding ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
-
-sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error --mail-user=${email} --mail-type=TIME_LIMIT_80,FAIL ${outdir}/jobs/queue/0-queueConversion.sh
 
 doScanmode() {
   echo "$1"
@@ -307,3 +306,5 @@ EOF
 
 doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
 doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
+
+sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error --mail-user=${email} --mail-type=TIME_LIMIT_80,FAIL ${outdir}/jobs/queue/0-queueConversion.sh
