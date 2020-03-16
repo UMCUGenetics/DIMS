@@ -1,4 +1,5 @@
 #!/bin/sh
+#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 set -o pipefail
 set -e
@@ -140,15 +141,31 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 # Clear the environment from any previously loaded modules
 #module purge > /dev/null 2>&1
 
-default="#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL"
-${default}
-
 module load R/3.2.2
+
+# 0-queueConversion.sh
+cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
+#!/bin/sh
+#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+
+job_ids=""
+find ${indir} -iname "*.raw" | sort | while read raw; do
+  input=\$(basename \$raw .raw)
+  echo "#!/bin/sh
+  source /hpc/dbg_mz/tools/mono/etc/profile
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/${input}.sh
+  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/${input}.out --error=${outdir}/logs/0-conversion/${input}.error ${outdir}/jobs/0-conversion/${input}.sh`
+  job_ids+="\${cur_id}:"
+done
+job_ids=\${job_ids::-1}
+
+sbatch --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.out --error=${outdir}/logs/queue/1-queueStart.error ${outdir}/jobs/queue/1-queueStart.sh
+EOF
 
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #!/bin/sh
-${default}
+#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
 find ${outdir}/data -iname "*.mzML" | sort | while read mzML; do
@@ -171,23 +188,6 @@ exit 2
 
 #sbatch --parsable --account==dbg_mz --time=10 --mem=500 --job-name="queueFinding_positive" -hold_jid "average" --mail-type=END --mail-user=${email} --output=${outdir}/logs/queue/2-queuePeakFinding --error=${outdir}/logs/queue/2-queuePeakFinding ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
 #sbatch --parsable --account==dbg_mz --time=10 --mem=500 --job-name="queueFinding_negative" -hold_jid "average" --mail-type=END --mail-user=${email} --output=${outdir}/logs/queue/2-queuePeakFinding --error=${outdir}/logs/queue/2-queuePeakFinding ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
-EOF
-
-
-# 0-queueConversion.sh
-cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
-find ${indir} -iname "*.raw" | sort | while read raw; do
-  input=\$(basename \$raw .raw)
-  job_ids=""
-  echo "#!/bin/sh
-  source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/${input}.sh
-  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/${input}.out --error=${outdir}/logs/0-conversion/${input}.error ${outdir}/jobs/0-conversion/${input}.sh`
-  job_ids+="\${cur_id}:"
-done
-job_ids=\${job_ids::-1}
-
-sbatch --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.out --error=${outdir}/logs/queue/1-queueStart.error ${outdir}/jobs/queue/1-queueStart.sh
 EOF
 
 sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error ${outdir}/jobs/queue/0-queueConversion.sh
