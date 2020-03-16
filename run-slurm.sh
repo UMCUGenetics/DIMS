@@ -229,7 +229,7 @@ for sample in ${outdir}/average_pklist/*${label}* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --parsable -t=1:00:00 --mem=8G -o=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o -e=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable -t=01:00:00 --mem=8G -o=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o -e=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -238,10 +238,10 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
-col_id=\$(sbatch --parsable -t=2:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/5-collectSamples/${scanmode}.o -e=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
+col_id=\$(sbatch --parsable -t=02:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/5-collectSamples/${scanmode}.o -e=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable -t=0:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/3-queuePeakGrouping.o -e=${outdir}/logs/queue/3-queuePeakGrouping.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+sbatch --parsable -t=00:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/3-queuePeakGrouping.o -e=${outdir}/logs/queue/3-queuePeakGrouping.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
   # 3-queuePeakGrouping.sh
@@ -257,7 +257,7 @@ for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${scripts}
   " > ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --parsable -t=2:00:00 --mem=8G -o=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o -e=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable -t=02:00:00 --mem=8G -o=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o -e=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -266,10 +266,10 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
-col_id=\$(sbatch --parsable -t=1:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o -e=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
+col_id=\$(sbatch --parsable -t=01:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o -e=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable -t=0:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/4-queuePeakGroupingRest.o -e=${outdir}/logs/queue/4-queuePeakGroupingRest.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
+sbatch --parsable -t=00:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/4-queuePeakGroupingRest.o -e=${outdir}/logs/queue/4-queuePeakGroupingRest.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
 
   # 4-queuePeakGroupingRest.sh
@@ -285,13 +285,13 @@ for file in ${outdir}/specpks_all_rest/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${scripts}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --parsable -t=1:00:00 --mem=8G -o=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o -e=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --parsable -t=01:00:00 --mem=8G -o=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o -e=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
 
 # start next queue
-sbatch --parsable -t=0:20:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/queue/5-queueFillMissing.o -e=${outdir}/logs/queue/5-queueFillMissing.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
+sbatch --parsable -t=00:20:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/queue/5-queueFillMissing.o -e=${outdir}/logs/queue/5-queueFillMissing.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
@@ -307,7 +307,7 @@ for file in ${outdir}/grouping_rest/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --parsable -t=2:00:00--mem=8G -o=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o -e=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable -t=02:00:00--mem=8G -o=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o -e=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 
@@ -318,7 +318,7 @@ for file in ${outdir}/grouping_hmdb/*_${scanmode}.RData ; do
   echo "#!/bin/sh
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --parsable -t=2:00:00--mem=8G -o=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o -e=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --parsable -t=02:00:00--mem=8G -o=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o -e=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -327,10 +327,10 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} $normalization ${scripts} ${db} ${z_score}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
-col_id=\$(sbatch --parsable -t=1:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o -e=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
+col_id=\$(sbatch --parsable -t=01:00:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o -e=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable -t=0:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/6-queueSumAdducts.o -e=${outdir}/logs/queue/6-queueSumAdducts.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
+sbatch --parsable -t=00:10:00 --mem=1G -d=afterany:\${col_id} -o=${outdir}/logs/queue/6-queueSumAdducts.o -e=${outdir}/logs/queue/6-queueSumAdducts.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
   # 6-queueSumAdducts.sh
@@ -346,7 +346,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} $adducts ${scripts} $z_score
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
-  sbatch --parsable -t=3:00:00 --mem=8G -o=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o -e=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+  sbatch --parsable -t=03:00:00 --mem=8G -o=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o -e=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -355,7 +355,7 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
-col_id=\$(sbatch --parsable -t=0:30:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/12-collectSamplesAdded -e=${outdir}/logs/12-collectSamplesAdded ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
+col_id=\$(sbatch --parsable -t=00:30:00 --mem=8G -d=afterany:\${job_ids} -o=${outdir}/logs/12-collectSamplesAdded -e=${outdir}/logs/12-collectSamplesAdded ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
 if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already queued
   echo other scanmode already queued - queue next step
@@ -364,8 +364,8 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already que
   echo "#!/bin/sh
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${scripts} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
-  exp_id=\$(sbatch --parsable -t=1:00:00 --mem=8G -d=afterany:\${col_id} -o=${outdir}/logs/13-excelExport/exp.o -e=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
-  sbatch --parsable -t=0:10:00 --mem=1G -d=afterany:\${exp_id} -o=${outdir}/logs/14-cleanup.o -e=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
+  exp_id=\$(sbatch --parsable -t=01:00:00 --mem=8G -d=afterany:\${col_id} -o=${outdir}/logs/13-excelExport/exp.o -e=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
+  sbatch --parsable -t=00:10:00 --mem=1G -d=afterany:\${exp_id} -o=${outdir}/logs/14-cleanup.o -e=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
 else
   echo other scanmode not queued yet
   touch ${outdir}/logs/done
