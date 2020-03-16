@@ -140,12 +140,14 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 # Clear the environment from any previously loaded modules
 #module purge > /dev/null 2>&1
 
-default="#!/bin/sh \n#SBATCH --mail-user=${email} \n#SBATCH --mail-type=TIME_LIMIT_80,FAIL"
+default="#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL"
+${default}
 
 module load R/3.2.2
 
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
+#!/bin/sh
 ${default}
 
 job_ids=""
@@ -173,22 +175,22 @@ EOF
 
 
 # 0-queueConversion.sh
+cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 find ${indir} -iname "*.raw" | sort | while read raw; do
-  input=$(basename $raw .raw)
+  input=\$(basename \$raw .raw)
   job_ids=""
-  cat << EOF >> ${outdir}/jobs/0-conversion/${input}.sh
-#!/bin/sh
-source /hpc/dbg_mz/tools/mono/etc/profile
-mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=${raw} -o=${outdir}/data -z -p
+  echo "#!/bin/sh
+  source /hpc/dbg_mz/tools/mono/etc/profile
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} -o=${outdir}/data -z -p" > ${outdir}/jobs/0-conversion/${input}.sh
+  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/${input}.out --error=${outdir}/logs/0-conversion/${input}.error ${outdir}/jobs/0-conversion/${input}.sh`
+  job_ids+="\${cur_id}:"
+done
+job_ids=\${job_ids::-1}
+
+sbatch --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.out --error=${outdir}/logs/queue/1-queueStart.error ${outdir}/jobs/queue/1-queueStart.sh
 EOF
 
-  cur_id=`sbatch --parsable --time=00:05:00 --mem=2G --mail-type=TIME_LIMIT_80,FAIL --mail-user=${email} --output=${outdir}/logs/0-conversion/${input}.out --error=${outdir}/logs/0-conversion/${input}.error ${outdir}/jobs/0-conversion/${input}.sh`
-  job_ids+="${cur_id}:"
-done
-job_ids=${job_ids::-1}
-
-sbatch --time=00:05:00 --mem=1G --dependency=afterok:${job_ids} --mail-type=TIME_LIMIT_80,FAIL --mail-user=${email} --output=${outdir}/logs/last.out ${outdir}/jobs/queue/1-queueStart.sh
-
+sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.out --error=${outdir}/logs/queue/0-queueConversion.error ${outdir}/jobs/queue/0-queueConversion.sh
 
 doScanmode() {
   echo "$1"
