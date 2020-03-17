@@ -241,7 +241,7 @@ Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db}
 col_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping.o --error=${outdir}/logs/queue/3-queuePeakGrouping.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.o --error=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
   # 3-queuePeakGrouping.sh
@@ -269,7 +269,7 @@ Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${scripts
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/4-queuePeakGroupingRest.o --error=${outdir}/logs/queue/4-queuePeakGroupingRest.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/4-queuePeakGroupingRest_${scanmode}.o --error=${outdir}/logs/queue/4-queuePeakGroupingRest_${scanmode}.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
 
   # 4-queuePeakGroupingRest.sh
@@ -291,7 +291,7 @@ done
 job_ids=\${job_ids::-1}
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${job_ids} --output=${outdir}/logs/queue/5-queueFillMissing.o --error=${outdir}/logs/queue/5-queueFillMissing.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${job_ids} --output=${outdir}/logs/queue/5-queueFillMissing_${scanmode}.o --error=${outdir}/logs/queue/5-queueFillMissing_${scanmode}.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
@@ -330,7 +330,7 @@ Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} $normalizatio
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/6-queueSumAdducts.o --error=${outdir}/logs/queue/6-queueSumAdducts.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/6-queueSumAdducts_${scanmode}.o --error=${outdir}/logs/queue/6-queueSumAdducts_${scanmode}.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
   # 6-queueSumAdducts.sh
@@ -355,7 +355,7 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
-  col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded --error=${outdir}/logs/12-collectSamplesAdded ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
+  col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
 if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already queued
   echo other scanmode already queued - queue next step
