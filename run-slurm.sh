@@ -185,7 +185,7 @@ for mzML in ${outdir}/data/*.mzML ; do
   echo "#!/bin/sh
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=\$(sbatch --parsable --time=00:10:00 --mem=2G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.o ${outdir}/jobs/2-DIMS/\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.o ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1} # remove last :
@@ -194,7 +194,7 @@ job_ids=\${job_ids::-1} # remove last :
 echo "#!/bin/sh
 Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
-avg_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
+avg_id=\$(sbatch --parsable --time=00:05:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
 # start next queue
 sbatch --parsable --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.o ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
