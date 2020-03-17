@@ -285,7 +285,7 @@ for file in ${outdir}/specpks_all_rest/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${scripts}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
