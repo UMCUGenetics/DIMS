@@ -185,7 +185,7 @@ for mzML in ${outdir}/data/*.mzML ; do
   echo "#!/bin/sh
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=\$(sbatch --parsable --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.o ${outdir}/jobs/2-DIMS/\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1} # remove last :
@@ -194,11 +194,11 @@ job_ids=\${job_ids::-1} # remove last :
 echo "#!/bin/sh
 Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
-avg_id=\$(sbatch --parsable --time=00:05:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
+avg_id=\$(sbatch --parsable --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
 # start next queue
-sbatch --parsable --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.o ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
-sbatch --parsable --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_negative.e --error=${outdir}/logs/queue/2-queuePeakFinding_negative.e ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.o ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_negative.e --error=${outdir}/logs/queue/2-queuePeakFinding_negative.e ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
 
 # 14-cleanup.sh
@@ -241,7 +241,7 @@ Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db}
 col_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:10:00 --mem=1G --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping.o --error=${outdir}/logs/queue/3-queuePeakGrouping.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping.o --error=${outdir}/logs/queue/3-queuePeakGrouping.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
   # 3-queuePeakGrouping.sh
@@ -269,7 +269,7 @@ Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${scripts
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:10:00 --mem=1G --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/4-queuePeakGroupingRest.o --error=${outdir}/logs/queue/4-queuePeakGroupingRest.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/4-queuePeakGroupingRest.o --error=${outdir}/logs/queue/4-queuePeakGroupingRest.e ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 EOF
 
   # 4-queuePeakGroupingRest.sh
@@ -291,7 +291,7 @@ done
 job_ids=\${job_ids::-1}
 
 # start next queue
-sbatch --parsable --time=00:20:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/queue/5-queueFillMissing.o --error=${outdir}/logs/queue/5-queueFillMissing.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${job_ids} --output=${outdir}/logs/queue/5-queueFillMissing.o --error=${outdir}/logs/queue/5-queueFillMissing.e ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 EOF
 
   # 5-queueFillMissing.sh
@@ -330,7 +330,7 @@ Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} $normalizatio
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
 # start next queue
-sbatch --parsable --time=00:10:00 --mem=1G --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/6-queueSumAdducts.o --error=${outdir}/logs/queue/6-queueSumAdducts.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/6-queueSumAdducts.o --error=${outdir}/logs/queue/6-queueSumAdducts.e ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 EOF
 
   # 6-queueSumAdducts.sh
@@ -365,7 +365,7 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already que
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${scripts} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
   exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_id} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
-  sbatch --parsable --time=00:10:00 --mem=1G --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
+  sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
 else
   echo other scanmode not queued yet
   touch ${outdir}/logs/done
