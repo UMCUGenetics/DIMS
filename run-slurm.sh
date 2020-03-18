@@ -346,7 +346,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} $adducts ${scripts} $z_score
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
-  sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
+  cur_id=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -355,10 +355,10 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
-  col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
+col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
-if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already queued
-  echo other scanmode already queued - queue next step
+if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already finished
+  echo other scanmode already finished - queue next step
 
   # 13-excelExport
   echo "#!/bin/sh
@@ -367,7 +367,7 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes is already que
   exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_id} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
   sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
 else
-  echo other scanmode not queued yet
+  echo other scanmode not finished yet
   touch ${outdir}/logs/done
 fi
 EOF
