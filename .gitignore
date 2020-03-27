@@ -1,3 +1,5 @@
-
 .R*
 .Rproj.user
+
+/tmp
+config.R
