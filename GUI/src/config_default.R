@@ -8,15 +8,15 @@ root2 <- "Y:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects"
 
 # Locations on HPC
 base <- "/hpc/dbg_mz"
-script_dir <- paste0(base, "/production/DIMS")
+script_dir <- paste0(base, "/production/DIMS/pipeline")
 proteowizard <- paste0(base, "/tools/proteowizard_3.0.19252-aa45583de")
 db <- paste0(base, "/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData")
 db2 <- paste0(base, "/tools/db/HMDB_with_info_relevance_IS_C5OH.RData")
 
 ### Default parameters - for lists it defaults to the first one
 run_pipeline <- TRUE  # put on FALSE if you solely want to upload data
-login <- "nvanunen"
-email <- "n.vanunen@umcutrecht.nl"
+login <- ""
+email <- ""
 run_name <- ""
 nrepl <- 3
 normalization <- list("disabled", "total_IS", "total_ident", "total")
