@@ -153,7 +153,7 @@ for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
   source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/data -z -p
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/data -p
   " > ${outdir}/jobs/0-conversion/\${input}.sh
   cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${outdir}/jobs/0-conversion/\${input}.sh)
   job_ids+="\${cur_id}:"

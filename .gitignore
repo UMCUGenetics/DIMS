@@ -1,5 +1,11 @@
 .R*
 .Rproj.user
 
-/tmp
-config.R
+#gui
+GUI/tmp
+GUI/config.R
+
+#post
+post/input/*
+post/output/*
+post/results/*
