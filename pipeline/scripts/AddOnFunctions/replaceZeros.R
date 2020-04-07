@@ -11,7 +11,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   source(paste(scriptDir, "AddOnFunctions/sourceDir.R", sep="/"))
   sourceDir(paste(scriptDir, "AddOnFunctions", sep="/"))
   
-  dir.create(paste(outdir, "samplePeaksFilled", sep="/"), showWarnings = FALSE)
+  dir.create(paste(outdir, "9-samplePeaksFilled", sep="/"), showWarnings = FALSE)
   
   # int.factor=1*10^5 # Number of x used to calc area under Gaussian (is not analytic)
   # scale=2 # Initial value used to estimate scaling parameter
@@ -100,5 +100,5 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   #############################################################################################
   
   # message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
-  save(final.outlist.idpat3, file=paste(outdir, "/samplePeaksFilled/", name, sep=""))
+  save(final.outlist.idpat3, file=paste(outdir, "/9-samplePeaksFilled/", name, sep=""))
 }

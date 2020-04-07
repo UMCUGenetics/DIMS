@@ -8,7 +8,7 @@ sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmo
   #scanmode <- "negative"
   #z_score <- 0
   
-  dir.create(paste(outdir, "adductSums", sep="/"), showWarnings = FALSE)
+  dir.create(paste(outdir, "11-adductSums", sep="/"), showWarnings = FALSE)
 
   hmdb_codes <- rownames(theor.MZ)
   hmdb_names <- theor.MZ[,1, drop=FALSE]
@@ -79,7 +79,7 @@ sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmo
     if (!is.null(adductsum)){ 
       rownames(adductsum)=names
       adductsum = cbind(adductsum, "HMDB_name"=names_long)
-      save(adductsum, file=paste(outdir, "adductSums", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
+      save(adductsum, file=paste(outdir, "11-adductSums", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
     }
   }  
 }

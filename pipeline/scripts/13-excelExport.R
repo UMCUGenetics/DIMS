@@ -2,11 +2,14 @@
 
 .libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2")
 
-cat("Start excelExport.R")
-cat("==> reading arguments:\n", sep = "")
+# load required packages 
+library("ggplot2")
+library("reshape2")
+library("openxlsx")
+library("loder")
 
+# define parameters 
 cmd_args = commandArgs(trailingOnly = TRUE)
-
 for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
@@ -28,10 +31,6 @@ source("AddOnFunctions/plotBoxPlot.R")
 source("AddOnFunctions/getPatients.R")
 setwd(outdir)
 
-library("ggplot2")
-library("reshape2")
-library("openxlsx")
-library("loder")
 
 plotdir <- "plots/adducts"
 sub <- 20000
@@ -82,7 +81,7 @@ if (z_score == 1) {
       cell_dim <- img_dim*imagesize_multiplier
       setColWidths(wb, filelist, cols = 1, widths = cell_dim[2]/20)
     }
-  
+    
     insertImage(wb, filelist, file_png, startRow = irow+1, startCol = 1, height = cell_dim[1], width = cell_dim[2], units = "px")
     if (irow %% 100 == 0) {
       cat(paste("\nat row:",irow))

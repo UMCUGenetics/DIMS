@@ -68,6 +68,6 @@ groupingRest <- function(outdir, fileIn, scanmode, ppm=2) {
   
   #save(outpgrlist_part, file=paste(outdir, paste(scanmode, "_", mzstart, "_", mzend, ".RData", sep=""), sep="/"))
   # save(final.outlist.filt, file=paste(outdir, "peak_grouping", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
-  save(outpgrlist, file=paste(outdir, "grouping_rest", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
+  save(outpgrlist, file=paste(outdir, "8-grouping_rest", paste(scanmode, "_",batch,".RData", sep=""), sep="/"))
   
 }
