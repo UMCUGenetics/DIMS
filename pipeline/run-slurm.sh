@@ -126,7 +126,7 @@ mkdir -p ${outdir}/logs/0-conversion
 mkdir -p ${outdir}/jobs/0-conversion
 mkdir -p ${outdir}/logs/queue
 mkdir -p ${outdir}/jobs/queue
-mkdir -p ${outdir}/data
+mkdir -p ${outdir}/1-data
 
 cp ${indir}/settings.config ${outdir}/logs
 cp ${indir}/init.RData ${outdir}/logs
@@ -153,7 +153,7 @@ for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
   source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/data -p
+  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/1-data -p
   " > ${outdir}/jobs/0-conversion/\${input}.sh
   cur_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${outdir}/jobs/0-conversion/\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -171,7 +171,7 @@ cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 
 job_ids=""
 
-for mzML in ${outdir}/data/*.mzML ; do
+for mzML in ${outdir}/1-data/*.mzML ; do
   input=\$(basename \$mzML .mzML)
   if [ ! -v break_id ] ; then
     # 1-generateBreaksFwhm.HPC.R
@@ -224,7 +224,7 @@ cat << EOF >> ${outdir}/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-for sample in ${outdir}/average_pklist/*${label}* ; do
+for sample in ${outdir}/3-average_pklist/*${label}* ; do
   input=\$(basename \$sample .RData)
 
   # 4-peakFinding.R
@@ -252,7 +252,7 @@ cat << EOF >> ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
+for hmdb in ${outdir}/5-hmdb_part/${scanmode}_* ; do
   input=\$(basename \$hmdb .RData)
 
   # 6-peakGrouping
@@ -280,7 +280,7 @@ cat << EOF >> ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-for file in ${outdir}/specpks_all_rest/${scanmode}_* ; do
+for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
   input=\$(basename \$file .RData)
 
   # 8-peakGrouping.rest
@@ -302,7 +302,7 @@ cat << EOF >> ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-for file in ${outdir}/grouping_rest/${scanmode}_* ; do
+for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   input=\$(basename \$file .RData)
 
   # 9-runFillMissing.R part 1
@@ -313,7 +313,7 @@ for file in ${outdir}/grouping_rest/${scanmode}_* ; do
   job_ids+="\${cur_id}:"
 done
 
-for file in ${outdir}/grouping_hmdb/*_${scanmode}.RData ; do
+for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
   input=\$(basename \$file .RData)
 
   # 9-runFillMissing.R part 2
@@ -341,7 +341,7 @@ cat << EOF >> ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 #SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
 
 job_ids=""
-for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
+for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
   input=\$(basename \$hmdb .RData)
 
   # 11-runSumAdducts
