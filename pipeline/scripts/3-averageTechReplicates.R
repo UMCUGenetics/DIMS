@@ -69,7 +69,7 @@ for (i in 1:length(repl.pattern)) {
   n_neg=0
   for (j in 1:length(tech_reps)) {
     load(paste(paste(outdir, "2-pklist/", sep="/"), tech_reps[j], ".RData", sep=""))
-    cat("Parsing", tech_reps[j], "\n")
+    cat("\n\nParsing", tech_reps[j])
     # load(paste(paste(outdir, "pklist/", sep="/"), "RES_PL_20170220_0146", ".RData", sep=""))
     
     cat("\n\tNegative pklist sum",sum(pklist$neg[,1]))
