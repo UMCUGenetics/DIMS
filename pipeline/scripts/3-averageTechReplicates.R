@@ -6,7 +6,7 @@
 # none 
 
 # define parameters 
-cmd_args = commandArgs(trailingOnly = TRUE)
+cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 indir <- cmd_args[1]

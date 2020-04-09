@@ -9,17 +9,11 @@ suppressPackageStartupMessages(library("xcms"))
 cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-filepath <- cmd_args[1]
-outdir <- cmd_args[2] 
-trim <- as.numeric(cmd_args[3])
-resol <- as.numeric(cmd_args[4])
-nrepl <- as.numeric(cmd_args[5])
-
-#filepath <- "/Users/nunen/Documents/Metab/raw_data/test_mzXML/RES_DBS_20180716_01.mzXML"
-#outdir <- "/Users/nunen/Documents/Metab/3.6.2"
-#trim <- 0.1
-#resol <- 140000
-#nrepl <- 3
+filepath <- cmd_args[1] #"/Users/nunen/Documents/Metab/raw_data/test_mzXML/RES_DBS_20180716_01.mzXML"
+outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
+trim <- as.numeric(cmd_args[3]) #0.1
+resol <- as.numeric(cmd_args[4]) #14000
+nrepl <- as.numeric(cmd_args[5]) #3
 
 trimLeft=NULL
 trimRight=NULL

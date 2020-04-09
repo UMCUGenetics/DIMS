@@ -17,6 +17,8 @@ verbose=0
 restart=0
 indir=""
 outdir=""
+rscript="/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript" #temp
+ppm=2 #temp
 
 # Show usage information
 function show_help() {
@@ -238,7 +240,7 @@ job_ids=\${job_ids::-1}
 
 # 5-collectSamples.R
 echo "#!/bin/sh
-Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db}
+Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
@@ -257,7 +259,7 @@ for hmdb in ${outdir}/5-hmdb_part/${scanmode}_* ; do
 
   # 6-peakGrouping
   echo "#!/bin/sh
-  Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${scripts}
+  Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --output=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o --error=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -266,7 +268,7 @@ job_ids=\${job_ids::-1}
 
 # 7-collectSamplesGroupedHMDB
 echo "#!/bin/sh
-Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${scripts}
+Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
 " > ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
@@ -285,7 +287,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
 
   # 8-peakGrouping.rest
   echo "#!/bin/sh
-  Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${scripts}
+  Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -307,7 +309,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
 
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
-  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -346,7 +348,7 @@ for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
 
   # 11-runSumAdducts
   echo "#!/bin/sh
-  Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} $adducts ${scripts} $z_score
+  Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -364,7 +366,7 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already fi
 
   # 13-excelExport
   echo "#!/bin/sh
-  /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${scripts} ${z_score}
+  /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
   exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_id} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
   sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh

@@ -6,7 +6,7 @@
 # none 
 
 # define parameters 
-cmd_args = commandArgs(trailingOnly = TRUE)
+cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 filepath <- cmd_args[1]
@@ -14,9 +14,14 @@ outdir <- cmd_args[2]
 scanmode <- cmd_args[3]
 thresh <- as.numeric(cmd_args[4])
 resol <- as.numeric(cmd_args[5])
+scripts <- cmd_args[6]
 
 # create output folder
 dir.create(paste(outdir, "4-specpks", sep="/"),showWarnings = F)
+
+# load in function scripts
+source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
+sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
 
 load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 load(filepath)

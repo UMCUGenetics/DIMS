@@ -9,17 +9,11 @@ suppressPackageStartupMessages(library("xcms"))
 cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
-filepath <- cmd_args[1]
-outdir <- cmd_args[2]
-trim <- as.numeric(cmd_args[3])
-dimsThresh <- as.numeric(cmd_args[4])
-resol <- as.numeric(cmd_args[5])
-
-#filepath <- "/Users/nunen/Documents/Metab/raw_data/test_mzXML/RES_DBS_20180716_01.mzXML"
-#outdir <- "/Users/nunen/Documents/Metab/3.6.2"
-#trim <- 0.1
-#dimsThresh <- 100
-#resol <- 140000
+filepath <- cmd_args[1] #"/Users/nunen/Documents/Metab/raw_data/test_mzXML/RES_DBS_20180716_01.mzXML"
+outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
+trim <- as.numeric(cmd_args[3]) #0.1
+dimsThresh <- as.numeric(cmd_args[4]) #100
+resol <- as.numeric(cmd_args[5]) #140000
 
 dir.create(paste(outdir, "2-pklist", sep = "/"), showWarnings = F)
 #dir.create(paste(outdir, "QC", sep="/"),showWarnings = F)

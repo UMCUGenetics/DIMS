@@ -6,7 +6,7 @@
 # none 
 
 # define parameters 
-cmd_args = commandArgs(trailingOnly = TRUE)
+cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) cat("  ", arg, "\n", sep="")
 
 file <- cmd_args[1]
@@ -26,5 +26,8 @@ scripts <- cmd_args[6]
 
 #message(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
 
-source(paste(scripts, "AddOnFunctions/replaceZeros.R", sep="/"))
+# load in function scripts
+source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
+sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
+
 replaceZeros(file,scanmode,resol,outdir,thresh,scripts)
