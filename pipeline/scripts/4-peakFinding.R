@@ -26,8 +26,7 @@ sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
 load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 load(filepath)
 
-sampname <- sub('\\..*$', '', basename(filepath))
-print(sampname)
+sampname <- outlist.persample[[1,1]]
 
 #  install.packages("Cairo", lib ="/hpc/local/CentOS6/dbg_mz/R-3.1.2/library")
 #  library( "yourLibrary", lib.loc = "/hpc/local/osversion/group/path" )

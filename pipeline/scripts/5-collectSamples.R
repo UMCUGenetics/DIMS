@@ -24,7 +24,7 @@ indir <- paste(outdir, "4-specpks", sep = "/")
 object.files = list.files(indir, full.names=TRUE, pattern="*.RData")
 
 for (i in 1:length(groupNames)) {
-  group <- paste0(indir, paste0(paste(groupNames[i], scanmode, sep = "_"), ".RData"))
+  group <- paste0(indir, "/", paste(paste(groupNames[i], scanmode, sep = "_"), ".RData"))
   if (!(group %in% object.files)) {
     notRun = c(notRun, group)
   }
