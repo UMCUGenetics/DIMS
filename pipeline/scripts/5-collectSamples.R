@@ -68,7 +68,7 @@ save(outlist.tot, file = paste(outdir_specpks, paste(scanmode, "RData", sep = ".
 
 # cut HMDB ##########################################################################################################################################
 load(db)
-outdir_hmdb <- paste(outdir, "hmdb_part", sep = "/")
+outdir_hmdb <- paste(outdir, "5-hmdb_part", sep = "/")
 dir.create(outdir_hmdb, showWarnings = FALSE)
 load(paste(outdir, "breaks.fwhm.RData", sep = "/"))
 
