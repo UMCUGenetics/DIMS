@@ -114,14 +114,3 @@ if (check==dim(outlist)[1]){
 } else {
   cat("Check is failed!\n")
 }
-
-cat("Start collectSamplesGroupedHMDB.R")
-cat("==> reading arguments:\n", sep = "")
-
-cmd_args = commandArgs(trailingOnly = TRUE)
-
-for (arg in cmd_args) cat("  ", arg, "\n", sep="")
-
-run(cmd_args[1], cmd_args[2], as.numeric(cmd_args[3]))
-
-cat("Ready collectSamplesGroupedHMDB.R")
