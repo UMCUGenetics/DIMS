@@ -34,7 +34,7 @@ height=768
 
 ### fit Gaussian estimate mean and integrate to obtain intensity
 findPeaks.Gauss.HPC <- function(plist, breaks.fwhm, int.factor, scale, resol, outdir, scanmode, plot, thresh, width, height) {
-  sampname <- colnames(pklist)[1]
+  sampname <- colnames(plist)[1]
   
   range = as.vector(plist)
   names(range) = rownames(plist)
