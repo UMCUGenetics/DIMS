@@ -35,7 +35,6 @@ load(paste(outdir, "5-specpks_all", paste(scanmode, "RData", sep="."), sep="/"))
 # Make a list of indexes of peaks that have been identified, then remove these from the peaklist.
 remove = NULL
 for (i in 1:length(files)) {
-  message(files[i])
   load(files[i]) #outlist.grouped
   remove = c(remove, which(outlist.tot[,"mzmed.pkt"] %in% outlist.grouped[,"mzmed.pkt"]))
 }
@@ -106,16 +105,14 @@ if(!is.null(outlist_i_min_1)){
 }
 
 outlist_i_min_1=outlist_i
-cat(paste("Process", i+2-1,":", dim(outlist_i_min_1)[1]))
+cat("Process", i+2-1,":", dim(outlist_i_min_1)[1], "\n")
 save(outlist_i_min_1, file=paste(outdir, paste(scanmode, paste("outlist_i_min_1",i+1,"RData", sep="."), sep="_"), sep="/"))
+
 check=check+dim(outlist_i_min_1)[1]
-
 if (check==dim(outlist)[1]){
-  cat(paste("Check is oke!"))
+  cat("Check is oke!\n")
 } else {
-  cat(paste("Check is failed!"))
-}
-
+  cat("Check is failed!\n")
 }
 
 cat("Start collectSamplesGroupedHMDB.R")
