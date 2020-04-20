@@ -23,7 +23,7 @@ load(paste0(outdir, "/repl.pattern.",scanmode, ".RData"))
 adducts=as.vector(unlist(strsplit(adducts, ",",fixed = TRUE)))
 
 load(file)
-load(paste(outdir, "/10-outlist_identified_", scanmode, ".RData", sep=""))
+load(paste(outdir, "/outlist_identified_", scanmode, ".RData", sep=""))
 
 # Local and on HPC
 batch = strsplit(file, "/",fixed = TRUE)[[1]]

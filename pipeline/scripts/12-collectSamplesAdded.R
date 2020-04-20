@@ -21,4 +21,4 @@ for (i in 1:length(object.files)) {
   outlist.tot = rbind(outlist.tot, adductsum)
 }
 
-save(outlist.tot, file=paste0(outdir, "/12-adductSums_", scanmode, ".RData"))
+save(outlist.tot, file=paste0(outdir, "/adductSums_", scanmode, ".RData"))
