@@ -309,7 +309,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
 
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
-  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol}
+  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"

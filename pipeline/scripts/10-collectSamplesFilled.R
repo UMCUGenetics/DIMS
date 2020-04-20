@@ -94,9 +94,9 @@ outlist.ident$theormz_noise=as.numeric(outlist.ident$theormz_noise)
 save(outlist.not.ident, outlist.ident, file=paste(outdir, "/outlist_identified_", scanmode, ".RData", sep=""))
 
 # cut HMDB ##########################################################################################################################################
+load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 outdir <- paste(outdir, "10-hmdb_part_adductSums", sep="/")
 dir.create(outdir, showWarnings = FALSE)
-load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 
 # filter mass range meassured!!!
 HMDB_add_iso = HMDB_add_iso[which(HMDB_add_iso[,label]>=breaks.fwhm[1] & HMDB_add_iso[,label]<=breaks.fwhm[length(breaks.fwhm)]),]
