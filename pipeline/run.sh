@@ -145,15 +145,18 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 
 module load R/3.2.2
 
+sbatch="#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80"
+
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
   echo "#!/bin/sh
+  ${sbatch}
   source /hpc/dbg_mz/tools/mono/etc/profile
   mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/1-data -p
   " > ${outdir}/jobs/0-conversion/\${input}.sh
@@ -169,7 +172,7 @@ EOF
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 
@@ -178,6 +181,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
   if [ ! -v break_id ] ; then
     # 1-generateBreaksFwhm.HPC.R
     echo "#!/bin/sh
+    ${sbatch}
     Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
     " > ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh
     break_id=\$(sbatch --parsable --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.o --error=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.e ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
@@ -185,7 +189,8 @@ for mzML in ${outdir}/1-data/*.mzML ; do
 
   # 2-DIMS.R
   echo "#!/bin/sh
-  /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
+  ${sbatch}
+  ${rscript} ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
   cur_id=\$(sbatch --parsable --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -194,6 +199,7 @@ job_ids=\${job_ids::-1} # remove last :
 
 # 3-averageTechReplicates.R
 echo "#!/bin/sh
+${sbatch}
 Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
 avg_id=\$(sbatch --parsable --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
@@ -224,7 +230,7 @@ doScanmode() {
   # 2-queuePeakFinding.sh
 cat << EOF >> ${outdir}/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for sample in ${outdir}/3-average_pklist/*${label}* ; do
@@ -232,6 +238,7 @@ for sample in ${outdir}/3-average_pklist/*${label}* ; do
 
   # 4-peakFinding.R
   echo "#!/bin/sh
+  ${sbatch}
   Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --output=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o --error=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
@@ -241,6 +248,7 @@ job_ids=\${job_ids::-1}
 
 # 5-collectSamples.R
 echo "#!/bin/sh
+${sbatch}
 Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=04:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
@@ -252,7 +260,7 @@ EOF
   # 3-queuePeakGrouping.sh
 cat << EOF >> ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for hmdb in ${outdir}/5-hmdb_part/${scanmode}_* ; do
@@ -269,6 +277,7 @@ job_ids=\${job_ids::-1}
 
 # 7-collectSamplesGroupedHMDB
 echo "#!/bin/sh
+${sbatch}
 Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
 " > ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
@@ -280,7 +289,7 @@ EOF
   # 4-queuePeakGroupingRest.sh
 cat << EOF >> ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
@@ -288,6 +297,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
 
   # 8-peakGrouping.rest
   echo "#!/bin/sh
+  ${sbatch}
   Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
@@ -302,7 +312,7 @@ EOF
   # 5-queueFillMissing.sh
 cat << EOF >> ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
@@ -310,9 +320,10 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
 
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
+  ${sbatch}
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --parsable --time=01:00:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 
@@ -321,15 +332,17 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
 
   # 9-runFillMissing.R part 2
   echo "#!/bin/sh
+  ${sbatch}
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --parsable --time=01:00:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --parsable --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
 
 # 10-collectSamplesFilled
 echo "#!/bin/sh
+${sbatch}
 Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} $normalization ${scripts} ${db} ${z_score}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
@@ -341,7 +354,7 @@ EOF
   # 6-queueSumAdducts.sh
 cat << EOF >> ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
+${sbatch}
 
 job_ids=""
 for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
@@ -349,6 +362,7 @@ for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
 
   # 11-runSumAdducts
   echo "#!/bin/sh
+  ${sbatch}
   Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
@@ -358,6 +372,7 @@ job_ids=\${job_ids::-1}
 
 # 12-collectSamplesAdded
 echo "#!/bin/sh
+${sbatch}
 Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
@@ -369,7 +384,8 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already fi
 
   # 13-excelExport
   echo "#!/bin/sh
-  /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
+  ${sbatch}
+  ${rscript} ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
   exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_ids} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
   sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
