@@ -51,3 +51,22 @@ OPTIONAL ARGS:
 EXAMPLE:
   sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$
 ```
+
+Input folder requirements:
+- all the .raw files 
+- init.RData, which contains which technical replicates belong to which biological sample 
+- a 'setting.config' file containing eg:
+```thresh_pos=2000
+thresh_neg=2000
+dims_thresh=100
+trim=0.1
+nrepl=3
+normalization=disabled
+thresh2remove=1000000000
+resol=140000
+email=example@example.com
+matrix=DBS
+proteowizard=/hpc/dbg_mz/tools/proteowizard_3.0.19252-aa45583de
+db=/hpc/dbg_mz/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
+db2=/hpc/dbg_mz/tools/db/HMDB_with_info_relevance_IS_C5OH.RData
+z_score=1```
