@@ -312,7 +312,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   echo "#!/bin/sh
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --parsable --time=01:00:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 
@@ -323,7 +323,7 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
   echo "#!/bin/sh
   Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --parsable --time=01:00:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
