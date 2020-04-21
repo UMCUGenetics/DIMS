@@ -148,7 +148,7 @@ module load R/3.2.2
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for raw in ${indir}/*.raw ; do
@@ -169,7 +169,7 @@ EOF
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 
@@ -210,6 +210,7 @@ chmod 777 -R ${indir}
 chmod 777 -R ${outdir}
 
 echo "$outdir" | mail -s "DIMS run $name - FINISHED" $email
+sleep 3s
 EOF
 
 doScanmode() {
@@ -223,7 +224,7 @@ doScanmode() {
   # 2-queuePeakFinding.sh
 cat << EOF >> ${outdir}/jobs/queue/2-queuePeakFinding_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for sample in ${outdir}/3-average_pklist/*${label}* ; do
@@ -251,7 +252,7 @@ EOF
   # 3-queuePeakGrouping.sh
 cat << EOF >> ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for hmdb in ${outdir}/5-hmdb_part/${scanmode}_* ; do
@@ -279,7 +280,7 @@ EOF
   # 4-queuePeakGroupingRest.sh
 cat << EOF >> ${outdir}/jobs/queue/4-queuePeakGroupingRest_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
@@ -301,7 +302,7 @@ EOF
   # 5-queueFillMissing.sh
 cat << EOF >> ${outdir}/jobs/queue/5-queueFillMissing_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
@@ -340,7 +341,7 @@ EOF
   # 6-queueSumAdducts.sh
 cat << EOF >> ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 #!/bin/sh
-#SBATCH --mail-user=${email}, --mail-type=TIME_LIMIT_80,FAIL
+#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80
 
 job_ids=""
 for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
@@ -362,17 +363,19 @@ Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
 if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already finished
-  echo other scanmode already finished - queue next step
+  echo other scanmode already finished queueing - queue next step
+  prev_col_id=`cat ${outdir}/logs/done`
+  col_ids="${prev_col_id}:${col_id}"
 
   # 13-excelExport
   echo "#!/bin/sh
   /hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
-  exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_id} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
+  exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_ids} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
   sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
 else
   echo other scanmode not finished yet
-  touch ${outdir}/logs/done
+  echo \${col_id} > ${outdir}/logs/done
 fi
 EOF
 }
@@ -380,4 +383,4 @@ EOF
 doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
 doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
 
-sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e --mail-user=${email} --mail-type=TIME_LIMIT_80,FAIL ${outdir}/jobs/queue/0-queueConversion.sh
+sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 ${outdir}/jobs/queue/0-queueConversion.sh
