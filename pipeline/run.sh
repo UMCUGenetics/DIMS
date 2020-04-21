@@ -145,7 +145,7 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 
 module load R/3.2.2
 
-sbatch="#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80"
+sbatch="#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80, --export=NONE"
 
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
