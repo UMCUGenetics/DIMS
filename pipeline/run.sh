@@ -379,8 +379,8 @@ col_id=\$(sbatch --parsable --time=00:30:00 --mem=8G --dependency=afterany:\${jo
 
 if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already finished
   echo other scanmode already finished queueing - queue next step
-  prev_col_id=\${cat ${outdir}/logs/done}
-  col_ids="${prev_col_id}:${col_id}"
+  prev_col_id=\$(cat ${outdir}/logs/done)
+  col_ids="\${prev_col_id}:\${col_id}"
 
   # 13-excelExport
   echo "#!/bin/sh
