@@ -243,7 +243,7 @@ job_ids=\${job_ids::-1}
 echo "#!/bin/sh
 Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
-col_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
+col_id=\$(sbatch --parsable --time=04:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # start next queue
 sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.o --error=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
