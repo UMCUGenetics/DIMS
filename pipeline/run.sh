@@ -207,8 +207,8 @@ Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thres
 avg_id=\$(sbatch --parsable --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.o ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_negative.e --error=${outdir}/logs/queue/2-queuePeakFinding_negative.e ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.e ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_negative.o --error=${outdir}/logs/queue/2-queuePeakFinding_negative.e ${outdir}/jobs/queue/2-queuePeakFinding_negative.sh
 EOF
 
 # 14-cleanup.sh
@@ -283,15 +283,15 @@ echo "#!/bin/sh
 ${sbatch}
 Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
-hmdb_id_1=\$(sbatch --parsable --time=03:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${outdir}/jobs/hmdb_part/${scanmode}.sh))
+hmdb_id_1=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${outdir}/jobs/hmdb_part/${scanmode}.sh)
 echo ${hmdb_id_1} > ${outdir}/logs/hmdb_1
 
 # hmdb_part_adductSums.R
 echo "#!/bin/sh
 ${sbatch}
-Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db}
-" > ${outdir}/jobs/hmdb_part/${scanmode}.sh
-hmdb_id_2=\$(sbatch --parsable --time=03:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh))
+Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
+" > ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh
+hmdb_id_2=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh)
 echo ${hmdb_id_2} > ${outdir}/logs/hmdb_2
 
 # start next queue
