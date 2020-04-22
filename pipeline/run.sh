@@ -215,6 +215,29 @@ cat << EOF >> ${outdir}/jobs/14-cleanup.sh
 chmod 777 -R ${indir}
 chmod 777 -R ${outdir}
 
+# send mail that run is finished, including contents of non-empty .e files
+msg="Output can be found at: <i>${outdir}</i><br>"
+msg+="<hr>"
+msg+="Possible errors (only showing first 10 lines per file):<br>"
+msg+="<p>"
+for x in \$(find ${outdir}/logs -name "*.e" -not -empty | sort); do
+  msg+="<b>\${x}</b><br>"
+  msg+=$(head \${x})
+  msg+="<br><br>"
+done
+msg+="</p>"
+
+echo \$msg > ${outdir}/logs/mail.html
+
+(
+echo "To: ${email}";
+echo "Subject: DIMS RUN ${name} - FINISHED";
+echo "Content-Type: text/html";
+echo "MIME-Version: 1.0";
+echo "";
+echo "\${msg}";
+) | sendmail -t
+
 echo "$outdir" | mail -s "DIMS run $name - FINISHED" $email
 sleep 3s
 EOF
@@ -390,7 +413,7 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already fi
   exp_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${col_ids} --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${outdir}/jobs/13-excelExport.sh)
   sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${exp_id} --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${outdir}/jobs/14-cleanup.sh
 else
-  echo other scanmode not finished yet
+  echo other scanmode not queued yet, not yet queueing next step
   echo \${col_id} > ${outdir}/logs/done
 fi
 EOF
