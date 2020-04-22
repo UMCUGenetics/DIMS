@@ -222,7 +222,7 @@ msg+="Possible errors (only showing first 10 lines per file):<br>"
 msg+="<p>"
 for x in \$(find ${outdir}/logs -name "*.e" -not -empty | sort); do
   msg+="<b>\${x}</b><br>"
-  msg+=$(head \${x})
+  msg+=\$(head \${x})
   msg+="<br><br>"
 done
 msg+="</p>"
