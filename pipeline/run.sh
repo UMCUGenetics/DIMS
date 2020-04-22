@@ -94,7 +94,9 @@ declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "10-collectSamplesFilled" \
                      "11-runSumAdducts" \
                      "12-collectSamplesAdded" \
-                     "13-excelExport" )
+                     "13-excelExport" \
+                     "hmdb_part" \
+                     "hmdb_part_adductSums" )
 
 
 # Check existence input dir
@@ -145,7 +147,7 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 
 module load R/3.2.2
 
-sbatch="#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80, --export=NONE"
+sbatch="#SBATCH --mail-user=${email}, --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80, --export=NONE, --account=dbg_mz"
 
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
@@ -272,12 +274,28 @@ job_ids=\${job_ids::-1}
 # 5-collectSamples.R
 echo "#!/bin/sh
 ${sbatch}
-Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode} ${db} ${ppm}
+Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
-col_id=\$(sbatch --parsable --time=04:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
+col_id=\$(sbatch --parsable --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
+
+# hmdb_part.R
+echo "#!/bin/sh
+${sbatch}
+Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
+" > ${outdir}/jobs/hmdb_part/${scanmode}.sh
+hmdb_id_1=\$(sbatch --parsable --time=03:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${outdir}/jobs/hmdb_part/${scanmode}.sh))
+echo ${hmdb_id_1} > ${outdir}/logs/hmdb_1
+
+# hmdb_part_adductSums.R
+echo "#!/bin/sh
+${sbatch}
+Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db}
+" > ${outdir}/jobs/hmdb_part/${scanmode}.sh
+hmdb_id_2=\$(sbatch --parsable --time=03:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh))
+echo ${hmdb_id_2} > ${outdir}/logs/hmdb_2
 
 # start next queue
-sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id} --output=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.o --error=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
+sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id}:\${hmdb_id_1}:\${hmdb_id_2} --output=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.o --error=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 EOF
 
   # 3-queuePeakGrouping.sh
@@ -286,7 +304,7 @@ cat << EOF >> ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
 ${sbatch}
 
 job_ids=""
-for hmdb in ${outdir}/5-hmdb_part/${scanmode}_* ; do
+for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
   input=\$(basename \$hmdb .RData)
 
   # 6-peakGrouping
@@ -366,7 +384,7 @@ job_ids=\${job_ids::-1}
 # 10-collectSamplesFilled
 echo "#!/bin/sh
 ${sbatch}
-Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} $normalization ${scripts} ${db} ${z_score}
+Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
 col_id=\$(sbatch --parsable --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
@@ -380,7 +398,7 @@ cat << EOF >> ${outdir}/jobs/queue/6-queueSumAdducts_${scanmode}.sh
 ${sbatch}
 
 job_ids=""
-for hmdb in ${outdir}/10-hmdb_part_adductSums/${scanmode}_* ; do
+for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   input=\$(basename \$hmdb .RData)
 
   # 11-runSumAdducts
@@ -422,4 +440,4 @@ EOF
 doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
 doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
 
-sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 ${outdir}/jobs/queue/0-queueConversion.sh
+sbatch --time=00:05:00 --mem=1G --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --account=dbg_mz ${outdir}/jobs/queue/0-queueConversion.sh
