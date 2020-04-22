@@ -19,7 +19,7 @@ hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_releva
 z_score <- as.numeric(cmd_args[5])
 
 plot <- TRUE
-init <- "logs/init.RData"
+init <- paste0(outdir, "/logs/init.RData")
 export <- TRUE
 control_label <- "C"
 case_label <- "P"
