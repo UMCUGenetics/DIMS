@@ -43,7 +43,7 @@ load(paste0(outdir,"/adductSums_positive.RData"))
 outlist.pos.adducts.HMDB <- outlist.tot
 rm(outlist.tot)
 
-# Only continue with patients (columns) that are in both pos and neg
+# Only continue with patients (columns) that are in both pos and neg, so patients that are in both
 tmp <- intersect(colnames(outlist.neg.adducts.HMDB), colnames(outlist.pos.adducts.HMDB))
 outlist.neg.adducts.HMDB <- outlist.neg.adducts.HMDB[,tmp]
 outlist.pos.adducts.HMDB <- outlist.pos.adducts.HMDB[,tmp]
@@ -53,7 +53,7 @@ index.neg <- which(rownames(outlist.neg.adducts.HMDB) %in% rownames(outlist.pos.
 index.pos <- which(rownames(outlist.pos.adducts.HMDB) %in% rownames(outlist.neg.adducts.HMDB))
 
 # Get number of columns
-# Only continue with HMDB codes (rows) that were found in both pos and neg mode and remove last column
+# Only continue with HMDB codes (rows) that were found in both pos and neg mode and remove last column (hmdb_name)
 tmp.pos <- outlist.pos.adducts.HMDB[rownames(outlist.pos.adducts.HMDB)[index.pos], 1:(dim(outlist.pos.adducts.HMDB)[2]-1)]
 tmp.hmdb_name.pos <- outlist.pos.adducts.HMDB[rownames(outlist.pos.adducts.HMDB)[index.pos], dim(outlist.pos.adducts.HMDB)[2]]
 tmp.pos.left <- outlist.pos.adducts.HMDB[-index.pos,]
@@ -155,7 +155,7 @@ if (z_score == 1) {
     
     intensities <- setNames(intensities, labels)
     
-    plot_width <- length(labels) * 12 + 90
+    plot_width <- length(labels) * 16 + 90
     
     plot.new()
     if (export) {

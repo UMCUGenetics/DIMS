@@ -214,8 +214,6 @@ EOF
 # 14-cleanup.sh
 cat << EOF >> ${outdir}/jobs/14-cleanup.sh
 #!/bin/sh
-chmod 777 -R ${indir}
-chmod 777 -R ${outdir}
 
 # send mail that run is finished, including contents of non-empty .e files
 msg="Output can be found at: <i>${outdir}</i><br>"
@@ -240,8 +238,9 @@ echo "";
 echo "\${msg}";
 ) | sendmail -t
 
-echo "$outdir" | mail -s "DIMS run $name - FINISHED" $email
-sleep 3s
+# chmod everything
+chmod 777 -R ${indir}
+chmod 777 -R ${outdir}
 EOF
 
 doScanmode() {
@@ -284,7 +283,7 @@ ${sbatch}
 Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
 hmdb_id_1=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${outdir}/jobs/hmdb_part/${scanmode}.sh)
-echo ${hmdb_id_1} > ${outdir}/logs/hmdb_1
+echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
 
 # hmdb_part_adductSums.R
 echo "#!/bin/sh
@@ -292,7 +291,7 @@ ${sbatch}
 Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
 " > ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh
 hmdb_id_2=\$(sbatch --parsable --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh)
-echo ${hmdb_id_2} > ${outdir}/logs/hmdb_2
+echo "${hmdb_id_2}" > ${outdir}/logs/hmdb_2
 
 # start next queue
 sbatch --parsable --time=00:05:00 --mem=500M --dependency=afterany:\${col_id}:\${hmdb_id_1}:\${hmdb_id_2} --output=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.o --error=${outdir}/logs/queue/3-queuePeakGrouping_${scanmode}.e ${outdir}/jobs/queue/3-queuePeakGrouping_${scanmode}.sh
