@@ -67,17 +67,8 @@ rownames(tmp) <- rownames(tmp.pos)
 tmp <- cbind(tmp, "HMDB_name"=tmp.hmdb_name.pos)
 outlist <- rbind(tmp, tmp.pos.left, tmp.neg.left)
 
-# Create new matrix
-#outlist <- cbind("mzmed.pgrp"=NA,
-#                 "fq.best"=NA,
-#                 "fq.worst"=NA,
-#                 "nrsamples"=dummy.neg,
-#                 "mzmin.pgrp"=dummy.neg,
-#                 "mzmax.pgrp"=dummy.neg,
-#                 adducts.neg.pos)
-
 # Filter 
-load(hmdb)
+load(hmdb) # rlvnc
 
 peaksInList <- which(rownames(outlist) %in% rownames(rlvnc))
 outlist <- cbind(outlist[peaksInList,],as.data.frame(rlvnc[rownames(outlist)[peaksInList],]))
@@ -210,17 +201,15 @@ rm(wb)
 write.table(outlist, file=paste(outdir, "allpgrps_stats.txt", sep="/"))
 
 
-
 # INTERNE STANDAARDEN
 load(init)
-len <- length(repl.pattern)
 
 IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 cat(IS_codes,"\n")
 
 # Retrieve IS summed adducts
-IS_summed <- IS[,1:(len+1)]
+IS_summed <- IS[c(names(repl.pattern), "HMDB_code")]
 IS_summed$HMDB.name <- IS$name
 IS_summed <- melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
 colnames(IS_summed) <- c('HMDB.code','HMDB.name','Sample','Intensity')
@@ -231,8 +220,7 @@ IS_summed$Project <- project
 IS_summed$Intensity <- as.numeric(as.character(IS_summed$Intensity))
 
 # Retrieve IS positive mode
-load("adductSums_positive.RData")
-IS_pos <- as.data.frame(subset(outlist.tot,rownames(outlist.tot) %in% IS_codes))
+IS_pos <- as.data.frame(subset(outlist.pos.adducts.HMDB,rownames(outlist.pos.adducts.HMDB) %in% IS_codes))
 IS_pos$HMDB_name <- IS[match(row.names(IS_pos),IS$HMDB_code,nomatch=NA),'name']
 IS_pos$HMDB.code <- row.names(IS_pos)
 IS_pos <- melt(IS_pos, id.vars=c('HMDB.code','HMDB_name'))
@@ -244,7 +232,7 @@ IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
 
 # Retrieve IS negative mode
 load("adductSums_negative.RData")
-IS_neg <- as.data.frame(subset(outlist.tot,rownames(outlist.tot) %in% IS_codes))
+IS_neg <- as.data.frame(subset(outlist.neg.adducts.HMDB,rownames(outlist.neg.adducts.HMDB) %in% IS_codes))
 IS_neg$HMDB_name <- IS[match(row.names(IS_neg),IS$HMDB_code,nomatch=NA),'name']
 IS_neg$HMDB.code <- row.names(IS_neg)
 IS_neg <- melt(IS_neg, id.vars=c('HMDB.code','HMDB_name'))
@@ -257,6 +245,7 @@ IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 # Save results
 save(IS_pos,IS_neg,IS_summed, file='IS_results_test.RData')
 
+len <- length(repl.pattern)
 w <- 9 + 0.35 * len
 
 # Barplot voor alle IS
@@ -268,7 +257,7 @@ IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
-ggsave("plots/IS_bar_neg.png", plot=IS_neg_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
 
 IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   ggtitle("Interne Standaard (Pos)") +
@@ -278,7 +267,7 @@ IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
-ggsave("plots/IS_bar_pos.png", plot=IS_pos_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
 
 IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   ggtitle("Interne Standaard (Summed)") +
@@ -288,7 +277,7 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
-ggsave("plots/IS_bar_sum.png", plot=IS_sum_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_sum.png"), plot=IS_sum_plot, height=w/2.5, width=w, units="in")
 
 
 
@@ -344,9 +333,9 @@ p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
 
 w <- 3 + 0.2 * len
 
-ggsave("plots/Leucine_neg.png", plot = p1, height = w/2.5, width = w, units = "in")
-ggsave("plots/Leucine_pos.png", plot = p2, height = w/2.5, width = w, units = "in")
-ggsave("plots/Leucine_sum.png", plot = p3, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/Leucine_neg.png"), plot = p1, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "plots/Leucine_pos.png"), plot = p2, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "plots/Leucine_sum.png"), plot = p3, height = w/2.5, width = w, units = "in")
 
 
 if (z_score == 1) {
