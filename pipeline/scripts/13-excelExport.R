@@ -231,7 +231,6 @@ IS_pos$Project <- project
 IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
 
 # Retrieve IS negative mode
-load("adductSums_negative.RData")
 IS_neg <- as.data.frame(subset(outlist.neg.adducts.HMDB,rownames(outlist.neg.adducts.HMDB) %in% IS_codes))
 IS_neg$HMDB_name <- IS[match(row.names(IS_neg),IS$HMDB_code,nomatch=NA),'name']
 IS_neg$HMDB.code <- row.names(IS_neg)
@@ -334,8 +333,8 @@ p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
 w <- 3 + 0.2 * len
 
 ggsave(paste0(outdir, "/plots/Leucine_neg.png"), plot = p1, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "plots/Leucine_pos.png"), plot = p2, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "plots/Leucine_sum.png"), plot = p3, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/Leucine_pos.png"), plot = p2, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/Leucine_sum.png"), plot = p3, height = w/2.5, width = w, units = "in")
 
 
 if (z_score == 1) {
