@@ -244,8 +244,7 @@ IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 # Save results
 save(IS_pos,IS_neg,IS_summed, file='IS_results_test.RData')
 
-len <- length(repl.pattern)
-w <- 9 + 0.35 * len
+
 
 # Barplot voor alle IS
 IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
@@ -256,7 +255,6 @@ IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
-ggsave(paste0(outdir, "/plots/IS_bar_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
 
 IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   ggtitle("Interne Standaard (Pos)") +
@@ -266,7 +264,6 @@ IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
-ggsave(paste0(outdir, "/plots/IS_bar_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
 
 IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   ggtitle("Interne Standaard (Summed)") +
@@ -276,9 +273,14 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
         legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+
+
+len <- length(repl.pattern)
+
+w <- 9 + 0.35 * len
+ggsave(paste0(outdir, "/plots/IS_bar_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
 ggsave(paste0(outdir, "/plots/IS_bar_sum.png"), plot=IS_sum_plot, height=w/2.5, width=w, units="in")
-
-
 
 
 # Lineplot voor alle IS
@@ -304,9 +306,9 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample, Intensity)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8))
 
 w <- 8 + 0.2 * len
-ggsave("plots/IS_line_neg.png", plot = IS_neg_plot, height = w/2.5, width = w, units = "in")
-ggsave("plots/IS_line_pos.png", plot = IS_pos_plot, height = w/2.5, width = w, units = "in")
-ggsave("plots/IS_line_sum.png", plot = IS_sum_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_neg.png"), plot = IS_neg_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_pos.png"), plot = IS_pos_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_sum.png"), plot = IS_sum_plot, height = w/2.5, width = w, units = "in")
 
 
 # Barplot voor Leucine voor alle data
