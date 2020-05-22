@@ -161,7 +161,7 @@ for raw in ${indir}/*.raw ; do
   source /hpc/dbg_mz/tools/mono/etc/profile
   mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/1-data -p
   " > ${outdir}/jobs/0-conversion/\${input}.sh
-  cur_id=\$(sbatch --job-name=0-conversion_${input}_${name} --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/0-conversion/\${input}.sh)
+  cur_id=\$(sbatch --job-name=0-conversion_\${input}_${name} --time=00:05:00 --mem=2G --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/0-conversion/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -192,7 +192,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
 
   ${rscript} ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=\$(sbatch --job-name=2-dims_${input}_${name} --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
+  cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=00:10:00 --mem=4G --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1} # remove last :
@@ -202,7 +202,7 @@ echo "#!/bin/sh
 
 /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
-avg_id=\$(sbatch --job-name=3-average_${input}_${name} --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
+avg_id=\$(sbatch --job-name=3-average_\${input}_${name} --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
 # start next queue
 sbatch --job-name=2-queuePeakFinding_positive_${name} --time=00:05:00 --mem=500M --dependency=afterok:\${avg_id} --output=${outdir}/logs/queue/2-queuePeakFinding_positive.o --error=${outdir}/logs/queue/2-queuePeakFinding_positive.e ${global_sbatch_parameters} ${outdir}/jobs/queue/2-queuePeakFinding_positive.sh
@@ -262,7 +262,7 @@ for sample in ${outdir}/3-average_pklist/*${label}* ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh
-    cur_id=\$(sbatch --job-name=4-peakFinding_${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o --error=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
+    cur_id=\$(sbatch --job-name=4-peakFinding_\${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o --error=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -306,7 +306,7 @@ for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
   echo "#!/bin/sh
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --job-name=6-peakGrouping_${input}_${scanmode}_${name} --time=02:00:00 --mem=4G --output=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o --error=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --job-name=6-peakGrouping_\${input}_${scanmode}_${name} --time=02:00:00 --mem=4G --output=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o --error=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -335,7 +335,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --job-name=8-peakGroupingRest_${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --job-name=8-peakGroupingRest_\${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -357,7 +357,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --job-name=9-runFillMissing_1_${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --job-name=9-runFillMissing_1_\${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 
@@ -369,7 +369,7 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --job-name=9-runFillMissing_2_${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --job-name=9-runFillMissing_2_\${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
@@ -398,7 +398,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
-  cur_id=\$(sbatch --job-name=11-runSumAdducts_${input}_${scanmode}_${name} --time=01:00:00 --mem=4G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
+  cur_id=\$(sbatch --job-name=11-runSumAdducts_\${input}_${scanmode}_${name} --time=01:00:00 --mem=4G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1}
