@@ -182,7 +182,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
     # 1-generateBreaksFwhm.HPC.R
     echo "#!/bin/sh
 
-    Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
+    /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
     " > ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh
     break_id=\$(sbatch --job-name=1-breaks_${name} --time=00:05:00 --mem=2G --output=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.o --error=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.e ${global_sbatch_parameters} ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
   fi
@@ -200,7 +200,7 @@ job_ids=\${job_ids::-1} # remove last :
 # 3-averageTechReplicates.R
 echo "#!/bin/sh
 
-Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
 avg_id=\$(sbatch --job-name=3-average_${input}_${name} --time=01:30:00 --mem=5G --dependency=afterok:\${job_ids} --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
@@ -260,7 +260,7 @@ for sample in ${outdir}/3-average_pklist/*${label}* ; do
   # 4-peakFinding.R
   echo "#!/bin/sh
 
-  Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh
     cur_id=\$(sbatch --job-name=4-peakFinding_${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o --error=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -270,14 +270,14 @@ job_ids=\${job_ids::-1}
 # 5-collectSamples.R
 echo "#!/bin/sh
 
-Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
 col_id=\$(sbatch --job-name=5-collectSamples_${scanmode}_${name} --time=02:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # hmdb_part.R
 echo "#!/bin/sh
 
-Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
 hmdb_id_1=\$(sbatch --job-name=hmdb_part_${scanmode}_${name} --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part/${scanmode}.sh)
 echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
@@ -285,7 +285,7 @@ echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
 # hmdb_part_adductSums.R
 echo "#!/bin/sh
 
-Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
 " > ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh
 hmdb_id_2=\$(sbatch --job-name=hmdb_part_adductSums_${scanmode}_${name} --time=03:00:00 --mem=8G --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh)
 echo "${hmdb_id_2}" > ${outdir}/logs/hmdb_2
@@ -304,7 +304,7 @@ for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
 
   # 6-peakGrouping
   echo "#!/bin/sh
-  Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=6-peakGrouping_${input}_${scanmode}_${name} --time=02:00:00 --mem=4G --output=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o --error=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -314,7 +314,7 @@ job_ids=\${job_ids::-1}
 # 7-collectSamplesGroupedHMDB
 echo "#!/bin/sh
 
-Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
 " > ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 col_id=\$(sbatch --job-name=7-collectSamplesGroupedHMDB_${scanmode}_${name} --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
@@ -333,7 +333,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
   # 8-peakGrouping.rest
   echo "#!/bin/sh
 
-  Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=8-peakGroupingRest_${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -355,7 +355,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
 
-  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=9-runFillMissing_1_${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -367,7 +367,7 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
   # 9-runFillMissing.R part 2
   echo "#!/bin/sh
 
-  Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
   cut_id=\$(sbatch --job-name=9-runFillMissing_2_${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -377,7 +377,7 @@ job_ids=\${job_ids::-1}
 # 10-collectSamplesFilled
 echo "#!/bin/sh
 
-Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
 col_id=\$(sbatch --job-name=10-collectSamplesFilled_${scanmode}_${name} --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
@@ -396,7 +396,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   # 11-runSumAdducts
   echo "#!/bin/sh
 
-  Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=11-runSumAdducts_${input}_${scanmode}_${name} --time=01:00:00 --mem=4G --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -406,7 +406,7 @@ job_ids=\${job_ids::-1}
 # 12-collectSamplesAdded
 echo "#!/bin/sh
 
-Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
 col_id=\$(sbatch --job-name=12-collectSamplesAdded_${scanmode}_${name} --time=00:30:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
