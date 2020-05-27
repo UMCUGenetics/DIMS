@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
 
-# run it from the input dir that contains sampleNames.txt
-# to make init.RData in the same dir
-
-df <- read.csv("sampleNames.txt", sep="\t")
+# used for when init.RData has to be created manually
+# arg1 : path to sampleNames.txt or whatever the name of the samplesheet txt file may be
+# arg2 : amount of technical replicates (usually 3)
 
 args <- commandArgs(trailingOnly=TRUE)
-nrepl <- as.numeric(args[1])
+df <- read.csv(args[1], sep="\t")
+nrepl <- as.numeric(args[2])
 
 sampleNames <- trimws(as.vector(unlist(df[1])))
 nsampgrps <- length(sampleNames)/nrepl
