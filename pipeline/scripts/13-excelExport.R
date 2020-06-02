@@ -33,6 +33,8 @@ dir.create(plotdir, showWarnings = F)
 
 options(digits=16)
 
+setwd(outdir)
+
 # sum positive and negative adductsums
 
 # Load pos and neg adduct sums
