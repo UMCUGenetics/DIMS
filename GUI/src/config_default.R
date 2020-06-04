@@ -20,16 +20,17 @@ email <- ""
 run_name <- ""
 nrepl <- 3
 normalization <- list("disabled", "total_IS", "total_ident", "total")
-matrix <- list("DBS", "Plasma", "Research")
+matrix <- list("DBS", "Plasma", "CSF", "Research")
 trim <- 0.1
 resol <- list(17500, 35000, 70000, 140000, 280000)
 default_resol <- 4  # in the list above
 dims_thresh <- 100
 
 thresh2remove <- vector(mode = "list", length = 3)
-names(thresh2remove) <- c("DBS", "Plasma", "Research")
+names(thresh2remove) <- matrix
 thresh2remove$DBS <- 500000000
 thresh2remove$Plasma <- 1000000000
+thresh2remove$CSF <- 1000000000
 thresh2remove$Research <- 100000000
 
 thresh_pos <- 2000
