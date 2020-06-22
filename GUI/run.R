@@ -1,7 +1,7 @@
-library("shiny")
-library("shinyFiles")
-library("shinydashboard")
 library("DT")
+library("shiny")
+library("shinydashboard")
+library("shinyFiles")
 library("ssh")
 
 cat("Doing application setup\n")

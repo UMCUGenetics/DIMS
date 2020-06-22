@@ -236,7 +236,6 @@ function(input, output, session) {
       paste0("email=", input$email),
       paste0("matrix=", input$matrix),
       paste0("z_score=", input$z_score),
-      paste0("proteowizard=", config$proteowizard),
       paste0("db=", config$db),
       paste0("db2=", config$db2)
     )

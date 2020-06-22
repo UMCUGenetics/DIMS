@@ -15,6 +15,8 @@ db2 <- paste0(base, "/tools/db/HMDB_with_info_relevance_IS_C5OH.RData")
 
 ### Default parameters - for lists it defaults to the first one
 run_pipeline <- TRUE  # put on FALSE if you solely want to upload data
+# Everything below here doesn't need to be edited for every run, 
+# as the parameters in the GUI override these
 login <- ""
 email <- ""
 run_name <- ""
