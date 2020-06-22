@@ -20,16 +20,8 @@ git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
 
 ### Tools
-- In `/tools`, install the [Proteowizard Docker](https://hub.docker.com/r/chambm/pwiz-skyline-i-agree-to-the-vendor-licenses) with [Singularity](https://singularity.lbl.gov/).
-```
-export SINGULARITY_CACHEDIR=/hpc/dbg_mz/tools/.singularity/
-export SINGULARITY_TMPDIR=/hpc/dbg_mz/tools/.singularity/tmp
-export SINGULARITY_LOCALCACHEDIR=/hpc/dbg_mz/tools/.singularity/tmp
-export SINGULARITY_PULLFOLDER=/hpc/dbg_mz/tools/.singularity/pull
-export SINGULARITY_BINDPATH=/hpc/dbg_mz/tools
-export WINEDEBUG=-all
-singularity build --sandbox proteowizard_3.0.19056-6b6b0a2b4/ docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.19056-6b6b0a2b4
-```
+- In `/tools`, install mono with GUIX under /mono
+- In `/tools`, place the latest tested release of [ThermoRawFileParser](https://github.com/compomics/ThermoRawFileParser/releases/tag/v1.1.11) (v1.1.11) under /ThermoRawFileParser_1.1.11
 - In `/tools`, put the required Human Metabolome Database (HMDB) .RData files under /db.
 
 ## Usage
@@ -49,12 +41,12 @@ OPTIONAL ARGS:
   -h - show help
 
 EXAMPLE:
-  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$
+  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1
 ```
 
 Input folder requirements:
 - all the .raw files 
-- init.RData, which contains which technical replicates belong to which biological sample 
+- init.RData (sampelsheet, which contains which technical replicates belong to which biological sample)
 - a 'setting.config' file containing eg:
 ```thresh_pos=2000
 thresh_neg=2000
@@ -66,7 +58,6 @@ thresh2remove=1000000000
 resol=140000
 email=example@example.com
 matrix=DBS
-proteowizard=/hpc/dbg_mz/tools/proteowizard_3.0.19252-aa45583de
-db=/hpc/dbg_mz/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
-db2=/hpc/dbg_mz/tools/db/HMDB_with_info_relevance_IS_C5OH.RData
+db=.../tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
+db2=.../tools/db/HMDB_with_info_relevance_IS_C5OH.RData
 z_score=1```
