@@ -1,9 +1,16 @@
 # DIMS
-Repository for diagnostic pipeline metabolomics using Direct Mass Spectrometry data.
+Pipeline that processes raw Direct Mass Spectrometry data.
 
-## Setup
-### Main scripts
-- Install [GIT](https://git-scm.com/downloads). 
+## Setup GUI
+Used R version: 3.6.1 \
+Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
+
+- Copy config_default.R to your own config.R, and configure as needed.
+
+## Setup HPC
+Used R versions: 3.6.2 and 3.2.2 (which R version is used is found at the top of the main .R scripts) \
+Libraries: xcms, Cairo, ggplot2, reshape2, openxlsx, loder
+
 - Create the following folders in the same root map (eg. /hpc/dbg_mz)
   - `/development`
   - `/processed`
@@ -18,15 +25,15 @@ git clone -b dev --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
 git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
-
-### Tools
 - In `/tools`, install mono with GUIX under /mono
 - In `/tools`, place the latest tested release of [ThermoRawFileParser](https://github.com/compomics/ThermoRawFileParser/releases/tag/v1.1.11) (v1.1.11) under /ThermoRawFileParser_1.1.11
 - In `/tools`, put the required Human Metabolome Database (HMDB) .RData files under /db.
 
-## Usage
 
-You generally wanna use the DIMS pipeline in combination with the [DIMS GUI](https://github.com/UMCUGenetics/DIMS_GUI/), which is an R shiny program to transfer data to the HPC and start the pipeline. However, manually starting the pipeline is also possible.
+## Usage
+The pipeline is meant to be started with the GUI, which is an R shiny program to transfer data to the HPC and start the pipeline. To open the GUI, open GUI.Rproj in Rstudio, which should open run.R and config.R. Then click "Run App" from the run.R file. 
+
+Manually starting the pipeline is also possible.
 ```
 CMD:
   sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
