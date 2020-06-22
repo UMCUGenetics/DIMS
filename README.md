@@ -25,7 +25,7 @@ git clone -b dev --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
 git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
-- In `/tools`, install mono with GUIX under /mono
+- In `/tools`, install [mono](https://www.mono-project.com/) with [GUIX](https://guix.gnu.org/) under /mono
 - In `/tools`, place the latest tested release of [ThermoRawFileParser](https://github.com/compomics/ThermoRawFileParser/releases/tag/v1.1.11) (v1.1.11) under /ThermoRawFileParser_1.1.11
 - In `/tools`, put the required Human Metabolome Database (HMDB) .RData files under /db.
 
