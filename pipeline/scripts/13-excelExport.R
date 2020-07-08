@@ -244,7 +244,7 @@ IS_neg$Project <- project
 IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 
 # Save results
-save(IS_pos,IS_neg,IS_summed, file = paste(outdir, 'IS_results_test.RData', sep = "/"))
+save(IS_pos,IS_neg,IS_summed, file = paste(outdir, 'IS_results.RData', sep = "/"))
 
 
 
@@ -371,7 +371,7 @@ if (z_score == 1) {
   Pos_Contr$Project <- project
   
   #Save results
-  save(Pos_Contr,file = paste(outdir, 'Pos_Contr_test.RData', sep = "/"))
+  save(Pos_Contr,file = paste(outdir, 'Pos_Contr.RData', sep = "/"))
 }
 
 

@@ -3,9 +3,9 @@
 
 #gui
 GUI/tmp
-GUI/config.R
+GUI/src/config.R
 
 #post
-post/input/*
-post/output/*
-post/results/*
+post/input
+post/output
+post/results
