@@ -1,6 +1,16 @@
 # DIMS
 Pipeline that processes raw Direct Mass Spectrometry data.
 
+### Folder Structure
+```
+.
+|───GUI/ (GUI scripts)
+|───db/ (Human Metabolome Database files)
+|───extra/ (flowcharts)
+|───pipeline/ (pipeline scripts)
+|───post/ (scripts that can be manually run after pipeline)
+```
+
 ## Setup GUI
 Used R version: 3.6.1 \
 Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
