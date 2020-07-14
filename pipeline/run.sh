@@ -149,6 +149,9 @@ module load R/3.2.2
 
 global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --parsable"
 
+# first job is queued
+echo Run started successfully
+
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
 #!/bin/sh
