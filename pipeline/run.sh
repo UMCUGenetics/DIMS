@@ -149,8 +149,6 @@ module load R/3.2.2
 
 global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --parsable"
 
-# first job is queued
-echo Run started successfully
 
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
@@ -169,6 +167,9 @@ for raw in ${indir}/*.raw ; do
 done
 job_ids=\${job_ids::-1}
 echo \${job_ids}
+
+# first job is queued
+echo Run started successfully
 
 sbatch --job-name=1-queueStart_${name} --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
 EOF
