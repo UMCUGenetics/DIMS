@@ -168,11 +168,11 @@ done
 job_ids=\${job_ids::-1}
 echo \${job_ids}
 
-# first job is queued
-echo Run started successfully
-
 sbatch --job-name=1-queueStart_${name} --time=00:05:00 --mem=1G --dependency=afterok:\${job_ids} --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
 EOF
+
+# first job is queued
+echo Run started successfully
 
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
