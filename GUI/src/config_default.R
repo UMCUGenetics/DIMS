@@ -27,7 +27,7 @@ resol <- list(17500, 35000, 70000, 140000, 280000)
 default_resol <- 4  # in the list above
 dims_thresh <- 100
 
-thresh2remove <- vector(mode = "list", length = 3)
+thresh2remove <- vector(mode = "list", length = 4)
 names(thresh2remove) <- matrix
 thresh2remove$DBS <- 500000000
 thresh2remove$Plasma <- 1000000000
