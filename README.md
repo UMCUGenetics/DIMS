@@ -1,9 +1,26 @@
 # DIMS
-Repository for diagnostic pipeline metabolomics using Direct Mass Spectrometry data.
+Pipeline that processes raw Direct Mass Spectrometry data.
 
-## Setup
-### Main scripts
-- Install [GIT](https://git-scm.com/downloads). 
+### Folder Structure
+```
+.
+|───GUI/ (GUI scripts)
+|───db/ (Human Metabolome Database files)
+|───extra/ (flowcharts)
+|───pipeline/ (pipeline scripts)
+|───post/ (scripts that can be manually run after pipeline)
+```
+
+## Setup GUI
+Used R version: 3.6.1 \
+Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
+
+- Copy config_default.R to your own config.R, and configure as needed.
+
+## Setup HPC
+Used R versions: 3.6.2 and 3.2.2 (which R version is used is found at the top of the main .R scripts) \
+Libraries: xcms, Cairo, ggplot2, reshape2, openxlsx, loder
+
 - Create the following folders in the same root map (eg. /hpc/dbg_mz)
   - `/development`
   - `/processed`
@@ -18,23 +35,15 @@ git clone -b dev --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
 git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 ```
-
-### Tools
-- In `/tools`, install the [Proteowizard Docker](https://hub.docker.com/r/chambm/pwiz-skyline-i-agree-to-the-vendor-licenses) with [Singularity](https://singularity.lbl.gov/).
-```
-export SINGULARITY_CACHEDIR=/hpc/dbg_mz/tools/.singularity/
-export SINGULARITY_TMPDIR=/hpc/dbg_mz/tools/.singularity/tmp
-export SINGULARITY_LOCALCACHEDIR=/hpc/dbg_mz/tools/.singularity/tmp
-export SINGULARITY_PULLFOLDER=/hpc/dbg_mz/tools/.singularity/pull
-export SINGULARITY_BINDPATH=/hpc/dbg_mz/tools
-export WINEDEBUG=-all
-singularity build --sandbox proteowizard_3.0.19056-6b6b0a2b4/ docker://chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.19056-6b6b0a2b4
-```
+- In `/tools`, install [mono](https://www.mono-project.com/) with [GUIX](https://guix.gnu.org/) under /mono
+- In `/tools`, place the latest tested release of [ThermoRawFileParser](https://github.com/compomics/ThermoRawFileParser/releases/tag/v1.1.11) (v1.1.11) under /ThermoRawFileParser_1.1.11
 - In `/tools`, put the required Human Metabolome Database (HMDB) .RData files under /db.
 
-## Usage
 
-You generally wanna use the DIMS pipeline in combination with the [DIMS GUI](https://github.com/UMCUGenetics/DIMS_GUI/), which is an R shiny program to transfer data to the HPC and start the pipeline. However, manually starting the pipeline is also possible.
+## Usage
+The pipeline is meant to be started with the GUI, which is an R shiny program to transfer data to the HPC and start the pipeline. To open the GUI, open GUI.Rproj in Rstudio, which should open run.R and config.R. Then click "Run App" from the run.R file. 
+
+Manually starting the pipeline is also possible.
 ```
 CMD:
   sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
@@ -49,12 +58,12 @@ OPTIONAL ARGS:
   -h - show help
 
 EXAMPLE:
-  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$
+  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1
 ```
 
 Input folder requirements:
 - all the .raw files 
-- init.RData, which contains which technical replicates belong to which biological sample 
+- init.RData (sampelsheet, which contains which technical replicates belong to which biological sample)
 - a 'setting.config' file containing eg:
 ```thresh_pos=2000
 thresh_neg=2000
@@ -66,7 +75,6 @@ thresh2remove=1000000000
 resol=140000
 email=example@example.com
 matrix=DBS
-proteowizard=/hpc/dbg_mz/tools/proteowizard_3.0.19252-aa45583de
-db=/hpc/dbg_mz/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
-db2=/hpc/dbg_mz/tools/db/HMDB_with_info_relevance_IS_C5OH.RData
+db=.../tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
+db2=.../tools/db/HMDB_with_info_relevance_IS_C5OH.RData
 z_score=1```
