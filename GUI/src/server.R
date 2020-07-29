@@ -258,10 +258,10 @@ function(input, output, session) {
     ### Transfer over RAW data
     input_folder_name <- paste(as.vector(unlist(input$input_folder['path']))[-1], collapse = "/", sep="")
     input_dir = paste(config$root, input_folder_name, sep = "/")
+    raw_files <- paste0(input_dir, "/", t_reps, ".raw")
     cat("Copying files from", input_dir, "to:", hpc_input_dir, "... (ignore the %)\n")
-    
     scp_upload(ssh_transfer, 
-               list.files(path = input_dir, pattern = ".raw$", full.names = TRUE), 
+               raw_files, 
                to = hpc_input_dir)
     
     ### Transfer over the tmp files to raw data folder (init.RData, settings.config)
