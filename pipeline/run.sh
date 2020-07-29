@@ -225,6 +225,15 @@ for x in \$(find ${outdir}/logs -name "*.e" -not -empty | sort); do
   msg+="<br><br>"
 done
 msg+="</p>"
+msg+="<hr>"
+msg+="Possible that have no results:<br>"
+msg+="<p>"
+for x in \$(find ${outdir} -name "sample_names_nodata.txt" -not -empty); do
+  msg+="<b>\${x}</b><br>"
+  msg+=\$(cat \${x})
+  msg+="<br><br>"
+done
+msg+="</p>"
 
 echo \$msg > ${outdir}/logs/mail.html
 

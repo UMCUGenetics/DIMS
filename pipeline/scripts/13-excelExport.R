@@ -210,6 +210,16 @@ IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 cat(IS_codes,"\n")
 
+# if all data from one samplename (for example P195.1) is filtered out in 3-averageTechReplicates because of too little data (threshold parameter) the init.RData (repl.pattern) will contain more sample_names then the peak data (IS), 
+# thus this data needs to be removed first, before the retrieval of the summed adducts. Write sample_names to a log file, to let user know that this sample_name contained no data.
+sample_names_nodata <- setdiff(names(repl.pattern),names(IS))
+if (!is.null(sample_names_nodata)) {
+  write.table(sample_names_nodata, file = paste(outdir, "sample_names_nodata.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
+  cat(sample_names_nodata,"\n")
+  for (sample_name in sample_names_nodata) {
+    repl.pattern[[sample_name]] <- NULL
+  }}
+
 # Retrieve IS summed adducts
 IS_summed <- IS[c(names(repl.pattern), "HMDB_code")]
 IS_summed$HMDB.name <- IS$name
