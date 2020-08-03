@@ -193,7 +193,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
 
   ${rscript} ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
-  cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=${job_2_time} --mem=${job_2_time} --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
+  cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=${job_2_time} --mem=${job_2_mem} --dependency=afterok:\${break_id} --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 job_ids=\${job_ids::-1} # remove last :
