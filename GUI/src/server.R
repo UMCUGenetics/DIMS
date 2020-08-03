@@ -240,6 +240,11 @@ function(input, output, session) {
       paste0("db2=", config$db2)
     )
     
+    for (i in 1:length(config$jobs)) {
+      parameters <- c(parameters, paste0(names(config$jobs)[[i]], "_time=", config$jobs[[i]]$time))
+      parameters <- c(parameters, paste0(names(config$jobs)[[i]], "_mem=", config$jobs[[i]]$mem))
+    }
+    
     writeLines(parameters, file_con, sep = "\n")
     close(file_con)
     
