@@ -14,6 +14,7 @@ db2 <- paste0(base, "/tools/db/HMDB_with_info_relevance_IS_C5OH.RData")
 
 ### Default parameters - for lists it defaults to the first one
 run_pipeline <- TRUE  # put on FALSE if you solely want to upload data
+
 # Everything below here doesn't need to be edited for every run, 
 # as the parameters in the GUI override these
 login <- ""
@@ -47,5 +48,32 @@ ssh_transfer <- "hpct01.op.umcutrecht.nl"
 commit <- paste(system("git name-rev HEAD", intern = TRUE), 
                 system("git rev-parse HEAD", intern = TRUE))
 
-
-# TODO Default job times
+### Max allowed time and memory per queued job 
+jobs <- list(
+  job_0 = list(time = "00:05:00", mem = "2G"),
+  job_1 = list(time = "00:05:00", mem = "2G"), 
+  job_2 = list(time = "00:10:00", mem = "4G"), 
+  job_3 = list(time = "01:30:00", mem = "5G"), 
+  job_4 = list(time = "01:00:00", mem = "8G"), 
+  job_5 = list(time = "02:00:00", mem = "8G"), 
+  job_6 = list(time = "02:30:00", mem = "4G"), 
+  job_7 = list(time = "01:00:00", mem = "8G"), 
+  job_8 = list(time = "01:00:00", mem = "8G"), 
+  job_9a = list(time = "00:30:00", mem = "4G"), 
+  job_9b = list(time = "00:30:00", mem = "4G"), 
+  job_10 = list(time = "01:00:00", mem = "8G"), 
+  job_11 = list(time = "03:00:00", mem = "8G"), 
+  job_12 = list(time = "00:30:00", mem = "8G"), 
+  job_13 = list(time = "01:00:00", mem = "8G"), 
+  job_14 = list(time = "00:05:00", mem = "500M"),
+  job_hmdb1 = list(time = "03:00:00", mem = "8G"),
+  job_hmdb2 = list(time = "03:00:00", mem = "8G"),
+  
+  queue_0 = list(time = "00:05:00", mem = "1G"), 
+  queue_1 = list(time = "00:05:00", mem = "1G"), 
+  queue_2 = list(time = "00:05:00", mem = "500M"), 
+  queue_3 = list(time = "00:05:00", mem = "500M"), 
+  queue_4 = list(time = "00:05:00", mem = "500M"), 
+  queue_5 = list(time = "00:05:00", mem = "500M"), 
+  queue_6 = list(time = "00:05:00", mem = "500M")
+)
