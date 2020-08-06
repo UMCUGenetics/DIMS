@@ -357,7 +357,7 @@ if (z_score == 1) {
   # find if one or more positive control samples are missing and put in list
   missing_pos <- c()
   for (pos in positivecontrol_list) {
-    if (!pos %in% outlist) {
+    if (!(pos %in% colnames(outlist))) {
       missing_pos <- c(missing_pos, pos)
     }}
   # you need all positive control samples, thus starting the script only if all are available
