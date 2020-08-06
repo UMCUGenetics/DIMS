@@ -210,6 +210,16 @@ IS <- outlist[grep("Internal standard", outlist[,"relevance"], fixed = TRUE),]
 IS_codes <- rownames(IS)
 cat(IS_codes,"\n")
 
+# if all data from one samplename (for example P195.1) is filtered out in 3-averageTechReplicates because of too little data (threshold parameter) the init.RData (repl.pattern) will contain more sample_names then the peak data (IS), 
+# thus this data needs to be removed first, before the retrieval of the summed adducts. Write sample_names to a log file, to let user know that this sample_name contained no data.
+sample_names_nodata <- setdiff(names(repl.pattern),names(IS))
+if (!is.null(sample_names_nodata)) {
+  write.table(sample_names_nodata, file = paste(outdir, "sample_names_nodata.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
+  cat(sample_names_nodata,"\n")
+  for (sample_name in sample_names_nodata) {
+    repl.pattern[[sample_name]] <- NULL
+  }}
+
 # Retrieve IS summed adducts
 IS_summed <- IS[c(names(repl.pattern), "HMDB_code")]
 IS_summed$HMDB.name <- IS$name
@@ -340,39 +350,51 @@ ggsave(paste0(outdir, "/plots/Leucine_neg.png"), plot = p1, height = w/2.5, widt
 ggsave(paste0(outdir, "/plots/Leucine_pos.png"), plot = p2, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/Leucine_sum.png"), plot = p3, height = w/2.5, width = w, units = "in")
 
-
+### POSITIVE CONTROLS CHECK
+# these positive controls need to be in the samplesheet, in order to make the Pos_Contr.RData file
+positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
 if (z_score == 1) {
-  ### POSITIVE CONTROLS
-  #HMDB codes
-  PA_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123')
-  PKU_codes <- c('HMDB00159')
-  LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
-  
-  PA_data <- outlist[PA_codes, c('HMDB_code','name','P1002.1_Zscore')]
-  PA_data <- melt(PA_data, id.vars = c('HMDB_code','name'))
-  colnames(PA_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
-  
-  PKU_data <- outlist[PKU_codes, c('HMDB_code','name','P1003.1_Zscore')]
-  PKU_data <- melt(PKU_data, id.vars = c('HMDB_code','name'))
-  colnames(PKU_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
-  
-  LPI_data <- outlist[LPI_codes, c('HMDB_code','name','P1005.1_Zscore')]
-  LPI_data <- melt(LPI_data, id.vars = c('HMDB_code','name'))
-  colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
-  
-  Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
-  
-  Pos_Contr <- rbind(PA_data)
-  
-  
-  Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
-  Pos_Contr$Matrix <- matrix
-  Pos_Contr$Rundate <- rundate
-  Pos_Contr$Project <- project
-  
-  #Save results
-  save(Pos_Contr,file = paste(outdir, 'Pos_Contr.RData', sep = "/"))
-}
+  # find if one or more positive control samples are missing and put in list
+  missing_pos <- c()
+  for (pos in positivecontrol_list) {
+    if (!(pos %in% colnames(outlist))) {
+      missing_pos <- c(missing_pos, pos)
+    }}
+  # you need all positive control samples, thus starting the script only if all are available
+  if (length(missing_pos) == 0) {
+    ### POSITIVE CONTROLS
+    #HMDB codes
+    PA_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123')
+    PKU_codes <- c('HMDB00159')
+    LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
+    
+    PA_data <- outlist[PA_codes, c('HMDB_code','name','P1002.1_Zscore')]
+    PA_data <- melt(PA_data, id.vars = c('HMDB_code','name'))
+    colnames(PA_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
+    
+    PKU_data <- outlist[PKU_codes, c('HMDB_code','name','P1003.1_Zscore')]
+    PKU_data <- melt(PKU_data, id.vars = c('HMDB_code','name'))
+    colnames(PKU_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
+    
+    LPI_data <- outlist[LPI_codes, c('HMDB_code','name','P1005.1_Zscore')]
+    LPI_data <- melt(LPI_data, id.vars = c('HMDB_code','name'))
+    colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
+    
+    Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
+    
+    Pos_Contr <- rbind(PA_data)
+    
+    
+    Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
+    Pos_Contr$Matrix <- matrix
+    Pos_Contr$Rundate <- rundate
+    Pos_Contr$Project <- project
+    
+    #Save results
+    save(Pos_Contr,file = paste(outdir, 'Pos_Contr.RData', sep = "/"))
+  } else {
+    write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
+  }}
 
 
 cat("Ready excelExport.R")
