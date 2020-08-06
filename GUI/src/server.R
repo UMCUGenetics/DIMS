@@ -110,7 +110,7 @@ function(input, output, session) {
         wrong_t_rep_count = TRUE
       }
       # check 10 : if name fits requirements ( + -> 1 or more, * -> 0 or more)
-      if (grepl("^(?:(?!(C|P))[a-zA-Z0-9]+_{1})*(C|P){1}[0-9]\\d*\\.([1-9]\\d*)+", b_rep, perl = TRUE) != TRUE) {
+      if (grepl("^(?:(?!(C|P))[a-zA-Z0-9]+_{1})*(C|P){1}[0-9]+\\.([1-9]\\d*)+", b_rep, perl = TRUE) != TRUE) {
         wrong_samplenames <- c(b_rep, wrong_samplenames)
       }
     }
