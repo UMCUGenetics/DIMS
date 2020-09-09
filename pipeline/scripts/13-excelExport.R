@@ -254,7 +254,7 @@ IS_neg$Project <- project
 IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 
 # Save results
-save(IS_pos,IS_neg,IS_summed, file = paste(outdir, 'IS_results.RData', sep = "/"))
+save(IS_pos,IS_neg,IS_summed, file = paste0(outdir, "/", project, '_IS_results.RData'))
 
 
 
@@ -264,8 +264,7 @@ IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
-        legend.position='none')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
 IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
@@ -273,8 +272,7 @@ IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
-        legend.position='none')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
 IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
@@ -282,17 +280,16 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity))+
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8),
-        legend.position='none')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
 
 len <- length(repl.pattern)
 
 w <- 9 + 0.35 * len
-ggsave(paste0(outdir, "/plots/IS_bar_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_sum.png"), plot=IS_sum_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_plot, height=w/2.5, width=w, units="in")
 
 
 # Lineplot voor alle IS
@@ -318,37 +315,75 @@ IS_sum_plot <- ggplot(IS_summed, aes(Sample, Intensity)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8))
 
 w <- 8 + 0.2 * len
-ggsave(paste0(outdir,"/plots/IS_line_neg.png"), plot = IS_neg_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_pos.png"), plot = IS_pos_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_sum.png"), plot = IS_sum_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_plot, height = w/2.5, width = w, units = "in")
 
 
-# Barplot voor Leucine voor alle data
-IS_now<-'2H3-Leucine (IS)'
-p1<-ggplot(subset(IS_neg, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
-  ggtitle(paste0(IS_now, " (Neg)")) +
+# Barplot voor selectie aan interne standaarden voor alle data
+IS_sum_selection <- c('2H8-Valine (IS)', '2H3-Leucine (IS)', '2H3-Glutamate (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
+IS_pos_selection <- c('2H4-Alanine (IS)', '13C6-Phenylalanine (IS)', '2H4_13C5-Arginine (IS)', '2H3-Propionylcarnitine (IS)', '2H9-Isovalerylcarnitine (IS)')
+IS_neg_selection <- c('2H2-Ornithine (IS)', '2H3-Glutamate (IS)', '2H2-Citrulline (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
+
+IS_neg_select_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Negative mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
-        legend.position='none')
-p2<-ggplot(subset(IS_pos, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
-  ggtitle(paste0(IS_now, " (Pos)")) +
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+IS_pos_select_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Positive mode',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
-        legend.position='none')
-p3<-ggplot(subset(IS_summed, HMDB.name %in% IS_now), aes(Sample,Intensity)) +
-  ggtitle(paste0(IS_now, " (Sum)")) +
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+IS_sum_select_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
-  labs(title='Adduct sums',x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10),
-        legend.position='none')
+  labs(x='',y='Intensity')+
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+
+w <- 4 + 0.2 * len
+ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_select_barplot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_select_barplot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_select_barplot, height = w/2.5, width = w, units = "in")
+
+
+# Lineplot voor selectie aan interne standaarden voor alle data
+IS_neg_select_lineplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Neg)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+IS_pos_select_lineplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Pos)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+IS_sum_select_lineplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
+  ggtitle("Interne Standaard (Sum)") +
+  geom_point(aes(col=HMDB.name))+
+  geom_line(aes(col=HMDB.name, group=HMDB.name))+
+  labs(x='',y='Intensity')+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
 w <- 3 + 0.2 * len
+ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_select_lineplot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_select_lineplot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_select_lineplot, height = w/2.5, width = w, units = "in")
 
-ggsave(paste0(outdir, "/plots/Leucine_neg.png"), plot = p1, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/Leucine_pos.png"), plot = p2, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/Leucine_sum.png"), plot = p3, height = w/2.5, width = w, units = "in")
+
+
+
 
 ### POSITIVE CONTROLS CHECK
 # these positive controls need to be in the samplesheet, in order to make the Pos_Contr.RData file
@@ -391,7 +426,8 @@ if (z_score == 1) {
     Pos_Contr$Project <- project
     
     #Save results
-    save(Pos_Contr,file = paste(outdir, 'Pos_Contr.RData', sep = "/"))
+    save(Pos_Contr,file = paste0(outdir, "/", project, '_Pos_Contr.RData'))
+    
   } else {
     write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
