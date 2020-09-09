@@ -9,3 +9,7 @@ GUI/src/config.R
 post/input
 post/output
 post/results
+
+#Macfiles
+.DS_Store
+pipeline/.DS_Store
