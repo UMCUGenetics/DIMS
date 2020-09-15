@@ -330,8 +330,8 @@ IS_neg_select_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection),
   geom_bar(aes(fill=HMDB.name),stat='identity')+
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free', ncol = 2)+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')
+scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 IS_pos_select_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
@@ -347,10 +347,10 @@ IS_sum_select_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selectio
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none')+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
-w <- 4 + 0.2 * len
-ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_select_barplot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_select_barplot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_select_barplot, height = w/2.5, width = w, units = "in")
+w <- 9 + 0.35 * len
+ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_select_barplot, height = w/2.0, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_select_barplot, height = w/2.0, width = w, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_select_barplot, height = w/2.0, width = w, units = "in")
 
 
 # Lineplot voor selectie aan interne standaarden voor alle data
@@ -359,28 +359,27 @@ IS_neg_select_lineplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection)
   geom_point(aes(col=HMDB.name))+
   geom_line(aes(col=HMDB.name, group=HMDB.name))+
   labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 IS_pos_select_lineplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_point(aes(col=HMDB.name))+
   geom_line(aes(col=HMDB.name, group=HMDB.name))+
   labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 IS_sum_select_lineplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_point(aes(col=HMDB.name))+
   geom_line(aes(col=HMDB.name, group=HMDB.name))+
   labs(x='',y='Intensity')+
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=10))+
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))+
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 
-w <- 3 + 0.2 * len
+w <- 8 + 0.2 * len
 ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_select_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_select_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_select_lineplot, height = w/2.5, width = w, units = "in")
-
 
 
 
@@ -427,7 +426,7 @@ if (z_score == 1) {
     
     #Save results
     save(Pos_Contr,file = paste0(outdir, "/", project, '_Pos_Contr.RData'))
-    
+    write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
   } else {
     write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
