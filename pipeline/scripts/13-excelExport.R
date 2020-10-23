@@ -415,10 +415,7 @@ if (z_score == 1) {
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
-    
-    Pos_Contr <- rbind(PA_data)
-    
-    
+    #Pos_Contr <- rbind(PA_data)
     Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
     Pos_Contr$Matrix <- matrix
     Pos_Contr$Rundate <- rundate
@@ -427,6 +424,19 @@ if (z_score == 1) {
     #Save results
     save(Pos_Contr,file = paste0(outdir, "/", project, '_Pos_Contr.RData'))
     write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
+    
+    # make positive control excel with specific HMDB_codes  
+    exceldata <- read.xlsx(xlsx_name)
+    pos_contr_excel <- select(exceldata, one_of(c("HMDB_code", "name", "P1002.1_Zscore", "P1003.1_Zscore", "P1005.1_Zscore"))) # "one_of" to accommodate for "invalid" column names (if not existing)
+    pos_contr_excel$Matrix <- matrix
+    pos_contr_excel$Rundate <- rundate
+    pos_contr_excel$Project <- project
+    setDT(pos_contr_excel)
+    pos_contr_excel <- melt(pos_contr_excel, measure=patterns("_Zscore$"), value.name = c("Zscore"), variable.name = "Sample")
+    selected_HMDB_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123', 'HMDB00159', 'HMDB00904', 'HMDB00641', 'HMDB00182')
+    pos_contr_excel <- subset(pos_contr_excel, HMDB_code %in% selected_HMDB_codes)
+    write.xlsx(pos_contr_excel, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
+    
   } else {
     write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
