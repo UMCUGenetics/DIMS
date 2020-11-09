@@ -435,6 +435,7 @@ if (z_score == 1) {
     pos_contr_excel <- melt(pos_contr_excel, measure=patterns("_Zscore$"), value.name = c("Zscore"), variable.name = "Sample")
     selected_HMDB_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123', 'HMDB00159', 'HMDB00904', 'HMDB00641', 'HMDB00182')
     pos_contr_excel <- subset(pos_contr_excel, HMDB_code %in% selected_HMDB_codes)
+    pos_contr_excel$Zscore <- round_df(pos_contr_excel$Zscore, 2)
     write.xlsx(pos_contr_excel, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
     
   } else {
