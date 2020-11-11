@@ -433,7 +433,7 @@ if (z_score == 1) {
     
     #Save results
     save(Pos_Contr,file = paste0(outdir, "/", project, '_Pos_Contr.RData'))
-    Pos_Contr$Zscore <- round_df(pos_contr_excel$Zscore, 2)
+    Pos_Contr$Zscore <- round_df(Pos_Contr$Zscore, 2)
     write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
     
     # make positive control excel with specific HMDB_codes  
