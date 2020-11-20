@@ -70,7 +70,7 @@ tmp <- cbind(tmp, "HMDB_name"=tmp.hmdb_name.pos)
 outlist <- rbind(tmp, tmp.pos.left, tmp.neg.left)
 
 # Filter 
-load(hmdb) # rlvnc
+load(hmdb) # rlvnc in global environment
 
 peaksInList <- which(rownames(outlist) %in% rownames(rlvnc))
 outlist <- cbind(outlist[peaksInList,],as.data.frame(rlvnc[rownames(outlist)[peaksInList],]))
@@ -88,8 +88,6 @@ filelist <- "AllPeakGroups"
 
 wb <- createWorkbook("SinglePatient")
 addWorksheet(wb, filelist)
-#outlist.backup <- outlist 
-#outlist <- outlist.backup
 
 # small function for rounding numbers to x digits
 round_df <- function(x, digits) {
@@ -268,7 +266,7 @@ save(IS_pos,IS_neg,IS_summed, file = paste0(outdir, "/", project, '_IS_results.R
 
 
 
-# Barplot voor alle IS
+# Barplot for all IS (interne standaards)
 IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity))+
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity')+
@@ -407,7 +405,7 @@ if (z_score == 1) {
   # you need all positive control samples, thus starting the script only if all are available
   if (length(missing_pos) == 0) {
     ### POSITIVE CONTROLS
-    #HMDB codes
+    # make positive control excel with specific HMDB_codes in combination with specific control samples 
     PA_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123')
     PKU_codes <- c('HMDB00159')
     LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
@@ -425,29 +423,17 @@ if (z_score == 1) {
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
-    #Pos_Contr <- rbind(PA_data)
+    #Pos_Contr <- rbind(PA_data) #old code, does not add all dataframes together, above is new
     Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
+    # extra information added to excel for future reference. made in beginning of this script
     Pos_Contr$Matrix <- matrix
     Pos_Contr$Rundate <- rundate
     Pos_Contr$Project <- project
     
     #Save results
     save(Pos_Contr,file = paste0(outdir, "/", project, '_Pos_Contr.RData'))
-    Pos_Contr$Zscore <- round_df(Pos_Contr$Zscore, 2)
+    Pos_Contr$Zscore <- round_df(Pos_Contr$Zscore, 2) # asked by Lab to round the number to 2 digits
     write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
-    
-    # make positive control excel with specific HMDB_codes  
-    #exceldata <- read.xlsx(xlsx_name)
-    #pos_contr_excel <- select(exceldata, one_of(c("HMDB_code", "name", "P1002.1_Zscore", "P1003.1_Zscore", "P1005.1_Zscore"))) # "one_of" to accommodate for "invalid" column names (if not existing)
-    #pos_contr_excel$Matrix <- matrix
-    #pos_contr_excel$Rundate <- rundate
-    #pos_contr_excel$Project <- project
-    #setDT(pos_contr_excel)
-    #pos_contr_excel <- melt(pos_contr_excel, measure=patterns("_Zscore$"), value.name = c("Zscore"), variable.name = "Sample")
-    #selected_HMDB_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123', 'HMDB00159', 'HMDB00904', 'HMDB00641', 'HMDB00182')
-    #pos_contr_excel <- subset(pos_contr_excel, HMDB_code %in% selected_HMDB_codes)
-    #pos_contr_excel$Zscore <- round_df(pos_contr_excel$Zscore, 2)
-    #write.xlsx(pos_contr_excel, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
     
   } else {
     write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
