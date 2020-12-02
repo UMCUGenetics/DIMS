@@ -18,7 +18,7 @@ restart=0
 indir=""
 outdir=""
 rscript="/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript" #temp
-ppm=2 #temp
+ppm=5 #temp
 
 # Show usage information
 function show_help() {
