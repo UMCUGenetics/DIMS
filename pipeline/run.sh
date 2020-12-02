@@ -334,7 +334,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
   # 8-peakGrouping.rest
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=8-peakGroupingRest_\${input}_${scanmode}_${name} --time=01:00:00 --mem=8G --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -356,7 +356,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts} ${ppm}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=9-runFillMissing_1_\${input}_${scanmode}_${name} --time=00:30:00 --mem=4G --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -378,7 +378,7 @@ job_ids=\${job_ids::-1}
 # 10-collectSamplesFilled
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}  ${ppm}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
 col_id=\$(sbatch --job-name=10-collectSamplesFilled_${scanmode}_${name} --time=01:00:00 --mem=8G --dependency=afterany:\${job_ids} --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 

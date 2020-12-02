@@ -1,5 +1,5 @@
 # modified identify function to also look for adducts and their isotopes
-ident.hires.noise.HPC <- function(peaklist, allAdducts, scanmode="Negative", look4=c("Cl", "Ac"), identlist=NULL, resol=280000, slope=0, incpt=0, ppm.fixed=10, ppm.iso.fixed=1) {
+ident.hires.noise.HPC <- function(peaklist, allAdducts, scanmode="Negative", look4=c("Cl", "Ac"), identlist=NULL, resol=280000, slope=0, incpt=0, ppm.fixed, ppm.iso.fixed) {
   
   #     peaklist=outlist_Neg
   #     scanmode="Negative"

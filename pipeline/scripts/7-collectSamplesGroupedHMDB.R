@@ -67,7 +67,7 @@ if (n>=sub & (floor(n/sub)-1)>=2){
       n_moved = 0
       
       # Calculate 3ppm and replace border, avoid cut within peakgroup!
-      while ((as.numeric(outlist_i[1,"mzmed.pkt"]) - as.numeric(outlist_i_min_1[min_1_last,"mzmed.pkt"]))*1e+06/as.numeric(outlist_i[1,"mzmed.pkt"]) < 3) {
+      while ((as.numeric(outlist_i[1,"mzmed.pkt"]) - as.numeric(outlist_i_min_1[min_1_last,"mzmed.pkt"]))*1e+06/as.numeric(outlist_i[1,"mzmed.pkt"]) < ppm) {
         outlist_i_min_1 = rbind(outlist_i_min_1, outlist_i[1,])
         outlist_i = outlist_i[-1,]
         n_moved = n_moved + 1
@@ -93,7 +93,7 @@ n_moved = 0
 
 if(!is.null(outlist_i_min_1)){
   # Calculate 4ppm and replace border, avoid cut within peakgroup!
-  while ((as.numeric(outlist_i[1,"mzmed.pkt"]) - as.numeric(outlist_i_min_1[min_1_last,"mzmed.pkt"]))*1e+06/as.numeric(outlist_i[1,"mzmed.pkt"]) < 2*ppm) {
+  while ((as.numeric(outlist_i[1,"mzmed.pkt"]) - as.numeric(outlist_i_min_1[min_1_last,"mzmed.pkt"]))*1e+06/as.numeric(outlist_i[1,"mzmed.pkt"]) < ppm) {
     outlist_i_min_1 = rbind(outlist_i_min_1, outlist_i[1,])
     outlist_i = outlist_i[-1,]
     n_moved = n_moved + 1
