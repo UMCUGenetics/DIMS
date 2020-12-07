@@ -73,7 +73,7 @@ outlist.not.ident = outlist.tot[-index,]
 
 if (z_score == 1) {
   outlist.ident$ppmdev=as.numeric(outlist.ident$ppmdev)
-  outlist.ident <- outlist.ident[which(outlist.ident["ppmdev"] >= -ppm & outlist.ident["ppmdev"] < ppm),]
+  outlist.ident <- outlist.ident[which(outlist.ident["ppmdev"] >= -ppm & outlist.ident["ppmdev"] <= ppm),]
 }
 # NAs in theormz_noise <======================================================================= uitzoeken!!!
 outlist.ident$theormz_noise[which(is.na(outlist.ident$theormz_noise))] = 0
