@@ -13,13 +13,14 @@ fileIn <- cmd_args[1]
 outdir <- cmd_args[2]
 scanmode <- cmd_args[3]
 resol <- as.numeric(cmd_args[4])
+ppm <- as.numeric(cmd_args[5])
 
 # create output folder
 dir.create(paste(outdir, "8-grouping_rest", sep = "/"),showWarnings = F)
 
 options(digits=16)
 
-groupingRest <- function(outdir, fileIn, scanmode, ppm=2) {
+groupingRest <- function(outdir, fileIn, scanmode, ppm) {
   # fileIn="./results/specpks_all_rest/negative_outlist_i_min_1.1.RData"
   # scanmode="negative"
   # outdir="./results"
@@ -95,4 +96,4 @@ groupingRest <- function(outdir, fileIn, scanmode, ppm=2) {
 
 cat("File to group: ", fileIn)
 
-groupingRest(outdir, fileIn, scanmode)
+groupingRest(outdir, fileIn, scanmode, ppm=ppm)
