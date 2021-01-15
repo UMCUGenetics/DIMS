@@ -14,6 +14,7 @@ scanmode <- cmd_args[2]
 normalization <- cmd_args[3]
 scripts <- cmd_args[4]
 z_score <- as.numeric(cmd_args[5])
+ppm <- as.numeric(cmd_args[6])
 
 #outdir <- "/Users/nunen/Documents/Metab/processed/test_old"
 #scanmode <- "negative"
@@ -72,6 +73,7 @@ outlist.not.ident = outlist.tot[-index,]
 
 if (z_score == 1) {
   outlist.ident$ppmdev=as.numeric(outlist.ident$ppmdev)
+  outlist.ident <- outlist.ident[which(outlist.ident["ppmdev"] >= -ppm & outlist.ident["ppmdev"] <= ppm),]
 }
 # NAs in theormz_noise <======================================================================= uitzoeken!!!
 outlist.ident$theormz_noise[which(is.na(outlist.ident$theormz_noise))] = 0

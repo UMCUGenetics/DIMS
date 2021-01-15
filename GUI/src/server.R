@@ -104,9 +104,14 @@ function(input, output, session) {
     t_reps <- trimws(selected_samples[,1]) # technical replicates / samples, usually 3 per biological replicate
     b_reps <- trimws(selected_samples[,2]) # biological replicates / patients
     wrong_t_rep_count = FALSE
+    wrong_samplenames = c()
     for (b_rep in unique(b_reps)) {
       if (sum(b_reps == b_rep) != input$nrepl) {
         wrong_t_rep_count = TRUE
+      }
+      # check 10 : if name fits requirements ( + -> 1 or more, * -> 0 or more)
+      if (grepl("^(?:(?!(C|P))[a-zA-Z0-9]+_{1})?(C|P){1}[0-9]+\\.([1-9]\\d*)+", b_rep, perl = TRUE) != TRUE) {
+        wrong_samplenames <- c(b_rep, wrong_samplenames)
       }
     }
     if (length(t_reps) == 0 || wrong_t_rep_count || length(t_reps) / input$nrepl != length(unique(b_reps))) {
@@ -114,6 +119,18 @@ function(input, output, session) {
       passed = FALSE
     } else {
       output$check4 <- renderText({"Yes"})
+    }
+    
+    # check 10 continued
+    if (input$z_score == "1") {
+      if (length(wrong_samplenames) > 0) {
+        output$check10 <- renderText({"No"})
+        output$check10_extra <- renderText({paste0("Wrong: ", paste(wrong_samplenames, collapse=', '))})
+        passed = FALSE
+      } else {
+        output$check10 <- renderText({"Yes"})
+        output$check10_extra <- renderText({""})
+      }
     }
     
     # check 5 : Parameters 
@@ -240,6 +257,11 @@ function(input, output, session) {
       paste0("db2=", config$db2)
     )
     
+    for (i in 1:length(config$jobs)) {
+      parameters <- c(parameters, paste0(names(config$jobs)[[i]], "_time=", config$jobs[[i]]$time))
+      parameters <- c(parameters, paste0(names(config$jobs)[[i]], "_mem=", config$jobs[[i]]$mem))
+    }
+    
     writeLines(parameters, file_con, sep = "\n")
     close(file_con)
     
@@ -258,10 +280,10 @@ function(input, output, session) {
     ### Transfer over RAW data
     input_folder_name <- paste(as.vector(unlist(input$input_folder['path']))[-1], collapse = "/", sep="")
     input_dir = paste(config$root, input_folder_name, sep = "/")
+    raw_files <- paste0(input_dir, "/", t_reps, ".raw")
     cat("Copying files from", input_dir, "to:", hpc_input_dir, "... (ignore the %)\n")
-    
     scp_upload(ssh_transfer, 
-               list.files(path = input_dir, pattern = ".raw$", full.names = TRUE), 
+               raw_files, 
                to = hpc_input_dir)
     
     ### Transfer over the tmp files to raw data folder (init.RData, settings.config)

@@ -1,4 +1,4 @@
-replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
+replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir,ppm){
   # file="./results/grouping_rest/negative_1.RData"
   # scanmode= "negative"
   # scriptDir="./scripts"
@@ -91,7 +91,7 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir){
   noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
   
   # Replace "Negative" by "negative" in ident.hires.noise
-  final.outlist.idpat2 = ident.hires.noise.HPC(outpgrlist, allAdducts, scanmode=label2, noise.MZ, look4=look4.add2, resol=resol, slope=0, incpt=0, ppm.fixed=2, ppm.iso.fixed=2)
+  final.outlist.idpat2 = ident.hires.noise.HPC(outpgrlist, allAdducts, scanmode=label2, noise.MZ, look4=look4.add2, resol=resol, slope=0, incpt=0, ppm.fixed=ppm, ppm.iso.fixed=ppm)
   # message(paste(sum(final.outlist.idpat2[ , "assi"] != ""), "assigned noise peaks"))
   tmp <- final.outlist.idpat2[ , c("assi", "theormz")]
   colnames(tmp) <- c("assi_noise",  "theormz_noise")
