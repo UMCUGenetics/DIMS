@@ -398,7 +398,14 @@ ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_
 
 ### POSITIVE CONTROLS CHECK
 # these positive controls need to be in the samplesheet, in order to make the Pos_Contr.RData file
-positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
+# Positive control samples all have the format P1002.x, P1003.x and P1005.x (where x is a number)
+
+# positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
+column_list <- colnames(outlist)
+patterns <- c("^(P1002.)[[:digit:]]+_", "^(P1003.)[[:digit:]]+_", "^(P1005.)[[:digit:]]+_")
+positive_controls_index <- grepl(pattern=paste(patterns, collapse="|"), column_list)
+positivecontrol_list <- column_list[positive_controls_index]
+
 if (z_score == 1) {
   # find if one or more positive control samples are missing and put in list
   missing_pos <- c()
@@ -409,20 +416,24 @@ if (z_score == 1) {
   # you need all positive control samples, thus starting the script only if all are available
   if (length(missing_pos) == 0) {
     ### POSITIVE CONTROLS
-    # make positive control excel with specific HMDB_codes in combination with specific control samples 
+    # make positive control excel with specific HMDB_codes in combination with specific control samples
+    PA_sample_name <- positivecontrol_list[grepl("P1002", positivecontrol_list)] #P1001.x_Zscore
+    PKU_sample_name <- positivecontrol_list[grepl("P1003", positivecontrol_list)] #P1003.x_Zscore
+    LPI_sample_name <- positivecontrol_list[grepl("P1005", positivecontrol_list)] #P1005.x_Zscore
+    
     PA_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123')
     PKU_codes <- c('HMDB00159')
     LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
     
-    PA_data <- outlist[PA_codes, c('HMDB_code','name','P1002.1_Zscore')]
+    PA_data <- outlist[PA_codes, c('HMDB_code','name', PA_sample_name)]
     PA_data <- melt(PA_data, id.vars = c('HMDB_code','name'))
     colnames(PA_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
-    PKU_data <- outlist[PKU_codes, c('HMDB_code','name','P1003.1_Zscore')]
+    PKU_data <- outlist[PKU_codes, c('HMDB_code','name', PKU_sample_name)]
     PKU_data <- melt(PKU_data, id.vars = c('HMDB_code','name'))
     colnames(PKU_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
-    LPI_data <- outlist[LPI_codes, c('HMDB_code','name','P1005.1_Zscore')]
+    LPI_data <- outlist[LPI_codes, c('HMDB_code','name', LPI_sample_name)]
     LPI_data <- melt(LPI_data, id.vars = c('HMDB_code','name'))
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
