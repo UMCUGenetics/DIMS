@@ -14,7 +14,7 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
 project <- cmd_args[2] #"test"
-matrix <- cmd_args[3] #"DBS"
+DIMSmatrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData"
 z_score <- as.numeric(cmd_args[5])
 
@@ -234,7 +234,7 @@ IS_summed$HMDB.name <- IS$name
 IS_summed <- melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
 colnames(IS_summed) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_summed$Intensity <- as.numeric(IS_summed$Intensity)
-IS_summed$Matrix <- matrix
+IS_summed$Matrix <- DIMSmatrix
 IS_summed$Rundate <- rundate
 IS_summed$Project <- project
 IS_summed$Intensity <- as.numeric(as.character(IS_summed$Intensity))
@@ -245,7 +245,7 @@ IS_pos$HMDB_name <- IS[match(row.names(IS_pos),IS$HMDB_code,nomatch=NA),'name']
 IS_pos$HMDB.code <- row.names(IS_pos)
 IS_pos <- melt(IS_pos, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_pos) <- c('HMDB.code','HMDB.name','Sample','Intensity')
-IS_pos$Matrix <- matrix
+IS_pos$Matrix <- DIMSmatrix
 IS_pos$Rundate <- rundate
 IS_pos$Project <- project
 IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
@@ -256,7 +256,7 @@ IS_neg$HMDB_name <- IS[match(row.names(IS_neg),IS$HMDB_code,nomatch=NA),'name']
 IS_neg$HMDB.code <- row.names(IS_neg)
 IS_neg <- melt(IS_neg, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_neg) <- c('HMDB.code','HMDB.name','Sample','Intensity')
-IS_neg$Matrix <- matrix
+IS_neg$Matrix <- DIMSmatrix
 IS_neg$Rundate <- rundate
 IS_neg$Project <- project
 IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
@@ -407,12 +407,11 @@ positive_controls_index <- grepl(pattern=paste(patterns, collapse="|"), column_l
 positivecontrol_list <- column_list[positive_controls_index]
 
 if (z_score == 1) {
-  # find if one or more positive control samples are missing and put in list
+  # find if one or more positive control samples are missing
   missing_pos <- c()
-  for (pos in positivecontrol_list) {
-    if (!(pos %in% colnames(outlist))) {
-      missing_pos <- c(missing_pos, pos)
-    }}
+  if (length(positivecontrol_list) != 3){
+    missing_pos <- paste0(c("positive controls list is not complete: ", positivecontrol_list), collapse=" ")
+  }
   # you need all positive control samples, thus starting the script only if all are available
   if (length(missing_pos) == 0) {
     ### POSITIVE CONTROLS
@@ -441,7 +440,7 @@ if (z_score == 1) {
     #Pos_Contr <- rbind(PA_data) #old code, does not add all dataframes together, above is new
     Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
     # extra information added to excel for future reference. made in beginning of this script
-    Pos_Contr$Matrix <- matrix
+    Pos_Contr$Matrix <- DIMSmatrix
     Pos_Contr$Rundate <- rundate
     Pos_Contr$Project <- project
     
