@@ -410,9 +410,9 @@ if (z_score == 1) {
   # find if one or more positive control samples are missing
   missing_pos <- c()
   # any() grep because you get a vector of FALSE's and TRUE's. only one grep match is needed for each positive control
-  if (any(grep("^(P1002\\.)[[:digit:]]+_", positive_controls)) && 
-      any(grep("^(P1003\\.)[[:digit:]]+_", positive_controls)) && 
-      any(grep("^(P1005\\.)[[:digit:]]+_", positive_controls))){
+  if (any(grep("^(P1002\\.)[[:digit:]]+_", positivecontrol_list)) && 
+      any(grep("^(P1003\\.)[[:digit:]]+_", positivecontrol_list)) && 
+      any(grep("^(P1005\\.)[[:digit:]]+_", positivecontrol_list))){
     cat("All three positive controls are present")
   } else {
     missing_pos <- paste0(c("positive controls list is not complete: ", positivecontrol_list), collapse=" ")
