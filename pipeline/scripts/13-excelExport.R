@@ -408,17 +408,17 @@ positivecontrol_list <- column_list[positive_controls_index]
 
 if (z_score == 1) {
   # find if one or more positive control samples are missing
-  missing_pos <- c()
+  pos_contr_warning <- c()
   # any() grep because you get a vector of FALSE's and TRUE's. only one grep match is needed for each positive control
   if (any(grep("^(P1002\\.)[[:digit:]]+_", positivecontrol_list)) && 
       any(grep("^(P1003\\.)[[:digit:]]+_", positivecontrol_list)) && 
       any(grep("^(P1005\\.)[[:digit:]]+_", positivecontrol_list))){
     cat("All three positive controls are present")
   } else {
-    missing_pos <- paste0(c("positive controls list is not complete: ", positivecontrol_list), collapse=" ")
+    pos_contr_warning <- paste0(c("positive controls list is not complete. Only ", positivecontrol_list, " is/are present"), collapse=" ")
   }
   # you need all positive control samples, thus starting the script only if all are available
-  if (length(missing_pos) == 0) {
+  if (length(pos_contr_warning) == 0) {
     ### POSITIVE CONTROLS
     # make positive control excel with specific HMDB_codes in combination with specific control samples
     PA_sample_name <- positivecontrol_list[grepl("P1002", positivecontrol_list)] #P1001.x_Zscore
@@ -455,7 +455,7 @@ if (z_score == 1) {
     write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
     
   } else {
-    write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
+    write.table(pos_contr_warning, file = paste(outdir, "positive_controls_warning.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
 
 
