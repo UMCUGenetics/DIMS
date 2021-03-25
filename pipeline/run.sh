@@ -235,9 +235,9 @@ for x in \$(find ${outdir} -name "sample_names_nodata.txt" -not -empty); do
 done
 msg+="</p>"
 msg+="<hr>"
-msg+="Missing positive controls:<br>"
+msg+="Positive controls warning:<br>"
 msg+="<p>"
-for x in \$(find ${outdir} -name "missing_positive_controls.txt" -not -empty); do
+for x in \$(find ${outdir} -name "positive_controls_warning.txt" -not -empty); do
   msg+="<b>\${x}</b><br>"
   msg+=\$(cat \${x})
   msg+="<br><br>"
