@@ -7,6 +7,7 @@ library("ggplot2")
 library("reshape2")
 library("openxlsx")
 library("loder")
+library("dplyr")
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -75,9 +76,7 @@ load(hmdb) # rlvnc in global environment
 peaksInList <- which(rownames(outlist) %in% rownames(rlvnc))
 outlist <- cbind(outlist[peaksInList,],as.data.frame(rlvnc[rownames(outlist)[peaksInList],]))
 
-outlist <- outlist[-grep("Exogenous", outlist[,"relevance"], fixed = TRUE),]
-outlist <- outlist[-grep("exogenous", outlist[,"relevance"], fixed = TRUE),]
-outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
+outlist <- filter(outlist, relevance == "Exogenous" | relevance == "exogenous" | relevance == "Drug")
 
 # Add HMDB_code column with all the HMDB ID and sort on it
 outlist <- cbind(outlist, "HMDB_code" = rownames(outlist))
