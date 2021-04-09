@@ -14,7 +14,7 @@ for (arg in cmd_args) cat("  ", arg, "\n", sep = "")
 
 outdir <- cmd_args[1] #"/Users/nunen/Documents/Metab/test_set"
 project <- cmd_args[2] #"test"
-matrix <- cmd_args[3] #"DBS"
+dims_matrix <- cmd_args[3] #"DBS"
 hmdb <- cmd_args[4] #"/Users/nunen/Documents/Metab/DIMS/db/HMDB_with_info_relevance_IS_C5OH.RData"
 z_score <- as.numeric(cmd_args[5])
 
@@ -234,7 +234,7 @@ IS_summed$HMDB.name <- IS$name
 IS_summed <- melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
 colnames(IS_summed) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_summed$Intensity <- as.numeric(IS_summed$Intensity)
-IS_summed$Matrix <- matrix
+IS_summed$Matrix <- dims_matrix
 IS_summed$Rundate <- rundate
 IS_summed$Project <- project
 IS_summed$Intensity <- as.numeric(as.character(IS_summed$Intensity))
@@ -245,7 +245,7 @@ IS_pos$HMDB_name <- IS[match(row.names(IS_pos),IS$HMDB_code,nomatch=NA),'name']
 IS_pos$HMDB.code <- row.names(IS_pos)
 IS_pos <- melt(IS_pos, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_pos) <- c('HMDB.code','HMDB.name','Sample','Intensity')
-IS_pos$Matrix <- matrix
+IS_pos$Matrix <- dims_matrix
 IS_pos$Rundate <- rundate
 IS_pos$Project <- project
 IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
@@ -256,7 +256,7 @@ IS_neg$HMDB_name <- IS[match(row.names(IS_neg),IS$HMDB_code,nomatch=NA),'name']
 IS_neg$HMDB.code <- row.names(IS_neg)
 IS_neg <- melt(IS_neg, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_neg) <- c('HMDB.code','HMDB.name','Sample','Intensity')
-IS_neg$Matrix <- matrix
+IS_neg$Matrix <- dims_matrix
 IS_neg$Rundate <- rundate
 IS_neg$Project <- project
 IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
@@ -398,31 +398,46 @@ ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_
 
 ### POSITIVE CONTROLS CHECK
 # these positive controls need to be in the samplesheet, in order to make the Pos_Contr.RData file
-positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
+# Positive control samples all have the format P1002.x, P1003.x and P1005.x (where x is a number)
+
+# positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
+column_list <- colnames(outlist)
+patterns <- c("^(P1002\\.)[[:digit:]]+_", "^(P1003\\.)[[:digit:]]+_", "^(P1005\\.)[[:digit:]]+_")
+positive_controls_index <- grepl(pattern=paste(patterns, collapse="|"), column_list)
+positivecontrol_list <- column_list[positive_controls_index]
+
 if (z_score == 1) {
-  # find if one or more positive control samples are missing and put in list
-  missing_pos <- c()
-  for (pos in positivecontrol_list) {
-    if (!(pos %in% colnames(outlist))) {
-      missing_pos <- c(missing_pos, pos)
-    }}
+  # find if one or more positive control samples are missing
+  pos_contr_warning <- c()
+  # any() grep because you get a vector of FALSE's and TRUE's. only one grep match is needed for each positive control
+  if (any(grep("^(P1002\\.)[[:digit:]]+_", positivecontrol_list)) && 
+      any(grep("^(P1003\\.)[[:digit:]]+_", positivecontrol_list)) && 
+      any(grep("^(P1005\\.)[[:digit:]]+_", positivecontrol_list))){
+    cat("All three positive controls are present")
+  } else {
+    pos_contr_warning <- paste0(c("positive controls list is not complete. Only ", positivecontrol_list, " is/are present"), collapse=" ")
+  }
   # you need all positive control samples, thus starting the script only if all are available
-  if (length(missing_pos) == 0) {
+  if (length(pos_contr_warning) == 0) {
     ### POSITIVE CONTROLS
-    # make positive control excel with specific HMDB_codes in combination with specific control samples 
+    # make positive control excel with specific HMDB_codes in combination with specific control samples
+    PA_sample_name <- positivecontrol_list[grepl("P1002", positivecontrol_list)] #P1001.x_Zscore
+    PKU_sample_name <- positivecontrol_list[grepl("P1003", positivecontrol_list)] #P1003.x_Zscore
+    LPI_sample_name <- positivecontrol_list[grepl("P1005", positivecontrol_list)] #P1005.x_Zscore
+    
     PA_codes <- c('HMDB00824', 'HMDB00783', 'HMDB00123')
     PKU_codes <- c('HMDB00159')
     LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
     
-    PA_data <- outlist[PA_codes, c('HMDB_code','name','P1002.1_Zscore')]
+    PA_data <- outlist[PA_codes, c('HMDB_code','name', PA_sample_name)]
     PA_data <- melt(PA_data, id.vars = c('HMDB_code','name'))
     colnames(PA_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
-    PKU_data <- outlist[PKU_codes, c('HMDB_code','name','P1003.1_Zscore')]
+    PKU_data <- outlist[PKU_codes, c('HMDB_code','name', PKU_sample_name)]
     PKU_data <- melt(PKU_data, id.vars = c('HMDB_code','name'))
     colnames(PKU_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
-    LPI_data <- outlist[LPI_codes, c('HMDB_code','name','P1005.1_Zscore')]
+    LPI_data <- outlist[LPI_codes, c('HMDB_code','name', LPI_sample_name)]
     LPI_data <- melt(LPI_data, id.vars = c('HMDB_code','name'))
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
@@ -430,7 +445,7 @@ if (z_score == 1) {
     #Pos_Contr <- rbind(PA_data) #old code, does not add all dataframes together, above is new
     Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
     # extra information added to excel for future reference. made in beginning of this script
-    Pos_Contr$Matrix <- matrix
+    Pos_Contr$Matrix <- dims_matrix
     Pos_Contr$Rundate <- rundate
     Pos_Contr$Project <- project
     
@@ -440,7 +455,7 @@ if (z_score == 1) {
     write.xlsx(Pos_Contr, file = paste0(outdir, "/", project, '_Pos_Contr.xlsx'), sheetName = "Sheet1", col.names = TRUE, row.names = TRUE, append = FALSE)
     
   } else {
-    write.table(missing_pos, file = paste(outdir, "missing_positive_controls.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
+    write.table(pos_contr_warning, file = paste(outdir, "positive_controls_warning.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
 
 
