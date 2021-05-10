@@ -50,55 +50,58 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir,ppm){
     for (i in 1:length(names(repl.pattern.filtered))){
       samplePeaks=outpgrlist[,names(repl.pattern.filtered)[i]]
       index=which(samplePeaks<=0)
-      
+      if (!length(index)){
+        next
+      }
       for (j in 1:length(index)){
         area = generateGaussian(outpgrlist[index[j],"mzmed.pgrp"],thresh,resol,FALSE,scanmode,int.factor=1*10^5,1,1)$area
         # area = area/2
         outpgrlist[index[j], names(repl.pattern.filtered)[i]] = rnorm(n=1, mean=area, sd=0.25*area)
       }
     }
-  }
+  
   ################################################################################
   
   
   #################### identification #########################################################
-  # load(paste(scriptDir, "../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
-  
-  # Add average column
-  outpgrlist = cbind(outpgrlist, "avg.int"=apply(outpgrlist[, 7:(ncol(outpgrlist)-4)], 1, mean))
-  
-  if (scanmode=="negative"){
-    label = "MNeg"
-    label2 = "Negative"
-    # take out multiple NaCl adducts
-    look4.add2 <- c("Cl", "Cl37", "For", "NaCl","KCl","H2PO4","HSO4","Na-H","K-H","H2O","I") # ,"min2H","min3H"
-    # HMDB_add_iso=HMDB_add_iso.Neg
-  } else {
-    label = "Mpos"
-    label2 = "Positive"
-    # take out NaCl adducts
-    look4.add2 <- c("Na", "K", "NaCl", "NH4","2Na-H","CH3OH","KCl","NaK-H") # ,"NaCl2","NaCl3","NaCl4","NaCl5")
-    # HMDB_add_iso=HMDB_add_iso.Pos
+    # load(paste(scriptDir, "../db/HMDB_add_iso_corrNaCl.RData", sep="/")) # E:\Metabolomics\LargeDataBase\Apr25_2016
+    
+    # Add average column
+    outpgrlist = cbind(outpgrlist, "avg.int"=apply(outpgrlist[, 7:(ncol(outpgrlist)-4)], 1, mean))
+    
+    if (scanmode=="negative"){
+      label = "MNeg"
+      label2 = "Negative"
+      # take out multiple NaCl adducts
+      look4.add2 <- c("Cl", "Cl37", "For", "NaCl","KCl","H2PO4","HSO4","Na-H","K-H","H2O","I") # ,"min2H","min3H"
+      # HMDB_add_iso=HMDB_add_iso.Neg
+    } else {
+      label = "Mpos"
+      label2 = "Positive"
+      # take out NaCl adducts
+      look4.add2 <- c("Na", "K", "NaCl", "NH4","2Na-H","CH3OH","KCl","NaK-H") # ,"NaCl2","NaCl3","NaCl4","NaCl5")
+      # HMDB_add_iso=HMDB_add_iso.Pos
+    }
+    
+    # # Identification using large database
+    # final.outlist.idpat = iden.code(outpgrlist, HMDB_add_iso, ppm=2, label)
+    # message(paste(sum(final.outlist.idpat[ , "assi_HMDB"] != ""), "assigned peakgroups"))
+    # message(paste(sum(final.outlist.idpat[ , "iso_HMDB"] != ""), "assigned isomeres"))
+    
+    # Identify noise peaks
+    noise.MZ <- read.table(file="/hpc/dbg_mz/tools/db/TheoreticalMZ_NegPos_incNaCl.txt", sep="\t", header=TRUE, quote = "")
+    noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
+    
+    # Replace "Negative" by "negative" in ident.hires.noise
+    final.outlist.idpat2 = ident.hires.noise.HPC(outpgrlist, allAdducts, scanmode=label2, noise.MZ, look4=look4.add2, resol=resol, slope=0, incpt=0, ppm.fixed=ppm, ppm.iso.fixed=ppm)
+    # message(paste(sum(final.outlist.idpat2[ , "assi"] != ""), "assigned noise peaks"))
+    tmp <- final.outlist.idpat2[ , c("assi", "theormz")]
+    colnames(tmp) <- c("assi_noise",  "theormz_noise")
+    
+    final.outlist.idpat3 <- cbind(outpgrlist, tmp)
+    #############################################################################################
+    
+    # message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
+    save(final.outlist.idpat3, file=paste(outdir, "/9-samplePeaksFilled/", name, sep=""))
   }
-  
-  # # Identification using large database
-  # final.outlist.idpat = iden.code(outpgrlist, HMDB_add_iso, ppm=2, label)
-  # message(paste(sum(final.outlist.idpat[ , "assi_HMDB"] != ""), "assigned peakgroups"))
-  # message(paste(sum(final.outlist.idpat[ , "iso_HMDB"] != ""), "assigned isomeres"))
-  
-  # Identify noise peaks
-  noise.MZ <- read.table(file="/hpc/dbg_mz/tools/db/TheoreticalMZ_NegPos_incNaCl.txt", sep="\t", header=TRUE, quote = "")
-  noise.MZ <- noise.MZ[(noise.MZ[ , label] != 0), 1:4]
-  
-  # Replace "Negative" by "negative" in ident.hires.noise
-  final.outlist.idpat2 = ident.hires.noise.HPC(outpgrlist, allAdducts, scanmode=label2, noise.MZ, look4=look4.add2, resol=resol, slope=0, incpt=0, ppm.fixed=ppm, ppm.iso.fixed=ppm)
-  # message(paste(sum(final.outlist.idpat2[ , "assi"] != ""), "assigned noise peaks"))
-  tmp <- final.outlist.idpat2[ , c("assi", "theormz")]
-  colnames(tmp) <- c("assi_noise",  "theormz_noise")
-  
-  final.outlist.idpat3 <- cbind(outpgrlist, tmp)
-  #############################################################################################
-  
-  # message(paste("File saved: ", paste(outdir, "/samplePeaksFilled/", name, sep="")))
-  save(final.outlist.idpat3, file=paste(outdir, "/9-samplePeaksFilled/", name, sep=""))
 }

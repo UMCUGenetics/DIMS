@@ -7,6 +7,7 @@ library("ggplot2")
 library("reshape2")
 library("openxlsx")
 library("loder")
+suppressMessages(library("dplyr"))
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -74,10 +75,11 @@ load(hmdb) # rlvnc in global environment
 
 peaksInList <- which(rownames(outlist) %in% rownames(rlvnc))
 outlist <- cbind(outlist[peaksInList,],as.data.frame(rlvnc[rownames(outlist)[peaksInList],]))
-
-outlist <- outlist[-grep("Exogenous", outlist[,"relevance"], fixed = TRUE),]
-outlist <- outlist[-grep("exogenous", outlist[,"relevance"], fixed = TRUE),]
-outlist <- outlist[-grep("Drug", outlist[,"relevance"], fixed = TRUE),]
+# filter out all irrelevant HMDB's. the tibble::rownames is needed for the older version of dplyr on the HPC (it will reindex the rownames)
+outlist <- outlist %>% 
+  tibble::rownames_to_column('rowname') %>% 
+  filter(!grepl("Exogenous|Drug|exogenous", relevance)) %>%
+  tibble::column_to_rownames('rowname')
 
 # Add HMDB_code column with all the HMDB ID and sort on it
 outlist <- cbind(outlist, "HMDB_code" = rownames(outlist))

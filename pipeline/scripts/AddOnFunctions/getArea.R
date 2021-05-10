@@ -9,7 +9,7 @@ getArea <- function(mu,resol,scale,sigma,int.factor){
   #   sigma=sigma1
   
   # avoid too big vector (cannot allocate vector of size ...)
-  if (mu>1000) return(0)
+  if (mu>1200) return(0)
   
   fwhm = getFwhm(mu,resol)
   mzMin = mu - 2*fwhm
