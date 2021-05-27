@@ -266,143 +266,184 @@ IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 # Save results
 save(IS_pos,IS_neg,IS_summed, file = paste0(outdir, "/", project, '_IS_results.RData'))
 
+# numer of samples, for plotting length and width
+len <- length(repl.pattern)
 
+##########
+##### bar plots with all IS
+##########
 
-# Barplot for all IS (interne standaards)
-IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
+# function for ggplot theme
+# theme for all IS bar plots
+theme_IS_bar <- function(myPlot) {
+  myPlot + 
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    theme(
+      legend.position='none',
+      axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=6),
+      axis.text.y=element_text(size=6))
+}
+
+# ggplot functions
+IS_neg_bar_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity')+
-  facet_wrap(~HMDB.name, scales='free_y') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free_y')
 
-IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
+IS_pos_bar_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free_y') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free_y')
 
-IS_sum_plot <- ggplot(IS_summed, aes(Sample,Intensity)) +
+IS_sum_bar_plot <- ggplot(IS_summed, aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Summed)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free_y') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free_y')
 
+# add theme to ggplot functions
+IS_neg_bar_plot <- theme_IS_bar(IS_neg_bar_plot)
+IS_pos_bar_plot <- theme_IS_bar(IS_pos_bar_plot)
+IS_sum_bar_plot <- theme_IS_bar(IS_sum_bar_plot)
 
-len <- length(repl.pattern)
-
+# save plots to disk
 w <- 9 + 0.35 * len
-ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_bar_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_bar_plot, height=w/2.5, width=w, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_bar_plot, height=w/2.5, width=w, units="in")
 
+##########
+##### Line plots with all IS
+##########
 
-# Lineplot voor alle IS
-IS_neg_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
+# function for ggplot theme
+# add smaller legend in the "all IS line plots", otherwise out-of-range when more than 13 IS lines
+theme_IS_line <- function(myPlot) {
+  myPlot + 
+    guides(
+      shape = guide_legend(override.aes = list(size = 0.5)),
+      color = guide_legend(override.aes = list(size = 0.5))) +
+    theme(
+      legend.title = element_text(size = 8), 
+      legend.text  = element_text(size = 6),
+      legend.key.size = unit(0.7, "line"),
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8))
+}
+
+# ggplot functions
+IS_neg_line_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
-  labs(x='',y='Intensity') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8))
+  labs(x='',y='Intensity')
 
-IS_pos_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
+IS_pos_line_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_point(aes(col = HMDB.name)) +
   geom_line(aes(col = HMDB.name, group = HMDB.name)) +
-  labs(x = '', y = 'Intensity') +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8))
+  labs(x = '', y = 'Intensity')
 
-IS_sum_plot <- ggplot(IS_summed, aes(Sample, Intensity)) +
+IS_sum_line_plot <- ggplot(IS_summed, aes(Sample, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_point(aes(col = HMDB.name)) +
   geom_line(aes(col = HMDB.name, group = HMDB.name)) +
-  labs(x = '', y = 'Intensity') +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8))
+  labs(x = '', y = 'Intensity')
 
+# add theme to ggplot functions
+IS_sum_line_plot <- theme_IS_line(IS_sum_line_plot)
+IS_neg_line_plot <- theme_IS_line(IS_neg_line_plot)
+IS_pos_line_plot <- theme_IS_line(IS_pos_line_plot)
+
+# save plots to disk
 w <- 8 + 0.2 * len
-ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_line_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_line_plot, height = w/2.5, width = w, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_line_plot, height = w/2.5, width = w, units = "in")
 
-
-# Barplot voor selectie aan interne standaarden voor alle data
+##########
+##### bar plots with a selection of IS
+##########
 IS_sum_selection <- c('2H8-Valine (IS)', '2H3-Leucine (IS)', '2H3-Glutamate (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
 IS_pos_selection <- c('2H4-Alanine (IS)', '13C6-Phenylalanine (IS)', '2H4_13C5-Arginine (IS)', '2H3-Propionylcarnitine (IS)', '2H9-Isovalerylcarnitine (IS)')
 IS_neg_selection <- c('2H2-Ornithine (IS)', '2H3-Glutamate (IS)', '2H2-Citrulline (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
 
+# function for ggplot theme
+# see bar plots with all IS
+
+# ggplot functions
 IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
 IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
 IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8), legend.position='none') +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
+# add theme to ggplot functions
+IS_neg_selection_barplot <- theme_IS_bar(IS_neg_selection_barplot)
+IS_pos_selection_barplot <- theme_IS_bar(IS_pos_selection_barplot)
+IS_sum_selection_barplot <- theme_IS_bar(IS_sum_selection_barplot)
+
+# save plots to disk
 w <- 9 + 0.35 * len
 ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_selection_barplot, height = w/2.0, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_selection_barplot, height = w/2.0, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_selection_barplot, height = w/2.0, width = w, units = "in")
 
+##########
+##### line plots with a selection of IS
+##########
 
-# Lineplot voor selectie aan interne standaarden voor alle data
+# function for ggplot theme
+# see line plots with all IS
+
+# ggplot functions
 IS_neg_selection_lineplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
-  labs(x='',y='Intensity') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8)) +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  labs(x='',y='Intensity')
 
 IS_pos_selection_lineplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
-  labs(x='',y='Intensity') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8)) +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  labs(x='',y='Intensity')
 
 IS_sum_selection_lineplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
-  labs(x='',y='Intensity') +
-  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5, size=8)) +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+  labs(x='',y='Intensity')
 
+# add theme to ggplot functions
+IS_neg_selection_lineplot <- theme_IS_line(IS_neg_selection_lineplot)
+IS_pos_selection_lineplot <- theme_IS_line(IS_pos_selection_lineplot)
+IS_sum_selection_lineplot <- theme_IS_line(IS_sum_selection_lineplot)
+
+# save plots to disk
 w <- 8 + 0.2 * len
 ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_selection_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_selection_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_lineplot, height = w/2.5, width = w, units = "in")
 
 
-
-
 ### POSITIVE CONTROLS CHECK
 # these positive controls need to be in the samplesheet, in order to make the Pos_Contr.RData file
 # Positive control samples all have the format P1002.x, P1003.x and P1005.x (where x is a number)
 
-# positivecontrol_list <- c('P1002.1_Zscore', 'P1003.1_Zscore', 'P1005.1_Zscore')
 column_list <- colnames(outlist)
 patterns <- c("^(P1002\\.)[[:digit:]]+_", "^(P1003\\.)[[:digit:]]+_", "^(P1005\\.)[[:digit:]]+_")
 positive_controls_index <- grepl(pattern=paste(patterns, collapse="|"), column_list)
@@ -444,7 +485,6 @@ if (z_score == 1) {
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
-    #Pos_Contr <- rbind(PA_data) #old code, does not add all dataframes together, above is new
     Pos_Contr$Zscore <- as.numeric(Pos_Contr$Zscore)
     # extra information added to excel for future reference. made in beginning of this script
     Pos_Contr$Matrix <- dims_matrix
