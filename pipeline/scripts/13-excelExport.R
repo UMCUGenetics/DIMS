@@ -365,9 +365,32 @@ ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_line_plot, hei
 ##########
 ##### bar plots with a selection of IS
 ##########
-IS_sum_selection <- c('2H8-Valine (IS)', '2H3-Leucine (IS)', '2H3-Glutamate (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
-IS_pos_selection <- c('2H4-Alanine (IS)', '13C6-Phenylalanine (IS)', '2H4_13C5-Arginine (IS)', '2H3-Propionylcarnitine (IS)', '2H9-Isovalerylcarnitine (IS)')
 IS_neg_selection <- c('2H2-Ornithine (IS)', '2H3-Glutamate (IS)', '2H2-Citrulline (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
+IS_pos_selection <- c('2H4-Alanine (IS)', '13C6-Phenylalanine (IS)', '2H4_13C5-Arginine (IS)', '2H3-Propionylcarnitine (IS)', '2H9-Isovalerylcarnitine (IS)')
+IS_sum_selection <- c('2H8-Valine (IS)', '2H3-Leucine (IS)', '2H3-Glutamate (IS)', '2H4_13C5-Arginine (IS)', '13C6-Tyrosine (IS)')
+
+# add minimal intensity lines based on matrix (DBS or Plasma) and machine mode (neg, pos, sum)
+if (dims_matrix == "DBS"){
+  hline.data.neg <- 
+    data.frame(z = c(15000, 200000, 130000, 18000, 50000),
+               HMDB.name = IS_neg_selection)
+  hline.data.pos <- 
+    data.frame(z = c(150000, 3300000, 1750000, 150000, 270000),
+               HMDB.name = IS_pos_selection)
+  hline.data.sum <- 
+    data.frame(z = c(1300000, 55000, 500000, 1800000, 1400000),
+               HMDB.name = IS_sum_selection)
+} else if (dims_matrix == "Plasma"){
+  hline.data.neg <- 
+    data.frame(z = c(6500, 100000, 75000, 7500, 25000),
+               HMDB.name = IS_neg_selection)
+  hline.data.pos <- 
+    data.frame(z = c(85000, 1000000, 425000, 70000, 180000),
+               HMDB.name = IS_pos_selection)
+  hline.data.sum <- 
+    data.frame(z = c(700000, 1250000, 150000, 425000, 300000),
+               HMDB.name = IS_sum_selection)
+}
 
 # function for ggplot theme
 # see bar plots with all IS
@@ -376,25 +399,28 @@ IS_neg_selection <- c('2H2-Ornithine (IS)', '2H3-Glutamate (IS)', '2H2-Citrullin
 IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
+  geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name)) + #subset, if some IS have no data, no empty plots will be generated with a line) +
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
 IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
+  geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name)) + 
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
 IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
+  geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_sum$HMDB.name)) + 
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
 # add theme to ggplot functions
-IS_neg_selection_barplot <- theme_IS_bar(IS_neg_selection_barplot)
+IS_neg_selection_barplot <- theme_IS_bar(IS_neg_selection_barplot) 
 IS_pos_selection_barplot <- theme_IS_bar(IS_pos_selection_barplot)
-IS_sum_selection_barplot <- theme_IS_bar(IS_sum_selection_barplot)
+IS_sum_selection_barplot <- theme_IS_bar(IS_sum_selection_barplot) 
 
 # save plots to disk
 w <- 9 + 0.35 * len
@@ -499,6 +525,5 @@ if (z_score == 1) {
   } else {
     write.table(pos_contr_warning, file = paste(outdir, "positive_controls_warning.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
-
 
 cat("Ready excelExport.R")
