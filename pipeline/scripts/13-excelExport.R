@@ -233,7 +233,7 @@ if (!is.null(sample_names_nodata)) {
 # Retrieve IS summed adducts
 IS_summed <- IS[c(names(repl.pattern), "HMDB_code")]
 IS_summed$HMDB.name <- IS$name
-IS_summed <- melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
+IS_summed <- reshape2::melt(IS_summed, id.vars=c('HMDB_code','HMDB.name'))
 colnames(IS_summed) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_summed$Intensity <- as.numeric(IS_summed$Intensity)
 IS_summed$Matrix <- dims_matrix
@@ -245,7 +245,7 @@ IS_summed$Intensity <- as.numeric(as.character(IS_summed$Intensity))
 IS_pos <- as.data.frame(subset(outlist.pos.adducts.HMDB,rownames(outlist.pos.adducts.HMDB) %in% IS_codes))
 IS_pos$HMDB_name <- IS[match(row.names(IS_pos),IS$HMDB_code,nomatch=NA),'name']
 IS_pos$HMDB.code <- row.names(IS_pos)
-IS_pos <- melt(IS_pos, id.vars=c('HMDB.code','HMDB_name'))
+IS_pos <- reshape2::melt(IS_pos, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_pos) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_pos$Matrix <- dims_matrix
 IS_pos$Rundate <- rundate
@@ -256,7 +256,7 @@ IS_pos$Intensity <- as.numeric(as.character(IS_pos$Intensity))
 IS_neg <- as.data.frame(subset(outlist.neg.adducts.HMDB,rownames(outlist.neg.adducts.HMDB) %in% IS_codes))
 IS_neg$HMDB_name <- IS[match(row.names(IS_neg),IS$HMDB_code,nomatch=NA),'name']
 IS_neg$HMDB.code <- row.names(IS_neg)
-IS_neg <- melt(IS_neg, id.vars=c('HMDB.code','HMDB_name'))
+IS_neg <- reshape2::melt(IS_neg, id.vars=c('HMDB.code','HMDB_name'))
 colnames(IS_neg) <- c('HMDB.code','HMDB.name','Sample','Intensity')
 IS_neg$Matrix <- dims_matrix
 IS_neg$Rundate <- rundate
@@ -268,6 +268,13 @@ save(IS_pos,IS_neg,IS_summed, file = paste0(outdir, "/", project, '_IS_results.R
 
 # numer of samples, for plotting length and width
 len <- length(repl.pattern)
+
+# change the order of the x-axis summed plots to a natural sorted one
+Sample_naturalorder <- unique(as.character(IS_summed$Sample))
+Sample_naturalorder <- Sample_naturalorder[gtools::mixedorder(Sample_naturalorder)]
+IS_summed$Sample_level <- factor(IS_summed$Sample, levels = c(Sample_naturalorder))
+IS_pos$Sample_level <- factor(IS_pos$Sample, levels = c(Sample_naturalorder))
+IS_neg$Sample_level <- factor(IS_neg$Sample, levels = c(Sample_naturalorder))
 
 ##########
 ##### bar plots with all IS
@@ -285,19 +292,19 @@ theme_IS_bar <- function(myPlot) {
 }
 
 # ggplot functions
-IS_neg_bar_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
+IS_neg_bar_plot <- ggplot(IS_neg, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity')+
   facet_wrap(~HMDB.name, scales='free_y')
 
-IS_pos_bar_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
+IS_pos_bar_plot <- ggplot(IS_pos, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free_y')
 
-IS_sum_bar_plot <- ggplot(IS_summed, aes(Sample,Intensity)) +
+IS_sum_bar_plot <- ggplot(IS_summed, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Summed)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   labs(x='',y='Intensity') +
@@ -333,19 +340,19 @@ theme_IS_line <- function(myPlot) {
 }
 
 # ggplot functions
-IS_neg_line_plot <- ggplot(IS_neg, aes(Sample,Intensity)) +
+IS_neg_line_plot <- ggplot(IS_neg, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
   labs(x='',y='Intensity')
 
-IS_pos_line_plot <- ggplot(IS_pos, aes(Sample,Intensity)) +
+IS_pos_line_plot <- ggplot(IS_pos, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_point(aes(col = HMDB.name)) +
   geom_line(aes(col = HMDB.name, group = HMDB.name)) +
   labs(x = '', y = 'Intensity')
 
-IS_sum_line_plot <- ggplot(IS_summed, aes(Sample, Intensity)) +
+IS_sum_line_plot <- ggplot(IS_summed, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_point(aes(col = HMDB.name)) +
   geom_line(aes(col = HMDB.name, group = HMDB.name)) +
@@ -396,21 +403,21 @@ if (dims_matrix == "DBS"){
 # see bar plots with all IS
 
 # ggplot functions
-IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
+IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name)) + #subset, if some IS have no data, no empty plots will be generated with a line) +
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
-IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
+IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name)) + 
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
-IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
+IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
   geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_sum$HMDB.name)) + 
@@ -436,19 +443,19 @@ ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_selection_b
 # see line plots with all IS
 
 # ggplot functions
-IS_neg_selection_lineplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample,Intensity)) +
+IS_neg_selection_lineplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
   labs(x='',y='Intensity')
 
-IS_pos_selection_lineplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample,Intensity)) +
+IS_pos_selection_lineplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
   labs(x='',y='Intensity')
 
-IS_sum_selection_lineplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample,Intensity)) +
+IS_sum_selection_lineplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_point(aes(col=HMDB.name)) +
   geom_line(aes(col=HMDB.name, group=HMDB.name)) +
@@ -499,15 +506,15 @@ if (z_score == 1) {
     LPI_codes <- c('HMDB00904', 'HMDB00641', 'HMDB00182')
     
     PA_data <- outlist[PA_codes, c('HMDB_code','name', PA_sample_name)]
-    PA_data <- melt(PA_data, id.vars = c('HMDB_code','name'))
+    PA_data <- reshape2::melt(PA_data, id.vars = c('HMDB_code','name'))
     colnames(PA_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     PKU_data <- outlist[PKU_codes, c('HMDB_code','name', PKU_sample_name)]
-    PKU_data <- melt(PKU_data, id.vars = c('HMDB_code','name'))
+    PKU_data <- reshape2::melt(PKU_data, id.vars = c('HMDB_code','name'))
     colnames(PKU_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     LPI_data <- outlist[LPI_codes, c('HMDB_code','name', LPI_sample_name)]
-    LPI_data <- melt(LPI_data, id.vars = c('HMDB_code','name'))
+    LPI_data <- reshape2::melt(LPI_data, id.vars = c('HMDB_code','name'))
     colnames(LPI_data) <- c('HMDB.code','HMDB.name','Sample','Zscore')
     
     Pos_Contr <- rbind(PA_data, PKU_data, LPI_data)
