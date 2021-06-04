@@ -8,6 +8,7 @@ library("reshape2")
 library("openxlsx")
 library("loder")
 suppressMessages(library("dplyr"))
+suppressMessages(library("stringr"))
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -271,7 +272,8 @@ len <- length(repl.pattern)
 
 # change the order of the x-axis summed plots to a natural sorted one
 Sample_naturalorder <- unique(as.character(IS_summed$Sample))
-Sample_naturalorder <- Sample_naturalorder[gtools::mixedorder(Sample_naturalorder)]
+Sample_naturalorder <- str_sort(Sample_naturalorder, numeric = TRUE)
+#Sample_naturalorder <- Sample_naturalorder[gtools::mixedorder(Sample_naturalorder)]
 IS_summed$Sample_level <- factor(IS_summed$Sample, levels = c(Sample_naturalorder))
 IS_pos$Sample_level <- factor(IS_pos$Sample, levels = c(Sample_naturalorder))
 IS_neg$Sample_level <- factor(IS_neg$Sample, levels = c(Sample_naturalorder))
