@@ -422,7 +422,7 @@ IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selectio
 IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_sum$HMDB.name)) + 
+  geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_summed$HMDB.name)) + 
   labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free', ncol = 2)
 
