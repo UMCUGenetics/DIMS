@@ -267,13 +267,12 @@ IS_neg$Intensity <- as.numeric(as.character(IS_neg$Intensity))
 # Save results
 save(IS_pos,IS_neg,IS_summed, file = paste0(outdir, "/", project, '_IS_results.RData'))
 
-# numer of samples, for plotting length and width
-len <- length(repl.pattern)
+# number of samples, for plotting length and width
+sample_count <- length(repl.pattern)
 
 # change the order of the x-axis summed plots to a natural sorted one
 Sample_naturalorder <- unique(as.character(IS_summed$Sample))
 Sample_naturalorder <- str_sort(Sample_naturalorder, numeric = TRUE)
-#Sample_naturalorder <- Sample_naturalorder[gtools::mixedorder(Sample_naturalorder)]
 IS_summed$Sample_level <- factor(IS_summed$Sample, levels = c(Sample_naturalorder))
 IS_pos$Sample_level <- factor(IS_pos$Sample, levels = c(Sample_naturalorder))
 IS_neg$Sample_level <- factor(IS_neg$Sample, levels = c(Sample_naturalorder))
@@ -318,7 +317,7 @@ IS_pos_bar_plot <- theme_IS_bar(IS_pos_bar_plot)
 IS_sum_bar_plot <- theme_IS_bar(IS_sum_bar_plot)
 
 # save plots to disk
-w <- 9 + 0.35 * len
+w <- 9 + 0.35 * sample_count
 ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_bar_plot, height=w/2.5, width=w, units="in")
 ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_bar_plot, height=w/2.5, width=w, units="in")
 ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_bar_plot, height=w/2.5, width=w, units="in")
@@ -366,7 +365,7 @@ IS_neg_line_plot <- theme_IS_line(IS_neg_line_plot)
 IS_pos_line_plot <- theme_IS_line(IS_pos_line_plot)
 
 # save plots to disk
-w <- 8 + 0.2 * len
+w <- 8 + 0.2 * sample_count
 ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_line_plot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_line_plot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_line_plot, height = w/2.5, width = w, units = "in")
@@ -432,7 +431,7 @@ IS_pos_selection_barplot <- theme_IS_bar(IS_pos_selection_barplot)
 IS_sum_selection_barplot <- theme_IS_bar(IS_sum_selection_barplot) 
 
 # save plots to disk
-w <- 9 + 0.35 * len
+w <- 9 + 0.35 * sample_count
 ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_selection_barplot, height = w/2.0, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_selection_barplot, height = w/2.0, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_selection_barplot, height = w/2.0, width = w, units = "in")
@@ -469,7 +468,7 @@ IS_pos_selection_lineplot <- theme_IS_line(IS_pos_selection_lineplot)
 IS_sum_selection_lineplot <- theme_IS_line(IS_sum_selection_lineplot)
 
 # save plots to disk
-w <- 8 + 0.2 * len
+w <- 8 + 0.2 * sample_count
 ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_selection_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_selection_lineplot, height = w/2.5, width = w, units = "in")
 ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_lineplot, height = w/2.5, width = w, units = "in")
