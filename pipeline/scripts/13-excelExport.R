@@ -398,7 +398,7 @@ if (dims_matrix == "DBS"){
   hline.data.sum <- 
     data.frame(z = c(700000, 1250000, 150000, 425000, 300000),
                HMDB.name = IS_sum_selection)
-}
+} 
 
 # function for ggplot theme
 # see bar plots with all IS
@@ -407,23 +407,23 @@ if (dims_matrix == "DBS"){
 IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name)) + #subset, if some IS have no data, no empty plots will be generated with a line) +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) + 
+  if(exists("hline.data.neg")){geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name))} #subset, if some IS have no data, no empty plots will be generated with a line)
 
 IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name)) + 
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
+  if(exists("hline.data.pos")){geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name))}
 
 IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_summed$HMDB.name)) + 
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
+  if(exists("hline.data.sum")){geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_summed$HMDB.name))}
 
 # add theme to ggplot functions
 IS_neg_selection_barplot <- theme_IS_bar(IS_neg_selection_barplot) 
