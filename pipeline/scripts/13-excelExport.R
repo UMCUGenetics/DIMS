@@ -386,7 +386,7 @@ if (dims_matrix == "DBS"){
     data.frame(z = c(150000, 3300000, 1750000, 150000, 270000),
                HMDB.name = IS_pos_selection)
   hline.data.sum <- 
-    data.frame(z = c(1300000, 55000, 500000, 1800000, 1400000),
+    data.frame(z = c(1300000, 2500000, 500000, 1800000, 1400000),
                HMDB.name = IS_sum_selection)
 } else if (dims_matrix == "Plasma"){
   hline.data.neg <- 
