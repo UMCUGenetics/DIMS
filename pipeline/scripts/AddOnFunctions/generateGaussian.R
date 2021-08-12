@@ -1,7 +1,7 @@
 generateGaussian <- function(x,y,resol,plot,scanmode,int.factor,width,height) {
   
   factor=1.5
-  index = which(y==max(y))
+  index = which(y==max(y))[1]
   x=x[index]
   y=y[index]
   mu = x
