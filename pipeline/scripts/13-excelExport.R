@@ -296,7 +296,7 @@ theme_IS_bar <- function(myPlot) {
 IS_neg_bar_plot <- ggplot(IS_neg, aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  labs(x='',y='Intensity')+
+  labs(x='',y='Intensity') +
   facet_wrap(~HMDB.name, scales='free_y')
 
 IS_pos_bar_plot <- ggplot(IS_pos, aes(Sample_level, Intensity)) +
@@ -317,10 +317,10 @@ IS_pos_bar_plot <- theme_IS_bar(IS_pos_bar_plot)
 IS_sum_bar_plot <- theme_IS_bar(IS_sum_bar_plot)
 
 # save plots to disk
-w <- 9 + 0.35 * sample_count
-ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_bar_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_bar_plot, height=w/2.5, width=w, units="in")
-ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_bar_plot, height=w/2.5, width=w, units="in")
+plot_width <- 9 + 0.35 * sample_count
+ggsave(paste0(outdir, "/plots/IS_bar_all_neg.png"), plot=IS_neg_bar_plot, height=plot_width/2.5, width=plot_width, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_pos.png"), plot=IS_pos_bar_plot, height=plot_width/2.5, width=plot_width, units="in")
+ggsave(paste0(outdir, "/plots/IS_bar_all_sum.png"), plot=IS_sum_bar_plot, height=plot_width/2.5, width=plot_width, units="in")
 
 ##########
 ##### Line plots with all IS
@@ -365,10 +365,10 @@ IS_neg_line_plot <- theme_IS_line(IS_neg_line_plot)
 IS_pos_line_plot <- theme_IS_line(IS_pos_line_plot)
 
 # save plots to disk
-w <- 8 + 0.2 * sample_count
-ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_line_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_line_plot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_line_plot, height = w/2.5, width = w, units = "in")
+plot_width <- 8 + 0.2 * sample_count
+ggsave(paste0(outdir,"/plots/IS_line_all_neg.png"), plot = IS_neg_line_plot, height = plot_width/2.5, width = plot_width, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_pos.png"), plot = IS_pos_line_plot, height = plot_width/2.5, width = plot_width, units = "in")
+ggsave(paste0(outdir,"/plots/IS_line_all_sum.png"), plot = IS_sum_line_plot, height = plot_width/2.5, width = plot_width, units = "in")
 
 ##########
 ##### bar plots with a selection of IS
@@ -386,7 +386,7 @@ if (dims_matrix == "DBS"){
     data.frame(z = c(150000, 3300000, 1750000, 150000, 270000),
                HMDB.name = IS_pos_selection)
   hline.data.sum <- 
-    data.frame(z = c(1300000, 55000, 500000, 1800000, 1400000),
+    data.frame(z = c(1300000, 2500000, 500000, 1800000, 1400000),
                HMDB.name = IS_sum_selection)
 } else if (dims_matrix == "Plasma"){
   hline.data.neg <- 
@@ -398,7 +398,7 @@ if (dims_matrix == "DBS"){
   hline.data.sum <- 
     data.frame(z = c(700000, 1250000, 150000, 425000, 300000),
                HMDB.name = IS_sum_selection)
-}
+} 
 
 # function for ggplot theme
 # see bar plots with all IS
@@ -407,23 +407,23 @@ if (dims_matrix == "DBS"){
 IS_neg_selection_barplot <- ggplot(subset(IS_neg, HMDB.name %in% IS_neg_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Neg)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name)) + #subset, if some IS have no data, no empty plots will be generated with a line) +
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) + 
+  if(exists("hline.data.neg")){geom_hline(aes(yintercept = z), subset(hline.data.neg, HMDB.name %in% IS_neg$HMDB.name))} #subset, if some IS have no data, no empty plots will be generated with a line)
 
 IS_pos_selection_barplot <- ggplot(subset(IS_pos, HMDB.name %in% IS_pos_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Pos)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name)) + 
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
+  if(exists("hline.data.pos")){geom_hline(aes(yintercept = z), subset(hline.data.pos, HMDB.name %in% IS_pos$HMDB.name))}
 
 IS_sum_selection_barplot <- ggplot(subset(IS_summed, HMDB.name %in% IS_sum_selection), aes(Sample_level, Intensity)) +
   ggtitle("Interne Standaard (Sum)") +
   geom_bar(aes(fill=HMDB.name),stat='identity') +
-  geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_summed$HMDB.name)) + 
   labs(x='',y='Intensity') +
-  facet_wrap(~HMDB.name, scales='free', ncol = 2)
+  facet_wrap(~HMDB.name, scales='free', ncol = 2) +
+  if(exists("hline.data.sum")){geom_hline(aes(yintercept = z), subset(hline.data.sum, HMDB.name %in% IS_summed$HMDB.name))}
 
 # add theme to ggplot functions
 IS_neg_selection_barplot <- theme_IS_bar(IS_neg_selection_barplot) 
@@ -431,10 +431,10 @@ IS_pos_selection_barplot <- theme_IS_bar(IS_pos_selection_barplot)
 IS_sum_selection_barplot <- theme_IS_bar(IS_sum_selection_barplot) 
 
 # save plots to disk
-w <- 9 + 0.35 * sample_count
-ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_selection_barplot, height = w/2.0, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_selection_barplot, height = w/2.0, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_selection_barplot, height = w/2.0, width = w, units = "in")
+plot_width <- 9 + 0.35 * sample_count
+ggsave(paste0(outdir, "/plots/IS_bar_select_neg.png"), plot = IS_neg_selection_barplot, height = plot_width/2.0, width = plot_width, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_pos.png"), plot = IS_pos_selection_barplot, height = plot_width/2.0, width = plot_width, units = "in")
+ggsave(paste0(outdir, "/plots/IS_bar_select_sum.png"), plot = IS_sum_selection_barplot, height = plot_width/2.0, width = plot_width, units = "in")
 
 ##########
 ##### line plots with a selection of IS
@@ -468,10 +468,10 @@ IS_pos_selection_lineplot <- theme_IS_line(IS_pos_selection_lineplot)
 IS_sum_selection_lineplot <- theme_IS_line(IS_sum_selection_lineplot)
 
 # save plots to disk
-w <- 8 + 0.2 * sample_count
-ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_selection_lineplot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_selection_lineplot, height = w/2.5, width = w, units = "in")
-ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_lineplot, height = w/2.5, width = w, units = "in")
+plot_width <- 8 + 0.2 * sample_count
+ggsave(paste0(outdir, "/plots/IS_line_select_neg.png"), plot = IS_neg_selection_lineplot, height = plot_width/2.5, width = plot_width, units = "in")
+ggsave(paste0(outdir, "/plots/IS_line_select_pos.png"), plot = IS_pos_selection_lineplot, height = plot_width/2.5, width = plot_width, units = "in")
+ggsave(paste0(outdir, "/plots/IS_line_select_sum.png"), plot = IS_sum_selection_lineplot, height = plot_width/2.5, width = plot_width, units = "in")
 
 
 ### POSITIVE CONTROLS CHECK
