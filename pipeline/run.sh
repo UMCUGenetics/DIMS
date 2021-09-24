@@ -243,6 +243,15 @@ for x in \$(find ${outdir} -name "positive_controls_warning.txt" -not -empty); d
   msg+="<br><br>"
 done
 msg+="</p>"
+msg+="<hr>"
+msg+="Missing m/z warning:<br>"
+msg+="<p>"
+for x in \$(find ${outdir} -name "missing_mz_warning.txt" -not -empty); do
+  msg+="<b>\${x}</b><br>"
+  msg+=\$(cat \${x})
+  msg+="<br><br>"
+done
+msg+="</p>"
 
 echo \$msg > ${outdir}/logs/mail.html
 
