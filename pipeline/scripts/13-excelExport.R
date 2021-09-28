@@ -534,4 +534,43 @@ if (z_score == 1) {
     write.table(pos_contr_warning, file = paste(outdir, "positive_controls_warning.txt", sep = "/"), row.names = FALSE, col.names = FALSE, quote = FALSE)
   }}
 
+### MISSING M/Z CHECK
+# check the outlist_identified_(negative/positive).RData files for missing m/z values and mention in the results mail
+
+# Load the outlist_identified files + remove the loaded files
+load(paste0(outdir,"/outlist_identified_negative.RData"))
+outlist.ident.neg <- outlist.ident
+load(paste0(outdir,"/outlist_identified_positive.RData"))
+outlist.ident.pos <- outlist.ident
+rm(outlist.ident)
+rm(outlist.not.ident)
+
+# check for missing m/z in negative and positive mode
+mode <- c("Negative", "Positive")
+index <- 1
+results_ident <- c() #empty results list
+outlist_ident_list <- list(outlist.ident.neg, outlist.ident.pos)
+for(outlist.ident in outlist_ident_list){
+  current_mode <- mode[index]
+  # retrieve all unique m/z values in whole numbers and check if all are available
+  mz_values <- as.numeric(unique(format(outlist.ident$mzmed.pgrp, digits=0)))
+  mz_range = seq(70, 599, by=1) #change accordingly to the machine m/z range. default = 70-600
+  mz_missing = c()
+  for (mz in mz_range){
+    if (!mz %in% mz_values) {
+      mz_missing <- c(mz_missing, mz)
+    } }
+  y <- mz_missing
+  # check if m/z are missing and make an .txt file with information
+  group_ident <- cumsum(c(1, abs(y[-length(y)] - y[-1]) > 1))
+  if(length(group_ident) > 1){
+    results_ident <- c(results_ident, paste0("Missing m/z values ", current_mode, " mode"))
+    results_ident <- c(results_ident, by(y, group_ident, identity))
+  } else {
+    results_ident <- c(results_ident, paste0(current_mode, " mode did not have missing mz values"))
+  }
+  index <- index + 1 # change to new mode in for loop
+}
+lapply(results_ident, write, file=paste(outdir, "missing_mz_warning.txt", sep = "/"), append=TRUE, ncolumns=1000)
+
 cat("Ready excelExport.R")
