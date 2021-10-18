@@ -24,21 +24,28 @@ ppm <- as.numeric(cmd_args[6])
 #z_score <- 0
 
 object.files = list.files(paste(outdir, "9-samplePeaksFilled", sep="/"), full.names=TRUE, pattern=scanmode)
+if (length(object.files) == 0){
+  print(paste0(scanmode, " has no 9-samplePeaksFilled"))
+}
 
 outlist.tot=NULL
 for (i in 1:length(object.files)) {
   load(object.files[i])
+  print(head(final.outlist.idpat3, 2))
   outlist.tot = rbind(outlist.tot, final.outlist.idpat3)
 }
+save(outlist.tot, file=paste(outdir, "/outlist_identified_", scanmode, "1.RData", sep=""))
 
 source(paste(scripts, "AddOnFunctions/sourceDir.R", sep="/"))
 sourceDir(paste(scripts, "AddOnFunctions", sep="/"))
 
 # remove duplicates
 outlist.tot = mergeDuplicatedRows(outlist.tot)
+save(outlist.tot, file=paste(outdir, "/outlist_identified_", scanmode, "2.RData", sep=""))
 
 # sort on mass
 outlist.tot = outlist.tot[order(outlist.tot[,"mzmed.pgrp"]),]
+save(outlist.tot, file=paste(outdir, "/outlist_identified_", scanmode, "3.RData", sep=""))
 
 # normalization
 load(paste0(outdir, "/repl.pattern.",scanmode,".RData"))
@@ -63,6 +70,7 @@ if (z_score == 1) {
   outlist.stats.more=cbind(outlist.stats.more,tmp)
   outlist.tot = outlist.stats.more
 }
+save(outlist.tot, file=paste(outdir, "/outlist_identified_", scanmode, "4.RData", sep=""))
 
 # filter identified compounds
 index.1=which((outlist.tot[,"assi_HMDB"]!="") & (!is.na(outlist.tot[,"assi_HMDB"])))
