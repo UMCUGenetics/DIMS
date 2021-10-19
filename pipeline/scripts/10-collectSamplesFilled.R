@@ -31,7 +31,7 @@ if (length(object.files) == 0){
 outlist.tot=NULL
 for (i in 1:length(object.files)) {
   load(object.files[i])
-  print(head(final.outlist.idpat3, 2))
+  print(print(object.files[i]))
   outlist.tot = rbind(outlist.tot, final.outlist.idpat3)
 }
 save(outlist.tot, file=paste(outdir, "/outlist_identified_", scanmode, "1.RData", sep=""))
