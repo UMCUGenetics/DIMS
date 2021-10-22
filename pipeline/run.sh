@@ -388,6 +388,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   cur_id=\$(sbatch --job-name=9-runFillMissing_1_\${input}_${scanmode}_${name} --time=${job_9a_time} --mem=${job_9a_mem} --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
+wait
 
 for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
   input=\$(basename \$file .RData)
@@ -397,7 +398,7 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
 
   /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
-  cut_id=\$(sbatch --wait --job-name=9-runFillMissing_2_\${input}_${scanmode}_${name} --time=${job_9b_time} --mem=${job_9b_mem} --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
+  cut_id=\$(sbatch --job-name=9-runFillMissing_2_\${input}_${scanmode}_${name} --time=${job_9b_time} --mem=${job_9b_mem} --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
 done
 wait
