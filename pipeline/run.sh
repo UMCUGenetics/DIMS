@@ -193,6 +193,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
 
   ${rscript} ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
+
   cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=${job_2_time} --mem=${job_2_mem} --dependency=afterok:\${break_id}:+5 --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
   job_ids+="\${cur_id}:"
 done
@@ -203,6 +204,7 @@ echo "#!/bin/sh
 
 /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
+
 avg_id=\$(sbatch --job-name=3-average_\${input}_${name} --time=${job_3_time} --mem=${job_3_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
 
 # start next queue
