@@ -24,10 +24,10 @@ ppm <- as.numeric(cmd_args[6])
 #z_score <- 0
 
 object.files = list.files(paste(outdir, "9-samplePeaksFilled", sep="/"), full.names=TRUE, pattern=scanmode)
-
 outlist.tot=NULL
 for (i in 1:length(object.files)) {
   load(object.files[i])
+  print(print(object.files[i]))
   outlist.tot = rbind(outlist.tot, final.outlist.idpat3)
 }
 
