@@ -1,9 +1,9 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2")
+#.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2")
 
 # load required packages 
-suppressPackageStartupMessages(library("xcms"))
+suppressPackageStartupMessages(library("mzR"))
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -14,7 +14,7 @@ outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
 trim <- as.numeric(cmd_args[3]) #0.1
 dimsThresh <- as.numeric(cmd_args[4]) #100
 resol <- as.numeric(cmd_args[5]) #140000
-
+stitch <- 1 #0
 dir.create(paste(outdir, "2-pklist", sep = "/"), showWarnings = F)
 #dir.create(paste(outdir, "QC", sep="/"),showWarnings = F)
 
@@ -69,19 +69,46 @@ bins=NULL
 posRes=NULL
 negRes=NULL
 
-x <- suppressMessages(xcmsRaw(filepath))
-
+#x <- suppressMessages(xcmsRaw(filepath))
+Dat<-openMSfile(filepath)
+hdr=header(Dat)
+pks=peaks(Dat)
 load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 
 # Create empty placeholders for later use
 bins <- rep(0,length(breaks.fwhm)-1)
 
 # Generate a matrix
-y <- rawMat(x)
+#y <- rawMat(x)
+times <- hdr$retentionTime
+y_proxybig <- NA
+t = NULL
+length(pks)
+for (i in 1:length(pks)) {
+  t = times[i]
+  this_scan <- pks[[i]]
+  l <- length(this_scan[,1])
+  time <- rep(t, l)
+  #print(paste0("length:",l," = ",length(time)))
+  this_scan <- cbind(time, this_scan)
+  colnames(this_scan) <- c("time", "mz", "intensity")
+  if (i==1) { y_proxybig <- this_scan } else{ y_proxybig <- rbind(y_proxybig, this_scan) }
+}
+y <- y_proxybig
+
 
 # Get time values for positive and negative scans
-posTimes <- x@scantime[x@polarity == "positive"]
-negTimes <- x@scantime[x@polarity == "negative"]
+posTimes <- hdr$retentionTime[hdr$polarity==1]
+negTimes <- hdr$retentionTime[hdr$polarity==0]
+if (stitch==1){
+  trimLeft = round(hdr$retentionTime[2]+0.5)
+  trimRight = round(hdr$retentionTime[length(hdr$retentionTime)-1]-0.5)
+} else {
+  trimLeft = round(hdr$retentionTime[length(hdr$retentionTime)*trim])
+  trimRight = round(hdr$retentionTime[length(hdr$retentionTime)*(1-trim)])
+}
+#posTimes <- x@scantime[x@polarity == "positive"]
+#negTimes <- x@scantime[x@polarity == "negative"]
 # Select scans where sample is present
 posTimes <- posTimes[posTimes > trimLeft & posTimes < trimRight]
 negTimes <- negTimes[negTimes > trimLeft & negTimes < trimRight]
