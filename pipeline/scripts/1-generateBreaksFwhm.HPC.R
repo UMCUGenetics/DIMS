@@ -1,9 +1,9 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-
+#.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+suppressPackageStartupMessages(library(mzR))
 # load required packages 
-suppressPackageStartupMessages(library("xcms"))
+#suppressPackageStartupMessages(library(xcms))
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -14,7 +14,7 @@ outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
 trim <- as.numeric(cmd_args[3]) #0.1
 resol <- as.numeric(cmd_args[4]) #14000
 nrepl <- as.numeric(cmd_args[5]) #3
-
+stitch <- 1
 trimLeft=NULL
 trimRight=NULL
 breaks.fwhm=NULL
@@ -23,18 +23,38 @@ bins=NULL
 posRes=NULL
 negRes=NULL
 
-x <- suppressMessages(xcmsRaw(filepath))
-
-trimLeft = round(x@scantime[length(x@scantime)*trim])
-trimRight = round(x@scantime[length(x@scantime)*(1-trim)])
+#x <- suppressMessages(xcmsRaw(filepath))
+Dat<-openMSfile(filepath)
+hdr=header(Dat)
+pks=peaks(Dat)
+#x <- readMSData(filepath, mode = "onDisk", msLevel. = 1)
+#trimLeft = round(x@featureData@data[["retentionTime"]][length(x@featureData@data[["retentionTime"]])*trim])
+#trimRight = round(x@featureData@data[["retentionTime"]][length(x@featureData@data[["retentionTime"]])*(1-trim)])
+if (stitch==1){
+  trimLeft = round(hdr$retentionTime[2]+0.5)
+  trimRight = round(hdr$retentionTime[length(hdr$retentionTime)-1]-0.5)
+} else {
+  trimLeft = round(hdr$retentionTime[length(hdr$retentionTime)*trim])
+  trimRight = round(hdr$retentionTime[length(hdr$retentionTime)*(1-trim)])
+}
 cat(paste("\ntrimLeft", trimLeft, sep=" "))
 cat(paste("\ntrimRight", trimRight, sep=" "))
 
 # Mass range m/z
-lowMZ = x@mzrange[1]
-highMZ = x@mzrange[2]
-cat(paste("lowMZ", lowMZ, sep=" "))
-cat(paste("highMZ", highMZ, sep=" "))
+#lowMZ = round(x@featureData@data[["lowMZ"]][1])
+#highMZ = round(x@featureData@data[["highMZ"]][1])
+lowMZ = round(min(hdr$lowMZ))
+highMZ = round(max(hdr$highMZ))
+#trimLeft = round(x@scantime[length(x@scantime)*trim])
+#trimRight = round(x@scantime[length(x@scantime)*(1-trim)])
+#cat(paste("\ntrimLeft", trimLeft, sep=" "))
+#cat(paste("\ntrimRight", trimRight, sep=" "))
+
+# Mass range m/z
+#lowMZ = x@mzrange[1]
+#highMZ = x@mzrange[2]
+#cat(paste("lowMZ", lowMZ, sep=" "))
+#cat(paste("highMZ", highMZ, sep=" "))
 
 # breaks.fwhm <- seq(from=lowMZ, to=highMZ, by=deltaMZ)
 # breaks has fixed distance between min and max of a bin.
