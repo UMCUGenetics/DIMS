@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
+#.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
 
 # load required packages 
 # none 
@@ -14,7 +14,7 @@ outdir <- cmd_args[2]
 nrepl <- as.numeric(cmd_args[3])
 thresh2remove <- as.numeric(cmd_args[4])
 dimsThresh <- as.numeric(cmd_args[5])
-
+stitch <- 1
 # create output folder
 dir.create(paste(outdir, "3-average_pklist", sep = "/"), showWarnings = F)
 
@@ -54,7 +54,9 @@ removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
 
 # get repl.pattern
 load(paste(indir, "init.RData", sep="/"))
-
+if (stitch==1){
+  thresh2remove <- thresh2remove/100
+}
 remove_neg=NULL
 remove_pos=NULL
 cat("Pklist sum threshold to remove technical replicate:", thresh2remove, "\n")
