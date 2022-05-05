@@ -145,31 +145,9 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 # Clear the environment from any previously loaded modules
 #module purge > /dev/null 2>&1
 
-module load R/3.2.2
+#module load R/3.2.2
 
 global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --parsable"
-
-
-# 0-queueConversion.sh
-cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
-#!/bin/sh
-
-job_ids=""
-for raw in ${indir}/*.raw ; do
-  input=\$(basename \$raw .raw)
-  echo "#!/bin/sh
-
-  source /hpc/dbg_mz/tools/mono/etc/profile
-  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/1-data -p
-  " > ${outdir}/jobs/0-conversion/\${input}.sh
-  cur_id=\$(sbatch --job-name=0-conversion_\${input}_${name} --time=${job_0_time} --mem=${job_0_mem} --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/0-conversion/\${input}.sh)
-  job_ids+="\${cur_id}:"
-done
-job_ids=\${job_ids::-1}
-echo \${job_ids}
-
-sbatch --job-name=1-queueStart_${name} --time=${queue_1_time} --mem=${queue_1_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
-EOF
 
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
@@ -183,7 +161,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
     # 1-generateBreaksFwhm.HPC.R
     echo "#!/bin/sh
 
-    /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
+    singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
     " > ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh
     break_id=\$(sbatch --job-name=1-breaks_${name} --time=${job_1_time} --mem=${job_1_mem} --output=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.o --error=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.e ${global_sbatch_parameters} ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
   fi
@@ -191,7 +169,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
   # 2-DIMS.R
   echo "#!/bin/sh
 
-  ${rscript} ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
 
   cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=${job_2_time} --mem=${job_2_mem} --dependency=afterok:\${break_id}:+5 --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
@@ -202,7 +180,7 @@ job_ids=\${job_ids::-1} # remove last :
 # 3-averageTechReplicates.R
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
 
 avg_id=\$(sbatch --job-name=3-average_\${input}_${name} --time=${job_3_time} --mem=${job_3_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
@@ -290,7 +268,7 @@ for sample in ${outdir}/3-average_pklist/*${label}* ; do
   # 4-peakFinding.R
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/4-peakFinding.R \${sample} ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh
     cur_id=\$(sbatch --job-name=4-peakFinding_\${input}_${scanmode}_${name} --time=${job_4_time} --mem=${job_4_mem} --output=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.o --error=${outdir}/logs/4-peakFinding/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/4-peakFinding/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -300,14 +278,14 @@ job_ids=\${job_ids::-1}
 # 5-collectSamples.R
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/5-collectSamples.R ${outdir} ${scanmode}
 " > ${outdir}/jobs/5-collectSamples/${scanmode}.sh
 col_id=\$(sbatch --job-name=5-collectSamples_${scanmode}_${name} --time=${job_5_time} --mem=${job_5_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/5-collectSamples/${scanmode}.o --error=${outdir}/logs/5-collectSamples/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/5-collectSamples/${scanmode}.sh)
 
 # hmdb_part.R
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
 hmdb_id_1=\$(sbatch --job-name=hmdb_part_${scanmode}_${name} --time=${job_hmdb1_time} --mem=${job_hmdb1_mem} --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part/${scanmode}.sh)
 echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
@@ -315,7 +293,7 @@ echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
 # hmdb_part_adductSums.R
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/hmdb_part_adductSums.R ${outdir} ${scanmode} ${db}
 " > ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh
 hmdb_id_2=\$(sbatch --job-name=hmdb_part_adductSums_${scanmode}_${name} --time=${job_hmdb2_time} --mem=${job_hmdb2_mem} --output=${outdir}/logs/hmdb_part_adductSums/${scanmode}.o --error=${outdir}/logs/hmdb_part_adductSums/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part_adductSums/${scanmode}.sh)
 echo "${hmdb_id_2}" > ${outdir}/logs/hmdb_2
@@ -334,7 +312,7 @@ for hmdb in ${outdir}/hmdb_part/${scanmode}_* ; do
 
   # 6-peakGrouping
   echo "#!/bin/sh
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/6-peakGrouping.R \$hmdb ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=6-peakGrouping_\${input}_${scanmode}_${name} --time=${job_6_time} --mem=${job_6_mem} --output=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.o --error=${outdir}/logs/6-peakGrouping/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/6-peakGrouping/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -344,7 +322,7 @@ job_ids=\${job_ids::-1}
 # 7-collectSamplesGroupedHMDB
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/7-collectSamplesGroupedHMDB.R ${outdir} ${scanmode} ${ppm}
 " > ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh
 col_id=\$(sbatch --job-name=7-collectSamplesGroupedHMDB_${scanmode}_${name} --time=${job_7_time} --mem=${job_7_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.o --error=${outdir}/logs/7-collectSamplesGroupedHMDB/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/7-collectSamplesGroupedHMDB/${scanmode}.sh)
 
@@ -363,7 +341,7 @@ for file in ${outdir}/7-specpks_all_rest/${scanmode}_* ; do
   # 8-peakGrouping.rest
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${ppm}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/8-peakGrouping.rest.R \$file ${outdir} ${scanmode} ${resol} ${ppm}
   " > ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=8-peakGroupingRest_\${input}_${scanmode}_${name} --time=${job_8_time} --mem=${job_8_mem} --output=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.o --error=${outdir}/logs/8-peakGrouping.rest/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/8-peakGrouping.rest/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -385,7 +363,7 @@ for file in ${outdir}/8-grouping_rest/${scanmode}_* ; do
   # 9-runFillMissing.R part 1
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts} ${ppm}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts} ${ppm}
   " > ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=9-runFillMissing_1_\${input}_${scanmode}_${name} --time=${job_9a_time} --mem=${job_9a_mem} --output=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/rest_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/rest_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -398,7 +376,7 @@ for file in ${outdir}/6-grouping_hmdb/*_${scanmode}.RData ; do
   # 9-runFillMissing.R part 2
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/9-runFillMissing.R \$file ${outdir} ${scanmode} ${thresh} ${resol} ${scripts}
   " > ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=9-runFillMissing_2_\${input}_${scanmode}_${name} --time=${job_9b_time} --mem=${job_9b_mem} --output=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.o --error=${outdir}/logs/9-runFillMissing/hmdb_${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/9-runFillMissing/hmdb_${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -409,7 +387,7 @@ job_ids=\${job_ids::-1}
 # 10-collectSamplesFilled
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}  ${ppm}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/10-collectSamplesFilled.R ${outdir} ${scanmode} ${normalization} ${scripts} ${z_score}  ${ppm}
 " > ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh
 col_id=\$(sbatch --job-name=10-collectSamplesFilled_${scanmode}_${name} --time=${job_10_time} --mem=${job_10_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/10-collectSamplesFilled/${scanmode}.o --error=${outdir}/logs/10-collectSamplesFilled/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/10-collectSamplesFilled/${scanmode}.sh)
 
@@ -428,7 +406,7 @@ for hmdb in ${outdir}/hmdb_part_adductSums/${scanmode}_* ; do
   # 11-runSumAdducts
   echo "#!/bin/sh
 
-  /hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/11-runSumAdducts.R \$hmdb ${outdir} ${scanmode} ${adducts} ${z_score}
   " > ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh
   cur_id=\$(sbatch --job-name=11-runSumAdducts_\${input}_${scanmode}_${name} --time=${job_11_time} --mem=${job_11_mem} --output=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.o --error=${outdir}/logs/11-runSumAdducts/${scanmode}_\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/11-runSumAdducts/${scanmode}_\${input}.sh)
   job_ids+="\${cur_id}:"
@@ -438,7 +416,7 @@ job_ids=\${job_ids::-1}
 # 12-collectSamplesAdded
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/12-collectSamplesAdded.R ${outdir} ${scanmode} ${scripts}
 " > ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh
 col_id=\$(sbatch --job-name=12-collectSamplesAdded_${scanmode}_${name} --time=${job_12_time} --mem=${job_12_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/12-collectSamplesAdded/${scanmode}.o --error=${outdir}/logs/12-collectSamplesAdded/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/12-collectSamplesAdded/${scanmode}.sh)
 
@@ -450,7 +428,7 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already fi
   # 13-excelExport
   echo "#!/bin/sh
 
-  ${rscript} ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
   exp_id=\$(sbatch --job-name=13-excelExport_${name} --time=${job_13_time} --mem=${job_13_mem} --dependency=afterok:\${col_ids}:+5 --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${global_sbatch_parameters} ${outdir}/jobs/13-excelExport.sh)
   sbatch --job-name=14-cleanup_${name} --time=${job_14_time} --mem=${job_14_mem} --dependency=afterok:\${exp_id}:+5 --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${global_sbatch_parameters} ${outdir}/jobs/14-cleanup.sh
@@ -464,7 +442,7 @@ EOF
 doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
 doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
 
-sbatch --time=${queue_0_time} --mem=${queue_0_mem} --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e ${global_sbatch_parameters} ${outdir}/jobs/queue/0-queueConversion.sh
+sbatch --job-name=1-queueStart_${name} --time=${queue_1_time} --mem=${queue_1_mem} --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
 
 # Let user know that first job is queued
 echo Run started successfully
