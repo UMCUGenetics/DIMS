@@ -149,6 +149,24 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 
 global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --parsable"
 
+# 0-queueConversion.sh
+#cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
+#!/bin/sh
+#job_ids=""
+#for raw in ${indir}/*.raw ; do
+#  input=\$(basename \$raw .raw)
+#  echo "#!/bin/sh
+#  source /hpc/dbg_mz/tools/mono/etc/profile
+#  mono /hpc/dbg_mz/tools/ThermoRawFileParser_1.1.11/ThermoRawFileParser.exe -i=\${raw} --output=${outdir}/1-data -p
+#  " > ${outdir}/jobs/0-conversion/\${input}.sh
+#  cur_id=\$(sbatch --job-name=0-conversion_\${input}_${name} --time=${job_0_time} --mem=${job_0_mem} --output=${outdir}/logs/0-conversion/\${input}.o --error=${outdir}/logs/0-conversion/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/0-conversion/\${input}.sh)
+#  job_ids+="\${cur_id}:"
+#done
+#job_ids=\${job_ids::-1}
+#echo \${job_ids}
+#sbatch --job-name=1-queueStart_${name} --time=${queue_1_time} --mem=${queue_1_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
+#EOF
+
 # 1-queueStart.sh
 cat << EOF >> ${outdir}/jobs/queue/1-queueStart.sh
 #!/bin/sh
