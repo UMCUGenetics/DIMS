@@ -16,7 +16,7 @@ outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
 trim <- as.numeric(cmd_args[3]) #0.1
 resol <- as.numeric(cmd_args[4]) #14000
 nrepl <- as.numeric(cmd_args[5]) #3
-stitch <- 1
+stitch <- as.numeric(cmd_args[7]) #1
 trimLeft=NULL
 trimRight=NULL
 breaks.fwhm=NULL

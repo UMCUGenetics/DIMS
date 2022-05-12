@@ -16,7 +16,7 @@ outdir <- cmd_args[2] #"/Users/nunen/Documents/Metab/3.6.2"
 trim <- as.numeric(cmd_args[3]) #0.1
 dimsThresh <- as.numeric(cmd_args[4]) #100
 resol <- as.numeric(cmd_args[5]) #140000
-stitch <- 1 #0
+stitch <- as.numeric(cmd_args[7]) #1
 dir.create(paste(outdir, "2-pklist", sep = "/"), showWarnings = F)
 #dir.create(paste(outdir, "QC", sep="/"),showWarnings = F)
 

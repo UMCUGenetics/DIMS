@@ -14,7 +14,7 @@ outdir <- cmd_args[2]
 nrepl <- as.numeric(cmd_args[3])
 thresh2remove <- as.numeric(cmd_args[4])
 dimsThresh <- as.numeric(cmd_args[5])
-stitch <- 1
+stitch <- as.numeric(cmd_args[7]) #1
 # create output folder
 dir.create(paste(outdir, "3-average_pklist", sep = "/"), showWarnings = F)
 
