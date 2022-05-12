@@ -10,6 +10,7 @@ resol=140000
 email=example@example.nl
 matrix=Plasma
 z_score=1
+stitch=0
 db=/hpc/dbg_mz/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
 db2=/hpc/dbg_mz/tools/db/HMDB_with_info_relevance_IS_C5OH.RData
 job_0_time=00:15:00
