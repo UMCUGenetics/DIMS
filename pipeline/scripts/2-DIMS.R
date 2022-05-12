@@ -4,6 +4,8 @@
 
 # load required packages 
 suppressPackageStartupMessages(library("mzR"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("stringr"))
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -70,9 +72,103 @@ posRes=NULL
 negRes=NULL
 
 #x <- suppressMessages(xcmsRaw(filepath))
+#Dat<-openMSfile(filepath)
+#hdr=header(Dat)
+#pks=peaks(Dat)
+
+### functions for stitching
+
+#Trims the MZ-range in header file (lower scan window limit) 
+TrimlowerMZrange<-function(hdr){
+  for(i in 1:length(hdr$scanWindowLowerLimit)){
+    #if (70%in%hdr$scanWindowLowerLimit[[i]]){print('Lowerlimit of current scan is 70')}
+    if (hdr$scanWindowLowerLimit[[i]]==min(hdr$scanWindowLowerLimit)) {cat('Lowerlimit has reached:', hdr$scanWindowLowerLimit[[i]])}
+    else{hdr$scanWindowLowerLimit[[i]]<-hdr$scanWindowLowerLimit[[i]]+5}
+    
+  } 
+  return(hdr)
+}    
+
+
+#Trims the MZ range in header file (upper scan window limit)
+TrimupperMZrange<-function(hdr){
+  for(i in 1:length(hdr$scanWindowUpperLimit)){
+    #if (1280%in%hdr$scanWindowUpperLimit[[i]]){print('Upperlimit of current scan is 1280')}
+    if (hdr$scanWindowUpperLimit[[i]]==max(hdr$scanWindowUpperLimit)) {cat('Upperlimit has reached:', hdr$scanWindowUpperLimit[[i]])}  
+    else{hdr$scanWindowUpperLimit[[i]]<-hdr$scanWindowUpperLimit[[i]]-5}
+  } 
+  return(hdr)
+}   
+
+#replace FTMS + p filterstring to correct mz-range
+Replace_FTMS<-function(hdr){
+  for(i in 1:length(hdr$filterString)){
+    hdr$filterString[i]<-str_replace(hdr$filterString[i],"(?<=\\[)\\d+", toString(hdr$scanWindowLowerLimit[i]))
+  } 
+  return(hdr)
+}   
+
+# replace FTMS + upper mz
+Replace_FTMShigh<-function(hdr){
+  for(i in 1:length(hdr$filterString)){
+    hdr$filterString[i]<-str_replace(hdr$filterString[i],"(?<=\\-)\\d+", toString(hdr$scanWindowUpperLimit[i]))
+  } 
+  return(hdr)
+} 
+
+#Removes all peaks outside of the scanwindow lower limit
+TrimPeaklistlower<-function(pks, hdr){
+  for (i in 1:length(pks)) { 
+    #a<-hdr$scanWindowLowerLimit[i]
+    #print(a)
+    x<-which(pks[[i]][,1]<hdr$scanWindowLowerLimit[i],arr.ind = TRUE)
+    #print(x)
+    if(length(x)!=0) {pks[[i]]<-pks[[i]][-x,]}
+  }
+  return(pks)
+  #return(hdr)
+}
+
+#Removes all peaks outside of the scanwindow upper limit
+TrimPeaklistupper<-function(pks, hdr){
+  for (i in 1:length(pks)) {
+    #b<-hdr$scanWindowUpperLimit[i]
+    #print(b)
+    y<-which(pks[[i]][,1]<hdr$scanWindowUppperLimit[i],arr.ind = TRUE)
+    #print(y)
+    if(length(y)!=0) {pks[[i]]<-pks[[i]][-y,]}
+  } 
+  return(pks)
+  #return(hdr)
+}
+
+#Replaces the peakcount, lowMZ and HighMZ in the header file based on the new peaklist
+Replace_low_high_MZ_and_pkCount<-function(hdr, pks){ 
+  for (i in 1:length(pks)) {
+    hdr$peaksCount[[i]] <-length(pks[[i]][,1]) 
+    hdr$lowMZ[[i]]<-min(pks[[i]][,1])
+    hdr$highMZ[[i]]<-max(pks[[i]][,1])
+  }
+  return(hdr)
+}
+
+
+#x <- suppressMessages(xcmsRaw(filepath))
 Dat<-openMSfile(filepath)
-hdr=header(Dat)
-pks=peaks(Dat)
+hdr <- header(Dat)
+pks <- spectra(Dat)
+hdr <- TrimlowerMZrange(hdr)
+hdr <- TrimupperMZrange(hdr)
+hdr <- Replace_FTMS(hdr)
+hdr <- Replace_FTMShigh(hdr)
+pks <- TrimPeaklistlower(pks, hdr)
+pks <- TrimPeaklistupper(pks, hdr)
+hdr <- Replace_low_high_MZ_and_pkCount(hdr, pks)
+
+#
+
+
+
 load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 
 # Create empty placeholders for later use
@@ -194,3 +290,4 @@ negResT <- t(negRes)
 pklist <- list("pos"=posResT,"neg"=negResT, "breaksFwhm"=breaks.fwhm)
 
 save(pklist, file=paste(paste(outdir, "2-pklist", sep="/"),"/", sampname, ".RData", sep=""), version = 2)
+writeMSData(object = pks, file = paste0(outdir, "/1-data/", sampname, "_St.mzML"), hdr)
