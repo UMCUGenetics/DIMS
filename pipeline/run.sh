@@ -17,7 +17,6 @@ verbose=0
 restart=0
 indir=""
 outdir=""
-#rscript="/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2/bin/Rscript" #temp
 ppm=5 #temp
 
 # Show usage information
@@ -151,7 +150,7 @@ global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL
 
 # 0-queueConversion.sh
 cat << EOF >> ${outdir}/jobs/queue/0-queueConversion.sh
-!/bin/sh
+#!/bin/sh
 job_ids=""
 for raw in ${indir}/*.raw ; do
   input=\$(basename \$raw .raw)
@@ -461,8 +460,6 @@ doScanmode "negative" ${thresh_neg} "*_neg.RData" "1"
 doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
 
 sbatch --time=${queue_0_time} --mem=${queue_0_mem} --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e ${global_sbatch_parameters} ${outdir}/jobs/queue/0-queueConversion.sh
-
-#sbatch --job-name=1-queueStart_${name} --time=${queue_1_time} --mem=${queue_1_mem} --output=${outdir}/logs/queue/1-queueStart.o --error=${outdir}/logs/queue/1-queueStart.e ${global_sbatch_parameters} ${outdir}/jobs/queue/1-queueStart.sh
 
 # Let user know that first job is queued
 echo Run started successfully
