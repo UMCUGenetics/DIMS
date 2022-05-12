@@ -141,10 +141,6 @@ mv -f ${indir}/settings.config_tmp ${indir}/settings.config
 . ${indir}/settings.config
 #thresh2remove=$(printf "%.0f" ${thresh}2remove) # to convert to decimal from scientific notation
 
-# Clear the environment from any previously loaded modules
-#module purge > /dev/null 2>&1
-
-#module load R/3.2.2
 
 global_sbatch_parameters="--account=dbg_mz --mail-user=${email} --mail-type=FAIL,TIME_LIMIT,TIME_LIMIT_80 --export=NONE --parsable"
 
@@ -178,7 +174,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
     # 1-generateBreaksFwhm.HPC.R
     echo "#!/bin/sh
 
-    singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts}
+    singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/1-generateBreaksFwhm.HPC.R \$mzML ${outdir} ${trim} ${resol} ${nrepl} ${scripts} ${stitch}
     " > ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh
     break_id=\$(sbatch --job-name=1-breaks_${name} --time=${job_1_time} --mem=${job_1_mem} --output=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.o --error=${outdir}/logs/1-generateBreaksFwhm.HPC/breaks.e ${global_sbatch_parameters} ${outdir}/jobs/1-generateBreaksFwhm.HPC/breaks.sh)
   fi
@@ -186,7 +182,7 @@ for mzML in ${outdir}/1-data/*.mzML ; do
   # 2-DIMS.R
   echo "#!/bin/sh
 
-  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts}
+  singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/2-DIMS.R \$mzML ${outdir} ${trim} ${dims_thresh} ${resol} ${scripts} ${stitch}
   " > ${outdir}/jobs/2-DIMS/\${input}.sh
 
   cur_id=\$(sbatch --job-name=2-dims_\${input}_${name} --time=${job_2_time} --mem=${job_2_mem} --dependency=afterok:\${break_id}:+5 --output=${outdir}/logs/2-DIMS/\${input}.o --error=${outdir}/logs/2-DIMS/\${input}.e ${global_sbatch_parameters} ${outdir}/jobs/2-DIMS/\${input}.sh)
@@ -197,7 +193,7 @@ job_ids=\${job_ids::-1} # remove last :
 # 3-averageTechReplicates.R
 echo "#!/bin/sh
 
-singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts}
+singularity exec -B /hpc/dbg_mz:/hpc/dbg_mz dims.img Rscript ${scripts}/3-averageTechReplicates.R ${indir} ${outdir} ${nrepl} ${thresh2remove} ${dims_thresh} ${scripts} ${stitch}
 " > ${outdir}/jobs/3-averageTechReplicates/average.sh
 
 avg_id=\$(sbatch --job-name=3-average_\${input}_${name} --time=${job_3_time} --mem=${job_3_mem} --dependency=afterok:\${job_ids}:+5 --output=${outdir}/logs/3-averageTechReplicates/average.o --error=${outdir}/logs/3-averageTechReplicates/average.e ${global_sbatch_parameters} ${outdir}/jobs/3-averageTechReplicates/average.sh)
