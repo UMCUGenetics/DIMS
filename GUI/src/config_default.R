@@ -8,7 +8,7 @@ root2 <- "Y:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects"
 
 # Locations on HPC
 base <- "/hpc/dbg_mz"
-script_dir <- paste0(base, "/production/DIMS/pipeline")
+script_dir <- paste0(base, "/development/add_docker/DIMS/pipeline")
 db <- paste0(base, "/tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData")
 db2 <- paste0(base, "/tools/db/HMDB_with_info_relevance_IS_C5OH.RData")
 
