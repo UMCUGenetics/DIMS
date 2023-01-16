@@ -13,8 +13,8 @@ outdir <- cmd_args[1]
 scanmode <- cmd_args[2]
 db <- cmd_args[3]
 ppm <- as.numeric(cmd_args[4])
-stdrun <- cmd_args[5] # "yes"
-std_loc <- cmd_args[6] # "/hpc/dbg_mz/development/HMDB_stukken/DIMS/hmdb_preparts/"
+stdrun  <- cmd_args[5] # "yes"
+std_loc <- cmd_args[6] # "/hpc/dbg_mz/development/HMDB_stukken/DIMS/hmdb_preparts/" 
 
 # Cut up entire HMDB into small parts based on the new binning/breaks 
 
@@ -29,15 +29,15 @@ max_mz <- round(breaks.fwhm[length(breaks.fwhm)])
 if (stdrun == "yes" & min_mz > 68 & min_mz < 71 & max_mz > 600 & max_mz < 610) {
   # skip generating HMDB parts
   use_external_HMDB <- TRUE
-  save(use_external_HMDB, file=paste(outdir, "use_external_HMDB_begin.RData", sep="/"))
+  save(use_external_HMDB, file=paste(outdir, "using_external_HMDB_parts.RData", sep="/"))
   HMDBstukken <- list.files(std_loc, pattern=scanmode) # only positive or negative files
   for (h in 1:length(HMDBstukken)) {
     file.copy(paste0(std_loc, HMDBstukken[h]), outdir_hmdb, recursive = TRUE)
   }
-  # indication of how long the file.copy takes: (can be removed in production)
-  save(use_external_HMDB, file=paste(outdir, "use_external_HMDB_copy_end.RData", sep="/"))
 } else { 
   # generate HMDB parts in case of non-standard mz range
+  use_external_HMDB <- FALSE
+  save(use_external_HMDB, file=paste(outdir, "not_using_external_HMDB_parts.RData", sep="/"))
   load(db)
   if (scanmode=="negative"){
     label = "MNeg"
