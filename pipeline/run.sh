@@ -307,12 +307,10 @@ col_id=\$(sbatch --job-name=5-collectSamples_${scanmode}_${name} --time=${job_5_
 # hmdb_part.R
 echo "#!/bin/sh
 
-/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm} ${stdrun} ${stdrun_loc}
+/hpc/local/CentOS7/common/lang/R/3.2.2/bin/Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm} ${standard_run} ${hmdb_parts_dir}
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
 hmdb_id_1=\$(sbatch --job-name=hmdb_part_${scanmode}_${name} --time=${job_hmdb1_time} --mem=${job_hmdb1_mem} --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part/${scanmode}.sh)
 echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
-echo "${stdrun}"  > ${outdir}/logs/stdrun.log
-echo "${stdrun_loc}"  > ${outdir}/logs/stdrun_loc.log
 
 # hmdb_part_adductSums.R
 echo "#!/bin/sh
