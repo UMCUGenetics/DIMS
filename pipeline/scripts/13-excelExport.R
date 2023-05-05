@@ -71,6 +71,10 @@ rownames(tmp) <- rownames(tmp.pos)
 tmp <- cbind(tmp, "HMDB_name"=tmp.hmdb_name.pos)
 outlist <- rbind(tmp, tmp.pos.left, tmp.neg.left)
 
+# Extra output: all metabolites, adduct sums
+save(outlist, file=paste0(outdir, "/adductSums_all.RData"))
+
+
 # Filter 
 load(hmdb) # rlvnc in global environment
 
@@ -123,6 +127,9 @@ if (z_score == 1) {
   # set intensities of 0 to NA?
   outlist[,intensity_col_ids][outlist[,intensity_col_ids] == 0] <- NA
   
+  # Extra output: save outlist as it is and use it to calculate robust scaler
+  outlist.noZ <- outlist
+  
   # calculate mean and sd for Control group
   outlist$avg.ctrls <- apply(control_columns, 1, function(x) mean(as.numeric(x),na.rm = TRUE))
   outlist$sd.ctrls <- apply(control_columns, 1, function(x) sd(as.numeric(x),na.rm = TRUE))
@@ -137,8 +144,43 @@ if (z_score == 1) {
   }
   colnames(outlist)[startcol:ncol(outlist)] <- cnames.z
   
+  # Extra output: calculate robust scaler (Zscores minus outliers in Controls)
+  # calculate mean and sd for Control group without outliers
+  outlist.noZ$avg.ctrls <- 0
+  outlist.noZ$sd.ctrls  <- 0
+  
+  robustscaler <- function(x, perc=5, control_col_ids) {
+    nr_toremove <- ceiling(length(control_col_ids)*perc/100)
+    sorted_x <- sort(as.numeric(x))
+    trimmed_x <- sorted_x[(nr_toremove+1):(length(sorted_x)-nr_toremove)]
+    return(trimmed_x)
+  }
+  
+  # only calculate robust Z-scores if there are enough Controls
+  if (length(patient_col_ids) > 10) {
+    for (metabolite_index in 1:nrow(outlist)) {
+      outlist.noZ$avg.ctrls[metabolite_index] <- mean(robustscaler(outlist.noZ[metabolite_index, control_col_ids], perc, control_col_ids))
+      outlist.noZ$sd.ctrls[metabolite_index]  <-   sd(robustscaler(outlist.noZ[metabolite_index, control_col_ids], perc, control_col_ids))
+    }
+  }
+  
+  # Make and add columns with robust zscores
+  cnames.robust <- gsub("_Zscore", "_RobZscore", cnames.z)
+  for (i in intensity_col_ids) {
+    zscores.1col <- (as.numeric(as.vector(unlist(outlist.noZ[ , i]))) - outlist.noZ$avg.ctrls) / outlist.noZ$sd.ctrls
+    outlist.noZ <- cbind(outlist.noZ, zscores.1col)
+  }
+  colnames(outlist.noZ)[startcol:ncol(outlist.noZ)] <- cnames.robust
+
+  # Extra output: metabolites filtered on relevance
+  save(outlist, file=paste0(outdir, "/adductSums_filtered_Zscores.RData"))
+  write.table(outlist, file=paste0(outdir, "/adductSums_filtered_Zscores.txt"), sep="\t", row.names = FALSE)
+  # Extra output: filtered metabolites with robust scaled Zscores
+  write.table(outlist.noZ, file=paste0(outdir, "/adductSums_filtered_robustZ.txt"), sep="\t", row.names = FALSE)
+  
   patient_ids <- unique(as.vector(unlist(lapply(strsplit(colnames(patient_columns), ".", fixed = TRUE), function(x) x[1]))))
   patient_ids <- patient_ids[order(nchar(patient_ids), patient_ids)] # sorts 
+  
   
   temp_png <- NULL
   
