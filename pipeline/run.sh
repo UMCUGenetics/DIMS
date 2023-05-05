@@ -301,7 +301,8 @@ col_id=\$(sbatch --job-name=5-collectSamples_${scanmode}_${name} --time=${job_5_
 # hmdb_part.R
 echo "#!/bin/sh
 
-singularity -q exec -B /hpc/dbg_mz:/hpc/dbg_mz -B $TMPDIR:$TMPDIR ${dims_r_pack_image_path} Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm}
+singularity -q exec -B /hpc/dbg_mz:/hpc/dbg_mz -B $TMPDIR:$TMPDIR ${dims_r_pack_image_path} Rscript ${scripts}/hmdb_part.R ${outdir} ${scanmode} ${db} ${ppm} ${standard_run} ${hmdb_parts_dir}
+
 " > ${outdir}/jobs/hmdb_part/${scanmode}.sh
 hmdb_id_1=\$(sbatch --job-name=hmdb_part_${scanmode}_${name} --time=${job_hmdb1_time} --mem=${job_hmdb1_mem} --output=${outdir}/logs/hmdb_part/${scanmode}.o --error=${outdir}/logs/hmdb_part/${scanmode}.e ${global_sbatch_parameters} ${outdir}/jobs/hmdb_part/${scanmode}.sh)
 echo "${hmdb_id_1}" > ${outdir}/logs/hmdb_1
