@@ -17,11 +17,6 @@ Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 
 - Copy config_default.R to your own config.R, and configure as needed.
 
-## Setup HPC
-Used R version: 4.1.0 \
-Docker image based on rocker/tidyverse:4.1.0 \
-Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
-
 ## Docker image 
 docker pull rocker/tidyverse:4.1 \
 docker build -t umcugenbioinf/dims:1.1 -f Dockerfile . \
@@ -31,6 +26,10 @@ on HPC: \
 srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash \
 cd /hpc/dbg_mz/tools/singularity_cache/ \
 singularity build /hpc/dbg_mz/tools/singularity_cache/dims-1.1.img docker://umcugenbioinf/dims:1.1 \
+
+## Setup HPC
+Used R version: 4.1.0 \
+Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
 
 - Create the following folders in the same root map (eg. /hpc/dbg_mz)
   - `/development`
