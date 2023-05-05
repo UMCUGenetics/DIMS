@@ -22,6 +22,16 @@ Used R version: 4.1.0 \
 Docker image based on rocker/tidyverse:4.1.0
 Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
 
+## Docker image created with
+docker pull rocker/tidyverse:4.1
+docker build -t umcugenbioinf/dims:1.1 -f Dockerfile .
+docker push umcugenbioinf/dims:1.1
+
+on HPC:
+srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash
+cd /hpc/dbg_mz/tools/singularity_cache/
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-1.1.img docker://umcugenbioinf/dims:1.1
+
 - Create the following folders in the same root map (eg. /hpc/dbg_mz)
   - `/development`
   - `/processed`
@@ -76,17 +86,10 @@ thresh2remove=1000000000
 resol=140000
 email=example@example.com
 matrix=DBS
-db=.../tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
-db2=.../tools/db/HMDB_with_info_relevance_IS_C5OH.RData
-z_score=1```
-
-## Docker image created with
-docker pull rocker/tidyverse:4.1
-docker build -t umcugenbioinf/dims:1.1 -f Dockerfile .
-docker push umcugenbioinf/dims:1.1
-
-on HPC:
-srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash
-cd /hpc/dbg_mz/tools/singularity_cache/
-singularity build /hpc/dbg_mz/tools/singularity_cache/dims-1.1.img docker://umcugenbioinf/dims:1.1
+db=.../tools/db/HMDB_add_iso_corrected_V2.RData
+db2=.../tools/db/HMDB_with_info_relevance_corrected_V2.RData
+z_score=1
+standard_run=yes
+hmdb_parts_dir=/hpc/dbg_mz/production/DIMS/hmdb_preparts
+```
 
