@@ -1,5 +1,5 @@
 # DIMS
-Pipeline that processes raw Direct Mass Spectrometry data.
+Pipeline that processes raw Direct Infusion Mass Spectrometry data.
 
 ### Folder Structure
 ```
@@ -12,14 +12,15 @@ Pipeline that processes raw Direct Mass Spectrometry data.
 ```
 
 ## Setup GUI
-Used R version: 3.6.1 \
+Used R version: 3.6.1
 Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 
 - Copy config_default.R to your own config.R, and configure as needed.
 
 ## Setup HPC
-Used R versions: 3.6.2 and 3.2.2 (which R version is used is found at the top of the main .R scripts) \
-Libraries: xcms, Cairo, ggplot2, reshape2, openxlsx, loder
+Used R version: 4.1.0 \
+Docker image based on rocker/tidyverse:4.1.0
+Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
 
 - Create the following folders in the same root map (eg. /hpc/dbg_mz)
   - `/development`
@@ -50,7 +51,7 @@ CMD:
 
 REQUIRED ARGS:
   -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1
-  -o - full path output folder, eg. /hpc/dbg-mz/processed/run1
+  -o - full path output folder, eg /hpc/dbg-mz/processed/run1
 
 OPTIONAL ARGS:
   -r - restart the pipeline, removing any existing output for the entered run (default off)
@@ -78,3 +79,14 @@ matrix=DBS
 db=.../tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
 db2=.../tools/db/HMDB_with_info_relevance_IS_C5OH.RData
 z_score=1```
+
+## Docker image created with
+docker pull rocker/tidyverse:4.1
+docker build -t umcugenbioinf/dims:1.1 -f Dockerfile .
+docker push umcugenbioinf/dims:1.1
+
+on HPC:
+srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash
+cd /hpc/dbg_mz/tools/singularity_cache/
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-1.1.img docker://umcugenbioinf/dims:1.1
+
