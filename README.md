@@ -18,20 +18,24 @@ Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 - Copy config_default.R to your own config.R, and configure as needed.
 
 ## Docker image 
-docker pull rocker/tidyverse:4.1 \
-docker build -t umcugenbioinf/dims:1.1 -f Dockerfile . \
-docker push umcugenbioinf/dims:1.1
+```
+docker pull rocker/tidyverse:4.1 
+docker build -t umcugenbioinf/dims:[tag] -f Dockerfile . 
+docker push umcugenbioinf/dims:[tag]
+```
 
 on HPC: \
-srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash \
-cd /hpc/dbg_mz/tools/singularity_cache/ \
-singularity build /hpc/dbg_mz/tools/singularity_cache/dims-1.1.img docker://umcugenbioinf/dims:1.1 \
+```
+srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
+cd /hpc/dbg_mz/tools/singularity_cache/ 
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://umcugenbioinf/dims:[tag]
+```
 
 ## Setup HPC
 Used R version: 4.1.0 \
 Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
 
-- Create the following folders in the same root map (eg. /hpc/dbg_mz)
+- Create the following folders in the same root map (e.g. /hpc/dbg_mz)
   - `/development`
   - `/processed`
   - `/production`
@@ -59,8 +63,8 @@ CMD:
   sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
 
 REQUIRED ARGS:
-  -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1
-  -o - full path output folder, eg /hpc/dbg-mz/processed/run1
+  -i - full path input folder, e.g. /hpc/dbg_mz/raw_data/run1
+  -o - full path output folder, e.g. /hpc/dbg-mz/processed/run1
 
 OPTIONAL ARGS:
   -r - restart the pipeline, removing any existing output for the entered run (default off)
@@ -74,7 +78,7 @@ EXAMPLE:
 Input folder requirements:
 - all the .raw files 
 - init.RData (sampelsheet, which contains which technical replicates belong to which biological sample)
-- a 'setting.config' file containing eg:
+- a 'setting.config' file containing e.g.:
 ```thresh_pos=2000
 thresh_neg=2000
 dims_thresh=100
