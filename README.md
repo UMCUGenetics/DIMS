@@ -19,7 +19,6 @@ Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 
 ## Docker image 
 ```
-docker pull rocker/tidyverse:4.1 
 docker build -t umcugenbioinf/dims:[tag] -f Dockerfile . 
 docker push umcugenbioinf/dims:[tag]
 ```
