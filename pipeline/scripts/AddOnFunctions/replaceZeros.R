@@ -55,7 +55,8 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir,ppm){
       }
       for (j in 1:length(index)){
         area = generateGaussian(outpgrlist[index[j],"mzmed.pgrp"],thresh,resol,FALSE,scanmode,int.factor=1*10^5,1,1)$area
-        # area = area/2
+        # for testing purposes, add a fixed random seed
+        set.seed(123)
         outpgrlist[index[j], names(repl.pattern.filtered)[i]] = rnorm(n=1, mean=area, sd=0.25*area)
       }
     }
