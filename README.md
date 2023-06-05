@@ -19,12 +19,11 @@ Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 
 ## Docker image 
 ```
-docker pull rocker/tidyverse:4.1 
 docker build -t umcugenbioinf/dims:[tag] -f Dockerfile . 
 docker push umcugenbioinf/dims:[tag]
 ```
 
-on HPC: \
+on HPC: 
 ```
 srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
 cd /hpc/dbg_mz/tools/singularity_cache/ 
