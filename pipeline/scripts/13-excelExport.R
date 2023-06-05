@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.6.2")
+
 # load required packages 
 library("ggplot2")
 library("reshape2")
@@ -24,6 +26,7 @@ export <- TRUE
 control_label <- "C"
 case_label <- "P"
 imagesize_multiplier <- 2
+perc <- 5
 
 rundate <- Sys.Date()
 
@@ -71,7 +74,6 @@ outlist <- rbind(tmp, tmp.pos.left, tmp.neg.left)
 
 # Extra output: all metabolites, adduct sums
 save(outlist, file=paste0(outdir, "/adductSums_all.RData"))
-
 
 # Filter 
 load(hmdb) # rlvnc in global environment
@@ -134,10 +136,10 @@ if (z_score == 1) {
   
   # Make and add columns with zscores
   cnames.z <- NULL
-  for (i in intensity_col_ids) {
-    cname <- colnames(outlist)[i]
+  for (intensity_col_id in intensity_col_ids) {
+    cname <- colnames(outlist)[intensity_col_id]
     cnames.z <- c(cnames.z, paste(cname, "Zscore", sep="_"))
-    zscores.1col <- (as.numeric(as.vector(unlist(outlist[ , i]))) - outlist$avg.ctrls) / outlist$sd.ctrls
+    zscores.1col <- (as.numeric(as.vector(unlist(outlist[ , intensity_col_id]))) - outlist$avg.ctrls) / outlist$sd.ctrls
     outlist <- cbind(outlist, zscores.1col)
   }
   colnames(outlist)[startcol:ncol(outlist)] <- cnames.z
@@ -147,23 +149,23 @@ if (z_score == 1) {
   outlist.noZ$avg.ctrls <- 0
   outlist.noZ$sd.ctrls  <- 0
   
-  robustscaler <- function(x, perc=5, control_col_ids) {
+  robust_scaler <- function(control_intensities, control_col_ids, perc=5) {
     nr_toremove <- ceiling(length(control_col_ids)*perc/100)
-    sorted_x <- sort(as.numeric(x))
-    trimmed_x <- sorted_x[(nr_toremove+1):(length(sorted_x)-nr_toremove)]
-    return(trimmed_x)
+    sorted_control_intensities <- sort(as.numeric(control_intensities))
+    trimmed_control_intensities <- sorted_control_intensities[(nr_toremove+1):(length(sorted_control_intensities)-nr_toremove)]
+    return(trimmed_control_intensities)
   }
   
   # only calculate robust Z-scores if there are enough Controls
   if (length(patient_col_ids) > 10) {
     for (metabolite_index in 1:nrow(outlist)) {
-      outlist.noZ$avg.ctrls[metabolite_index] <- mean(robustscaler(outlist.noZ[metabolite_index, control_col_ids], perc, control_col_ids))
-      outlist.noZ$sd.ctrls[metabolite_index]  <-   sd(robustscaler(outlist.noZ[metabolite_index, control_col_ids], perc, control_col_ids))
+      outlist.noZ$avg.ctrls[metabolite_index] <- mean(robust_scaler(outlist.noZ[metabolite_index, control_col_ids], control_col_ids, perc))
+      outlist.noZ$sd.ctrls[metabolite_index]  <-   sd(robust_scaler(outlist.noZ[metabolite_index, control_col_ids], control_col_ids, perc))
     }
   }
   
   # Make and add columns with robust zscores
-  cnames.robust <- gsub("_Zscore", "_RobZscore", cnames.z)
+  cnames.robust <- gsub("_Zscore", "_RobustZscore", cnames.z)
   for (i in intensity_col_ids) {
     zscores.1col <- (as.numeric(as.vector(unlist(outlist.noZ[ , i]))) - outlist.noZ$avg.ctrls) / outlist.noZ$sd.ctrls
     outlist.noZ <- cbind(outlist.noZ, zscores.1col)
