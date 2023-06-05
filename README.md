@@ -1,5 +1,5 @@
 # DIMS
-Pipeline that processes raw Direct Mass Spectrometry data.
+Pipeline that processes raw Direct Infusion Mass Spectrometry data.
 
 ### Folder Structure
 ```
@@ -17,11 +17,24 @@ Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
 
 - Copy config_default.R to your own config.R, and configure as needed.
 
-## Setup HPC
-Used R versions: 3.6.2 and 3.2.2 (which R version is used is found at the top of the main .R scripts) \
-Libraries: xcms, Cairo, ggplot2, reshape2, openxlsx, loder
+## Docker image 
+```
+docker build -t umcugenbioinf/dims:[tag] -f Dockerfile . 
+docker push umcugenbioinf/dims:[tag]
+```
 
-- Create the following folders in the same root map (eg. /hpc/dbg_mz)
+on HPC: 
+```
+srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
+cd /hpc/dbg_mz/tools/singularity_cache/ 
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://umcugenbioinf/dims:[tag]
+```
+
+## Setup HPC
+Used R version: 4.1.0 \
+Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra 
+
+- Create the following folders in the same root map (e.g. /hpc/dbg_mz)
   - `/development`
   - `/processed`
   - `/production`
@@ -49,8 +62,8 @@ CMD:
   sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
 
 REQUIRED ARGS:
-  -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1
-  -o - full path output folder, eg. /hpc/dbg-mz/processed/run1
+  -i - full path input folder, e.g. /hpc/dbg_mz/raw_data/run1
+  -o - full path output folder, e.g. /hpc/dbg-mz/processed/run1
 
 OPTIONAL ARGS:
   -r - restart the pipeline, removing any existing output for the entered run (default off)
@@ -64,7 +77,7 @@ EXAMPLE:
 Input folder requirements:
 - all the .raw files 
 - init.RData (sampelsheet, which contains which technical replicates belong to which biological sample)
-- a 'setting.config' file containing eg:
+- a 'setting.config' file containing e.g.:
 ```thresh_pos=2000
 thresh_neg=2000
 dims_thresh=100
@@ -75,6 +88,10 @@ thresh2remove=1000000000
 resol=140000
 email=example@example.com
 matrix=DBS
-db=.../tools/db/HMDB_add_iso_corrNaCl_withIS_withC5OH.RData
-db2=.../tools/db/HMDB_with_info_relevance_IS_C5OH.RData
-z_score=1```
+db=.../tools/db/HMDB_add_iso_corrected_V2.RData
+db2=.../tools/db/HMDB_with_info_relevance_corrected_V2.RData
+z_score=1
+standard_run=yes
+hmdb_parts_dir=/hpc/dbg_mz/production/DIMS/hmdb_preparts
+```
+

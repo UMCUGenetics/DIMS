@@ -1,10 +1,10 @@
 ### Settings
 
 # Root for raw data file selector
-root <- "C:/Xcalibur/data/Research"
+root <- ""
 
 # Root for experimental design file selector (sample sheet)
-root2 <- "Y:/Metabolomics/Research Metabolic Diagnostics/Metabolomics Projects"
+root2 <- ""
 
 # Locations on HPC
 base <- "/hpc/dbg_mz"
