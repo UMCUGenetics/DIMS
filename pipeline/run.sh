@@ -135,7 +135,7 @@ mkdir -p ${outdir}/1-data
 
 cp ${indir}/settings.config ${outdir}/logs
 cp ${indir}/init.RData ${outdir}/logs
-git --git-dir=.git rev-parse HEAD > ${outdir}/logs/commit
+git --git-dir=../.git rev-parse HEAD > ${outdir}/logs/commit
 echo `date +%s` >> ${outdir}/logs/commit
 
 dos2unix -n ${indir}/settings.config ${indir}/settings.config_tmp
