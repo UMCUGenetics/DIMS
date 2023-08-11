@@ -157,7 +157,7 @@ if (z_score == 1) {
   }
   
   # only calculate robust Z-scores if there are enough Controls
-  if (length(patient_col_ids) > 10) {
+  if (length(control_col_ids) > 10) {
     for (metabolite_index in 1:nrow(outlist)) {
       outlist.noZ$avg.ctrls[metabolite_index] <- mean(robust_scaler(outlist.noZ[metabolite_index, control_col_ids], control_col_ids, perc))
       outlist.noZ$sd.ctrls[metabolite_index]  <-   sd(robust_scaler(outlist.noZ[metabolite_index, control_col_ids], control_col_ids, perc))

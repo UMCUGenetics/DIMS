@@ -70,7 +70,7 @@ if [ ${verbose} -gt 0 ] ; then set -x ; fi
 name=$(basename ${outdir})
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
 dims_r_pack_image_path="/hpc/dbg_mz/tools/singularity_cache/dims-1.1.img"
-singularity_exec="singularity -q exec -B /hpc/dbg_mz:/hpc/dbg_mz -B $TMPDIR:$TMPDIR ${dims_r_pack_image_path}"
+singularity_exec="singularity -q exec -B /hpc/dbg_mz:/hpc/dbg_mz -B \\\$TMPDIR:\\\$TMPDIR ${dims_r_pack_image_path}"
 
 while [[ ${restart} -gt 0 ]]
 do
@@ -135,7 +135,7 @@ mkdir -p ${outdir}/1-data
 
 cp ${indir}/settings.config ${outdir}/logs
 cp ${indir}/init.RData ${outdir}/logs
-git rev-parse HEAD > ${outdir}/logs/commit
+git --git-dir=../.git rev-parse HEAD > ${outdir}/logs/commit
 echo `date +%s` >> ${outdir}/logs/commit
 
 dos2unix -n ${indir}/settings.config ${indir}/settings.config_tmp
