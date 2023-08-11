@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-workflow_path='/hpc/dbg_mz/development/NextflowDIMS'
+workflow_path='/hpc/dbg_mz/development/DIMS_Nextflow'
 
 # Set input and output dirs
 input=$1
@@ -24,14 +24,14 @@ sbatch <<EOT
 #!/bin/bash
 #SBATCH --time=1:00:00
 #SBATCH --nodes=1
-#SBATCH --mem 50G 
+#SBATCH --mem 5G
 #SBATCH --job-name Nextflow_DIMS
 #SBATCH -o log/slurm_nextflow_dims.%j.out
 #SBATCH -e log/slurm_nextflow_dims.%j.err
 #SBATCH --mail-user $email
 #SBATCH --mail-type FAIL
 #SBATCH --export=NONE
-#SBATCH --gres=tmpspace:50G
+#SBATCH --gres=tmpspace:5G
 
 /hpc/diaggen/software/tools/nextflow run $workflow_path/DIMS.nf \
 -c $workflow_path/DIMS.config \
