@@ -1,7 +1,5 @@
 #!/usr/bin/Rscript
 
-.libPaths(new = "/hpc/local/CentOS7/dbg_mz/R_libs/3.2.2")
-
 # load required packages 
 # none 
 
@@ -83,4 +81,12 @@ outlist.ident$theormz_noise=as.numeric(outlist.ident$theormz_noise)
 
 save(outlist.not.ident, outlist.ident, file=paste(outdir, "/outlist_identified_", scanmode, ".RData", sep=""))
 
+# Extra output in Excel-readable format:
+remove_columns <- c("fq.best", "fq.worst", "mzmin.pgrp", "mzmax.pgrp")
+remove_colindex <- which(colnames(outlist.ident) %in% remove_columns)
+outlist.ident <- outlist.ident[ , -remove_colindex]
+write.table(outlist.ident, file=paste0(outdir, "/outlist_identified_", scanmode, ".txt"), sep="\t", row.names = FALSE)
+remove_colindex <- which(colnames(outlist.not.ident) %in% remove_columns)
+outlist.not.ident <- outlist.not.ident[ , -remove_colindex]
+write.table(outlist.not.ident, file=paste0(outdir, "/outlist_not_identified_", scanmode, ".txt"), sep="\t", row.names = FALSE)
 
