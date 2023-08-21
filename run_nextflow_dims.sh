@@ -10,10 +10,11 @@ email=$3
 samplesheet=$4
 nr_replicates=$5
 resolution=$6
+ppm=$7
 echo "input directory: $input"
 echo "output directory: $output"
 echo "workflow path: $workflow_path"
-optional_params=( "${@:4}" )
+optional_params=( "${@:8}" )
 mkdir -p $output 
 cd $output
 mkdir -p log
@@ -36,11 +37,12 @@ sbatch <<EOT
 /hpc/diaggen/software/tools/nextflow run $workflow_path/DIMS.nf \
 -c $workflow_path/DIMS.config \
 --rawfiles_path $input \
+--outdir $output \
+--email $email \
 --samplesheet $input/$samplesheet \
 --nr_replicates $nr_replicates \
 --resolution $resolution \
---outdir $output \
---email $email \
+--ppm $ppm \
 -profile slurm \
 -resume -ansi-log false \
 ${optional_params[@]:-""}
