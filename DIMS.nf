@@ -11,19 +11,21 @@ include HMDBparts from './CustomModules/DIMS/HMDBparts.nf' params(standard_run:"
 include AverageTechReplicates from './CustomModules/DIMS/AverageTechReplicates.nf' params(nr_replicates:"$params.nr_replicates")
 include PeakFinding from './CustomModules/DIMS/PeakFinding.nf' params(resolution:"$params.resolution", scripts_dir:"$params.scripts_dir")
 include SpectrumPeakFinding from './CustomModules/DIMS/SpectrumPeakFinding.nf'
-include PeakGroupingIdentified from './CustomModules/DIMS/PeakGroupingIdentified.nf' params(resolution:"$params.resolution", ppm:"$params.ppm")
+include PeakGrouping from './CustomModules/DIMS/PeakGrouping.nf' params(ppm:"$params.ppm")
+include FillMissing from './CustomModules/DIMS/FillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
 
 
 // define parameters
-def samplesheet = params.samplesheet
+def samplesheet   = params.samplesheet
 def nr_replicates = params.nr_replicates
-def raw_files = extractRawfilesFromDir(params.rawfiles_path)
-def analysis_id = params.outdir.split('/')[-1]
-def resolution = params.resolution
-def hmdb_db_file = params.hmdb_db_file
-def ppm = params.ppm
-def standard_run = params.standard_run
-def scripts_dir = params.scripts_dir
+def raw_files     = extractRawfilesFromDir(params.rawfiles_path)
+def analysis_id   = params.outdir.split('/')[-1]
+def resolution    = params.resolution
+def hmdb_db_file  = params.hmdb_db_file
+def ppm           = params.ppm
+def standard_run  = params.standard_run
+def scripts_dir   = params.scripts_dir
+def thresh        = params.thresh
 
 
 workflow {
@@ -35,10 +37,8 @@ workflow {
     
     // Generate breaks on the mzML files
     GenerateBreaks(ConvertRawFile.out.take(1))
-    // breaks_out = GenerateBreaks(ConvertRawFile.out.take(1))
 
     // Generate HMDB parts
-    // HMDBparts(hmdb_db_file, GenerateBreaks.out, standard_run, ppm)
     HMDBparts(hmdb_db_file, GenerateBreaks.out)
 
     // Assign intensities to bins (breaks)
@@ -48,22 +48,16 @@ workflow {
     AverageTechReplicates(AssignToBins.out.collect(), MakeInit.out)
 
     // Peak finding
-    // with combine:
-    // PeakFinding(AverageTechReplicates.out.binned.flatten().combine(GenerateBreaks.out))
-    // without combine:
-    // PeakFinding(AverageTechReplicates.out.binned.flatten(), GenerateBreaks.out)
-    // with breaks_out:
-    // PeakFinding(AverageTechReplicates.out.binned.flatten(), breaks_out)
-    // try with collectFile
-    // PeakFinding(AverageTechReplicates.out.binned.flatten().combine(GenerateBreaks.out.collectFile("breaks.fwhm.RData")))
-    // with collect and tuple in PeakFinding.nf
     PeakFinding(AverageTechReplicates.out.binned.collect().flatten().combine(GenerateBreaks.out))
 
     // Spectrum peak finding
     SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.patterns)
 
     // Peak grouping: identified part
-    // PeakGroupingIdentified(SpectrumPeakFinding.out, HMDBparts.out.collect().flatten(), AverageTechReplicates.out.patterns)
+    PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.patterns)
+
+    // Fill missing: identified part
+    FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.patterns)
 
     // Create log files: Repository versions and Workflow params
     //VersionLog(
