@@ -11,6 +11,7 @@ samplesheet=$4
 nr_replicates=$5
 resolution=$6
 ppm=$7
+zscore=$8
 echo "input directory: $input"
 echo "output directory: $output"
 echo "workflow path: $workflow_path"
