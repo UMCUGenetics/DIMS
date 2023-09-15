@@ -24,10 +24,11 @@ violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NULL) {
   if (!is.null(dim(top_metab_pt))) {
     plot.new()
     # get the names and numbers in the table aligned
-    #table_theme <- ttheme_default(core = list(fg_params = list(hjust=0, x=0.05, fontsize=6)),
-    #                              colhead = list(fg_params = list(fontsize=8, fontface="bold")))
-    # grid.table(top_metab_pt, rows = NULL)
-    #grid.table(top_metab_pt, theme = table_theme, rows = NULL)
+    table_theme <- ttheme_default(core = list(fg_params = list(hjust=0, x=0.05, fontsize=6)),
+                                  colhead = list(fg_params = list(fontsize=8, fontface="bold")))
+    grid.table(top_metab_pt, theme = table_theme, rows = NULL)
+    # g <- tableGrob(top_metab_pt)
+    # grid.draw(g)
     text(x=0.45, y=1.02, paste0("Top deviating metabolites for patient: ", pt_name), font=1, cex=1)
   }
   
@@ -69,6 +70,22 @@ violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NULL) {
     suppressWarnings(print(g))
     
   }
+
+  # add explanation of violin plots, version number etc.
+  # plot.new()
+  plot(NA, xlim=c(0,5), ylim=c(0,5), bty='n', xaxt='n', yaxt='n', xlab='', ylab='')
+  if (length(explanation) > 0) {
+    text(0.2, 5, explanation[1], pos=4, cex=0.8)
+    for (line_index in 2:length(explanation)) {
+      text_y_position <- 5 - (line_index*0.2)
+      text(-0.2, text_y_position, explanation[line_index], pos=4, cex=0.5)
+    }
+    # full_explanation <- paste(explanation[2:length(explanation)], sep="  \n")
+    # text(0.2, 4, full_explanation, pos=4, cex=0.6)
+    #explanation_grob=textGrob(apply(full_explanation, 2, paste, collapse="\n"))
+    #grid.arrange(explanation_grob)
+  }
+
   # close the PDF file
   dev.off()
   
