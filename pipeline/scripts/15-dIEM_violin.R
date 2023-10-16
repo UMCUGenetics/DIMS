@@ -14,18 +14,18 @@ library(ggplot2) # for plotting
 library(gridExtra) # for table top highest/lowest
 
 # load functions
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/same_samplename.R")
+#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/violin_plots.R")
+#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
 #temporary:
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/same_samplename.R")
+source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/violin_plots.R")
+source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
 
 # define parameters - check after addition to run.sh
@@ -46,7 +46,9 @@ nr_plots_perpage <- 20 # number of violin plots per page in PDF
 
 # Settings from config.R
 # binary variable: run function, yes(1) or no(0). Can be removed at later stage
-if (z_score == 1) { algorithm <- ratios <- violin <- 1 } #
+if (z_score == 1) { 
+	algorithm <- ratios <- violin <- 1 
+} 
 # integer: are the sample names headers on row 1 or row 2 in the DIMS excel? (default 1)
 header_row <- 1
 # column name where the data starts (default B)
@@ -201,7 +203,7 @@ if (ratios == 1) {
     # matching intensity column
     int_col <- intensity_cols[sample_index]
     # test on column names
-    if (same_samplename(colnames(ratio_list)[int_col], colnames(ratio_list)[zscore_col])) {
+    if (check_same_samplename(colnames(ratio_list)[int_col], colnames(ratio_list)[zscore_col])) {
       # calculate Z-scores
       ratio_list[ , zscore_col] <- (ratio_list[ , int_col] - ratio_list[ , "Mean_controls"]) / ratio_list[ , "SD_controls"]
     }
@@ -216,7 +218,7 @@ if (ratios == 1) {
   names(dims_xls_ratios) <- gsub("HMDB.name", "HMDB_name", names(dims_xls_ratios))
 
   # for debugging:
-  write.table(dims_xls_ratios, file=paste0(outdir, "ratios.txt"), sep="\t")
+  write.table(dims_xls_ratios, file=paste0(output_dir, "/ratios.txt"), sep="\t")
 
   # Select only the cols with zscores of the patients 
   zscore_patients <- dims_xls_ratios[ , c(1, 2, zscore_cols[grep("P", colnames(dims_xls_ratios)[zscore_cols])])]
@@ -398,7 +400,7 @@ if (violin == 1) { # make violin plots
       }
 
       # generate normal violin plots
-      violin_plots(pdf_dir, pt_name, metab_perpage, top_metab_pt)
+      create_violin_plots(pdf_dir, pt_name, metab_perpage, top_metab_pt)
       
     } # end for pt_nr
 
@@ -457,7 +459,7 @@ if (violin == 1) { # make violin plots
       dIEM_metab_perpage <- prepare_data_perpage(metab_IEM_sorted, metab_IEM_controls, nr_plots_perpage, nr_pat)
 
       # generate dIEM violin plots
-      violin_plots(dIEM_plot_dir, pt_name, dIEM_metab_perpage, top_metab_pt)
+      create_violin_plots(dIEM_plot_dir, pt_name, dIEM_metab_perpage, top_metab_pt)
 
     } else {
       cat(paste0("\n\n**** This patient had no prob_scores higher than ", threshold_IEM,".
