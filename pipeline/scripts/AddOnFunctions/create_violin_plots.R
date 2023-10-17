@@ -1,4 +1,4 @@
-violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NULL) {
+create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NULL) {
 
   # set parameters for plots
   plot_height <- 9.6 
