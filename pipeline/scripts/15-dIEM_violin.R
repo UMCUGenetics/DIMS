@@ -14,19 +14,12 @@ library(ggplot2) # for plotting
 library(gridExtra) # for table top highest/lowest
 
 # load functions
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-#temporary:
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
