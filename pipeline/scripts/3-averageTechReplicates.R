@@ -94,8 +94,9 @@ for (i in 1:length(repl.pattern)) {
   }
   
   # filter within bins on at least signal in more than one tech. rep.!!!
-  if (!is.null(dim(sum_pos))) sum_pos[apply(techRepsArray.pos,1,function(x) length(which(x>dimsThresh))==1),1]=0
-  if (!is.null(dim(sum_neg))) sum_neg[apply(techRepsArray.neg,1,function(x) length(which(x>dimsThresh))==1),1]=0
+  # turned off for measurement in duplo (n=2)
+  # if (!is.null(dim(sum_pos))) sum_pos[apply(techRepsArray.pos,1,function(x) length(which(x>dimsThresh))==1),1]=0
+  # if (!is.null(dim(sum_neg))) sum_neg[apply(techRepsArray.neg,1,function(x) length(which(x>dimsThresh))==1),1]=0
   
   if (n_neg != 0){
     sum_neg[,1] <- sum_neg[,1]/n_neg

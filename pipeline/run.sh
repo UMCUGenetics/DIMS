@@ -96,6 +96,7 @@ declare -a scriptsR=("1-generateBreaksFwhm.HPC" \
                      "11-runSumAdducts" \
                      "12-collectSamplesAdded" \
                      "13-excelExport" \
+                     "15-dIEM_violin" \
                      "hmdb_part" \
                      "hmdb_part_adductSums" )
 
@@ -449,7 +450,18 @@ if [ -f "${outdir}/logs/done" ]; then   # if one of the scanmodes has already fi
   ${singularity_exec} Rscript ${scripts}/13-excelExport.R ${outdir} ${name} ${matrix} ${db2} ${z_score}
   " > ${outdir}/jobs/13-excelExport.sh
   exp_id=\$(sbatch --job-name=13-excelExport_${name} --time=${job_13_time} --mem=${job_13_mem} --dependency=afterok:\${col_ids}:+5 --output=${outdir}/logs/13-excelExport/exp.o --error=${outdir}/logs/13-excelExport/exp.e ${global_sbatch_parameters} ${outdir}/jobs/13-excelExport.sh)
+
+  # 14-cleanup
   sbatch --job-name=14-cleanup_${name} --time=${job_14_time} --mem=${job_14_mem} --dependency=afterok:\${exp_id}:+5 --output=${outdir}/logs/14-cleanup.o --error=${outdir}/logs/14-cleanup.e ${global_sbatch_parameters} ${outdir}/jobs/14-cleanup.sh
+  
+  # 15-dIEM_violin
+  echo "#!/bin/sh
+
+  ${singularity_exec} Rscript ${scripts}/15-dIEM_violin.R ${outdir} ${name} ${z_score}
+  " > ${outdir}/jobs/15-dIEM_violin.sh
+
+  sbatch --job-name=15-dIEM_violin_${name} --time=20:00 --mem=8GB --dependency=afterok:\${exp_id}:+5 --output=${outdir}/logs/15-dIEM_violin.o --error=${outdir}/logs/15-dIEM_violin.e ${global_sbatch_parameters} ${outdir}/jobs/15-dIEM_violin.sh
+
 else
   echo other scanmode not queued yet, not yet queueing next step
   echo \${col_id} > ${outdir}/logs/done
@@ -463,4 +475,4 @@ doScanmode "positive" ${thresh_pos} "*_pos.RData" "1,2"
 sbatch --time=${queue_0_time} --mem=${queue_0_mem} --output=${outdir}/logs/queue/0-queueConversion.o --error=${outdir}/logs/queue/0-queueConversion.e ${global_sbatch_parameters} ${outdir}/jobs/queue/0-queueConversion.sh
 
 # Let user know that first job is queued
-echo Run started successfully
+#echo Run started successfully
