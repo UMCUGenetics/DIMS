@@ -42,17 +42,25 @@ create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NU
   for (page_index in 1:length(metab_perpage)) {
     # extract list of metabolites to plot on a page
     metab_list_2plot <- metab_perpage[[page_index]]
+    # extract original data for patient of interest (pt_name) before cut-offs
+    pt_list_2plot_orig <- metab_list_2plot[which(metab_list_2plot$variable == pt_name), ]
     # cut off Z-scores higher than 20 or lower than -5 (for nicer plots)
     metab_list_2plot$value[metab_list_2plot$value >  20] <-  20
     metab_list_2plot$value[metab_list_2plot$value <  -5] <-  -5
     # extract data for patient of interest (pt_name)
     pt_list_2plot <- metab_list_2plot[which(metab_list_2plot$variable == pt_name), ]
+    # restore original Z-score before cut-off, for showing Z-scores in PDF
+    pt_list_2plot$value_orig <- pt_list_2plot_orig$value
     # remove patient of interest (pt_name) from list; violins will be made up of controls and other patients
     metab_list_2plot <- metab_list_2plot[-which(metab_list_2plot$variable == pt_name), ]
     # subtitle per page
     sub_perpage <- gsub("_", " ", page_headers[page_index])
     # for IEM plots, put subtitle on two lines
     sub_perpage <- gsub("probability", "\nprobability", sub_perpage)
+    # add size parameter for showing Z-score of patient per metabolite
+    Z_size <- rep(3, nrow(pt_list_2plot))
+    # set size to 0 if row is empty
+    Z_size[is.na(pt_list_2plot$value)] <- 0
     
     # draw violin plot. shape=22 gives square for patient of interest
     ggplot_object <- ggplot(metab_list_2plot, aes(x=value, y=HMDB_name)) +
@@ -61,6 +69,8 @@ create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NU
       geom_violin(scale="width") +
       geom_point(data = pt_list_2plot, aes(color=value), size = 3.5*circlesize, shape=22, fill="white") +
       scale_fill_gradientn(colors = colors_4plot, values = NULL, space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "colour") +
+      # add Z-score value for patient of interest at x=16
+      geom_text(data = pt_list_2plot, aes(16, label = paste0("Z=", round(value_orig, 2))), hjust = "left", vjust = +0.2, size = Z_size) +
       # add labels. Use font Courier to get all the plots in the same location.
       labs(x = "Z-scores", y = "Metabolites", subtitle = sub_perpage, color = "z-score") + 
       theme(axis.text.y = element_text(family = "Courier", size=6)) +
