@@ -13,13 +13,19 @@ nr_replicates=$5
 resolution=$6
 ppm=$7
 zscore=$8
+matrix=$9
+standard_run=${10}
+optional_params=( "${@:11}" )
+
 echo "input directory: $input"
 echo "output directory: $output"
 echo "workflow path: $workflow_path"
-optional_params=( "${@:8}" )
+echo "matrix: $matrix"
+echo "standard run: $standard_run"
 mkdir -p $output 
 cd $output
 mkdir -p log
+mkdir -p Bioinformatics
 
 if ! { [ -f 'workflow.running' ] || [ -f 'workflow.done' ] || [ -f 'workflow.failed' ]; }; then
 touch workflow.running
@@ -45,6 +51,9 @@ NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $wor
 --nr_replicates $nr_replicates \
 --resolution $resolution \
 --ppm $ppm \
+--zscore $zscore \
+--matrix $matrix \
+--standard_run $standard_run \
 -profile slurm \
 -resume -ansi-log false \
 ${optional_params[@]:-""}

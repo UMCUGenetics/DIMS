@@ -8,43 +8,32 @@ include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
 include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(trim:"$params.trim", resolution:"$params.resolution")
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(hmdb_parts_files:"$params.hmdb_parts_files", standard_run:"$params.standard_run", ppm:"$params.ppm")
-include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf' 
+include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
-include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(nr_replicates:"$params.nr_replicates")
+include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(nr_replicates:"$params.nr_replicates", matrix:"$params.matrix")
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(resolution:"$params.resolution", scripts_dir:"$params.scripts_dir")
 include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(ppm:"$params.ppm")
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(scripts_dir:"$params.scripts_dir", ppm:"$params.ppm", zscore:"$params.zscore")
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(scripts_dir:"$params.scripts_dir", zscore:"$params.zscore")
-include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf' 
+include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(analysis_id:"$params.analysis_id", zscore:"$params.zscore", matrix:"$params.matrix")
-include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(analysis_id:"$params.analysis_id", scripts_dir:"$params.scripts_dir")
-include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(ppm:"$params.ppm") 
+include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(analysis_id:"$params.analysis_id", scripts_dir:"$params.scripts_dir", zscore:"$params.zscore")
+include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(ppm:"$params.ppm")
 include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(resolution:"$params.resolution", ppm:"$params.ppm")
 include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
 include { UnidentifiedCalcZscores } from './CustomModules/DIMS/UnidentifiedCalcZscores.nf' params(scripts_dir:"$params.scripts_dir", ppm:"$params.ppm", zscore:"$params.zscore")
 
-
 // define parameters
-// def samplesheet     = params.samplesheet
-// def nr_replicates   = params.nr_replicates
 def raw_files       = extractRawfilesFromDir(params.rawfiles_path)
 def analysis_id     = params.outdir.split('/')[-1]
-// def resolution      = params.resolution
-// def hmdb_db_file    = params.hmdb_db_file
-// def ppm             = params.ppm
-// def standard_run    = params.standard_run
-// def scripts_dir     = params.scripts_dir
-// def thresh          = params.thresh
-// def zscore          = params.zscore
-// def matrix          = params.matrix
-// def relevance_file  = params.relevance_file
-
+def matrix          = params.matrix
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(tuple(params.samplesheet, params.nr_replicates))
+    MakeInit(tuple(params.samplesheet,
+             params.nr_replicates))
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
@@ -54,16 +43,22 @@ workflow {
 
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
-    HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out)
+    HMDBparts_main(params.hmdb_db_file, 
+                   GenerateBreaks.out)
 
     // Generate HMDB parts for parallel processing in PeakGrouping step
-    HMDBparts(params.hmdb_db_file, GenerateBreaks.out)
+    HMDBparts(params.hmdb_db_file, 
+              GenerateBreaks.out)
 
     // Assign intensities to bins (breaks) per mzML file
     AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out))
 
     // Average intensities over technical replicates for each sample
-    AverageTechReplicates(AssignToBins.out.collect(), MakeInit.out)
+    AverageTechReplicates(AssignToBins.out.RData_files.collect(),
+                          AssignToBins.out.TIC_txt_files.collect(),
+                          MakeInit.out,
+                          analysis_id,
+                          matrix)
 
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned.collect().flatten().combine(GenerateBreaks.out))
@@ -90,7 +85,7 @@ workflow {
     GenerateExcel(CollectSumAdducts.out.collect(), MakeInit.out, analysis_id, params.relevance_file)
 
     // Generate violin plots 
-    // GenerateViolinPlots(GenerateExcel.out)
+    GenerateViolinPlots(GenerateExcel.out)
 
     // Collect unidentified peaks
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
