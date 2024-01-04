@@ -126,7 +126,7 @@ write.table(remove_neg, file=paste(outdir, "miss_infusions_neg.txt", sep="/"), r
 
 # New: generate TIC plots
 run_name <- basename(outdir)
-TIC_input_dir <- paste(outdir, "2-pklist", sep = "/")
+tic_input_dir <- paste(outdir, "2-pklist", sep = "/")
 
 # get replication pattern
 load(paste(outdir, "logs", "init.RData", sep="/"))
@@ -135,25 +135,25 @@ bad_pos <- read.table(paste(outdir, "miss_infusions_pos.txt", sep="/"))
 bad_neg <- read.table(paste(outdir, "miss_infusions_neg.txt", sep="/"))
 
 # get all txt files
-TIC.files = list.files(TIC_input_dir, full.names=TRUE, pattern="*TIC.txt")
-all_samps <- sub('_TIC\\..*$', '', basename(TIC.files))
+tic_files = list.files(tic_input_dir, full.names=TRUE, pattern="*TIC.txt")
+all_samps <- sub('_TIC\\..*$', '', basename(tic_files))
 
 print("\n")
-print(paste0("reading TIC files", TIC.files[1], " - till - ", TIC.files[length(TIC.files)]))
+print(paste0("reading TIC files", tic_files[1], " - till - ", tic_files[length(tic_files)]))
 # determine maximum intensity
 highest_tic_max <- 0
-for (file in TIC.files) {
+for (file in tic_files) {
   tic <- read.table(file)
   this_tic_max <- max(tic$TIC)
   if (this_tic_max > highest_tic_max) {
     highest_tic_max <- this_tic_max
     max_sample <- sub('_TIC\\..*$', '', basename(file))
-    }
+  }
 }
 
 tic_plot_list <- list()
 k = 0
-for (i in c(1:length(repl.pattern))) { # change after test-phase !!!
+for (i in c(1:length(repl.pattern))) { 
   tech_reps <- as.vector(unlist(repl.pattern[i]))
   sampleName <- names(repl.pattern)[i]
   for (j in 1:length(tech_reps)) {
@@ -161,7 +161,15 @@ for (i in c(1:length(repl.pattern))) { # change after test-phase !!!
     repl1.nr <- read.table(paste(paste(outdir, "2-pklist/", sep="/"), tech_reps[j], "_TIC.txt", sep=""))
     bad_color_pos <- tech_reps[j] %in% bad_pos[[1]]
     bad_color_neg <- tech_reps[j] %in% bad_neg[[1]]
-    if (bad_color_neg & bad_color_pos) {plotcolor = '#F8766D'} else if (bad_color_pos) {plotcolor = "#ED8141"} else if (bad_color_neg) {plotcolor = "#BF80FF"} else {plotcolor = 'white'}
+    if (bad_color_neg & bad_color_pos) {
+	    plotcolor = '#F8766D'
+    } else if (bad_color_pos) {
+	    plotcolor = "#ED8141"
+    } else if (bad_color_neg) {
+	    plotcolor = "#BF80FF"
+    } else {
+	    plotcolor = 'white'
+    }
     tic_plot <- ggplot(repl1.nr, aes(retentionTime, TIC)) +
       geom_line(linewidth = 0.3) +
       geom_hline(yintercept = highest_tic_max, col = "grey", linetype = 2, linewidth = 0.3) +
@@ -171,7 +179,7 @@ for (i in c(1:length(repl.pattern))) { # change after test-phase !!!
   }
 
 }
-# create a layout matrix dependent on numer of replicates
+# Create a layout matrix with the size of the number of replicates as number of columns
 layout <- matrix(1:(10 * nrepl), 10, nrepl, TRUE)
 
 tic_plot_pdf <- marrangeGrob(grobs = tic_plot_list, 
