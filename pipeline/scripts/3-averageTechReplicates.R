@@ -1,7 +1,9 @@
 #!/usr/bin/Rscript
 
-# load required packages 
-# none 
+# load required packages  for TIC plots
+library("ggplot2")
+library("gridExtra")
+pdf(NULL) 
 
 # define parameters 
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -121,4 +123,70 @@ retVal <- removeFromRepl.pat(remove_neg, repl.pattern, nrepl)
 repl.pattern.filtered <- retVal$pattern
 save(repl.pattern.filtered, file=paste(outdir, "repl.pattern.negative.RData", sep="/"))
 write.table(remove_neg, file=paste(outdir, "miss_infusions_neg.txt", sep="/"), row.names=FALSE, col.names=FALSE ,sep= "\t")
+
+# New: generate TIC plots
+run_name <- basename(outdir)
+tic_input_dir <- paste(outdir, "2-pklist", sep = "/")
+
+# get replication pattern
+load(paste(outdir, "logs", "init.RData", sep="/"))
+# get misinjections
+bad_pos <- read.table(paste(outdir, "miss_infusions_pos.txt", sep="/"))
+bad_neg <- read.table(paste(outdir, "miss_infusions_neg.txt", sep="/"))
+
+# get all txt files
+tic_files = list.files(tic_input_dir, full.names=TRUE, pattern="*TIC.txt")
+all_samps <- sub('_TIC\\..*$', '', basename(tic_files))
+
+print("\n")
+print(paste0("reading TIC files", tic_files[1], " - till - ", tic_files[length(tic_files)]))
+# determine maximum intensity
+highest_tic_max <- 0
+for (file in tic_files) {
+  tic <- read.table(file)
+  this_tic_max <- max(tic$TIC)
+  if (this_tic_max > highest_tic_max) {
+    highest_tic_max <- this_tic_max
+    max_sample <- sub('_TIC\\..*$', '', basename(file))
+  }
+}
+
+tic_plot_list <- list()
+k = 0
+for (i in c(1:length(repl.pattern))) { 
+  tech_reps <- as.vector(unlist(repl.pattern[i]))
+  sampleName <- names(repl.pattern)[i]
+  for (j in 1:length(tech_reps)) {
+    k = k + 1
+    repl1.nr <- read.table(paste(paste(outdir, "2-pklist/", sep="/"), tech_reps[j], "_TIC.txt", sep=""))
+    bad_color_pos <- tech_reps[j] %in% bad_pos[[1]]
+    bad_color_neg <- tech_reps[j] %in% bad_neg[[1]]
+    if (bad_color_neg & bad_color_pos) {
+	    plotcolor = '#F8766D'
+    } else if (bad_color_pos) {
+	    plotcolor = "#ED8141"
+    } else if (bad_color_neg) {
+	    plotcolor = "#BF80FF"
+    } else {
+	    plotcolor = 'white'
+    }
+    tic_plot <- ggplot(repl1.nr, aes(retentionTime, TIC)) +
+      geom_line(linewidth = 0.3) +
+      geom_hline(yintercept = highest_tic_max, col = "grey", linetype = 2, linewidth = 0.3) +
+      labs(x = 't (s)', y = 'TIC', title = paste0(tech_reps[j], "  ||  ", sampleName)) +
+      theme(plot.background = element_rect(fill = plotcolor), axis.text = element_text(size = 4), axis.title = element_text(size = 4), plot.title = element_text(size = 6))
+    tic_plot_list[[k]] <- tic_plot
+  }
+
+}
+# Create a layout matrix with the size of the number of replicates as number of columns
+layout <- matrix(1:(10 * nrepl), 10, nrepl, TRUE)
+
+tic_plot_pdf <- marrangeGrob(grobs = tic_plot_list, 
+			     nrow = 10, 
+			     ncol = nrepl, 
+			     layout_matrix = layout, 
+			     top = quote(paste("TICs of run", run_name," \n colors: red = both modes misinjection, orange = pos mode misinjection, purple = neg mode misinjection \n ", g, "/", npages)))
+ggsave(filename = paste0(outdir, "/", run_name, "_TICplots.pdf"), tic_plot_pdf, width = 21, height = 29.7, units = "cm")
+
 
