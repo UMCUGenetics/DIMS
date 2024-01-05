@@ -90,6 +90,8 @@ sumAdducts <- function(peaklist, theor.MZ, grpnames.long, adducts, batch, scanmo
       } else {
         ints=peaklist[metab, c(7:(length(grpnames.long)+6))]
       }
+      # bugfix: no NAs in ints
+      ints[is.na(ints)] <- 0
       total=apply(ints, 2, sum)
       
       if (sum(total)!=0) {
