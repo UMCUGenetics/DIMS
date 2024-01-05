@@ -69,6 +69,7 @@ if [ ${verbose} -gt 0 ] ; then set -x ; fi
 
 name=$(basename ${outdir})
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/scripts
+dims_r_pack_image_path="/hpc/dbg_mz/tools/singularity_cache/dims_r_pack-1.0.img"
 
 while [[ ${restart} -gt 0 ]]
 do
