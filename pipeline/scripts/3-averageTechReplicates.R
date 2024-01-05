@@ -54,8 +54,9 @@ removeFromRepl.pat <- function(bad_samples, repl.pattern, nrepl) {
 
 # get repl.pattern
 load(paste(indir, "init.RData", sep="/"))
+# lower the threshold for accepting/rejecting raw data by factor 100 (1000 for URI_RUN0_stitching)
 if (stitch==1){
-  thresh2remove <- thresh2remove/100
+  thresh2remove <- thresh2remove/100000
 }
 remove_neg=NULL
 remove_pos=NULL
@@ -98,8 +99,9 @@ for (i in 1:length(repl.pattern)) {
   }
   
   # filter within bins on at least signal in more than one tech. rep.!!!
-  if (!is.null(dim(sum_pos))) sum_pos[apply(techRepsArray.pos,1,function(x) length(which(x>dimsThresh))==1),1]=0
-  if (!is.null(dim(sum_neg))) sum_neg[apply(techRepsArray.neg,1,function(x) length(which(x>dimsThresh))==1),1]=0
+  # NB: filter removed for URI_RUN0_stitching where all negative lists are rejected. 
+  # if (!is.null(dim(sum_pos))) sum_pos[apply(techRepsArray.pos,1,function(x) length(which(x>dimsThresh))==1),1]=0
+  # if (!is.null(dim(sum_neg))) sum_neg[apply(techRepsArray.neg,1,function(x) length(which(x>dimsThresh))==1),1]=0
   
   if (n_neg != 0){
     sum_neg[,1] <- sum_neg[,1]/n_neg
