@@ -49,7 +49,9 @@ replaceZeros <- function(file,scanmode,resol,outdir,thresh,scriptDir,ppm){
   if (!is.null(outpgrlist)) {
     for (i in 1:length(names(repl.pattern.filtered))){
       samplePeaks=outpgrlist[,names(repl.pattern.filtered)[i]]
-      index=which(samplePeaks<=0)
+      # bug fix: replace NA as well
+      index=which(samplePeaks<=0 | is.na(samplePeaks))
+      # index=which(samplePeaks<=0)
       if (!length(index)){
         next
       }
