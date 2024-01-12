@@ -393,7 +393,8 @@ if (violin == 1) { # make violin plots
       # get output file for Helix
       output_helix <- output_for_Helix(protocol_name, metab_list_all, metab_interest_sorted)
       # write output to file
-      # write.csv(df_metabs_Helix, "metabs_to_Helix.csv", quote = F, row.names = F) NOG AANPASSEN
+      path_Helixfile <- paste0(outdir, "/output_Helix.csv")
+      write.csv(output_helix, path_Helixfile, quote = F, row.names = F)
     }
     
     
