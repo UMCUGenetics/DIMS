@@ -12,6 +12,7 @@ library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
 library(gridExtra) # for table top highest/lowest
+library(tidyverse) # for Helix output
 
 # load functions
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
@@ -27,6 +28,7 @@ source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/output_Helix.R")
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -55,6 +57,7 @@ header_row <- 1
 col_start     <- "B"
 zscore_cutoff <- 5
 xaxis_cutoff  <- 20
+protocol_name <- "DIMS_PL_DIAG"
 
 # path to DIMS excel file
 path_DIMSfile <- paste0(outdir, "/", run_name, ".xlsx") # ${outdir} in run.sh
@@ -385,6 +388,14 @@ if (violin == 1) { # make violin plots
     metab_interest_sorted <- prepare_data(metab_list_all, zscore_patients)
     metab_interest_controls <- prepare_data(metab_list_all, zscore_controls)
     metab_perpage <- prepare_data_perpage(metab_interest_sorted, metab_interest_controls, nr_plots_perpage, nr_pat, nr_contr)
+    
+    if(grepl("Diagnost", pdf_dir)) {
+      # get output file for Helix
+      output_helix <- output_for_Helix(protocol_name, metab_list_all, metab_interest_sorted)
+      # write output to file
+      # write.csv(df_metabs_Helix, "metabs_to_Helix.csv", quote = F, row.names = F) NOG AANPASSEN
+    }
+    
     
     # make violin plots per patient
     for (pt_nr in 1:length(patient_list)) {
