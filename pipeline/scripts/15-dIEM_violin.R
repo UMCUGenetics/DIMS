@@ -12,7 +12,8 @@ library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
 library(gridExtra) # for table top highest/lowest
-library(tidyverse) # for Helix output
+library(stringr) # for Helix output
+# library(tidyverse) # for Helix output
 
 # load functions
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
