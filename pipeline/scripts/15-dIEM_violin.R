@@ -390,12 +390,16 @@ if (violin == 1) { # make violin plots
     metab_interest_controls <- prepare_data(metab_list_all, zscore_controls)
     metab_perpage <- prepare_data_perpage(metab_interest_sorted, metab_interest_controls, nr_plots_perpage, nr_pat, nr_contr)
     
+    # for Diagnostics metabolites to be saved in Helix
     if(grepl("Diagnost", pdf_dir)) {
-      # get output file for Helix
-      output_helix <- output_for_Helix(protocol_name, metab_list_all, metab_interest_sorted)
-      # write output to file
-      path_Helixfile <- paste0(outdir, "/output_Helix.csv")
-      write.csv(output_helix, path_Helixfile, quote = F, row.names = F)
+      # check if run contains Diagnostics patients (e.g. "P2024M"), not for research runs
+      if(any(grepl("^P[0-9]{4}M", metab_interest_sorted$Patient))){
+        # get output file for Helix
+        output_helix <- output_for_Helix(protocol_name, metab_list_all, metab_interest_sorted)
+        # write output to file
+        path_Helixfile <- paste0(outdir, "/output_Helix.csv")
+        write.csv(output_helix, path_Helixfile, quote = F, row.names = F)
+      }
     }
     
     
