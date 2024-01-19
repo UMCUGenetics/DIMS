@@ -7,7 +7,6 @@ output_for_Helix <- function(protocol_name, metab_all, metab_interest_sorted){
   # Delete whitespaces HMDB_name 
   df_all_metabs_zscores$HMDB_name <- str_trim(df_all_metabs_zscores$HMDB_name, "right")
   # Split HMDB_name column on "nitine;" for match DIMS_Helix_table
-  # df_all_metabs_zscores <- df_all_metabs_zscores %>% separate_wider_delim(HMDB_name, "nitine;", names = c("HMDB_name", NA), too_few = "align_start")
   df_all_metabs_zscores$HMDB_name <- str_split_fixed(df_all_metabs_zscores$HMDB_name, "nitine;", 2)[,1]
   
   # Combine stofgroepen
@@ -15,10 +14,8 @@ output_for_Helix <- function(protocol_name, metab_all, metab_interest_sorted){
   # Filter table for metabolites for Helix
   DIMS_Helix_table <- DIMS_Helix_table %>% filter(Helix == "ja")
   # Split HMDB_name column on "nitine;" for match df_all_metabs_zscores
-  # DIMS_Helix_table <- DIMS_Helix_table %>% separate_wider_delim(HMDB_name, "nitine;", names = c("HMDB_name", NA), too_few = "align_start")
   DIMS_Helix_table$HMDB_name <- str_split_fixed(DIMS_Helix_table$HMDB_name, "nitine;", 2)[,1]
-  DIMS_Helix_table$HMDB_name <- gsub("\"", "", DIMS_Helix_table$HMDB_name)
-  
+
   # Filter DIMS results for metabolites for Helix
   df_metabs_Helix <- df_all_metabs_zscores %>% filter(HMDB_name %in% DIMS_Helix_table$HMDB_name)
   
