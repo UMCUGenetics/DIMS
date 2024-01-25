@@ -392,7 +392,10 @@ if (violin == 1) { # make violin plots
       # for category Diagnostics, make list of metabolites that exceed alarm values for this patient
       # for category Other, make list of top highest and lowest Z-scores for this patient
       if (grepl("Diagnost", pdf_dir)) {
-        top_metab_pt <- prepare_alarmvalues(pt_name, metab_interest_sorted)
+        # get table that combines DIMS results with stofgroepen/Helix table
+        DIMS_Helix_table <- get_patient_data_to_Helix(metab_interest_sorted, metab_list_all)
+        
+        top_metab_pt <- prepare_alarmvalues(pt_name, DIMS_Helix_table)
         # save(top_metab_pt, file=paste0(outdir, "/start_15_prepare_alarmvalues.RData"))
       } else {
         top_metab_pt <- prepare_toplist(pt_name, zscore_patients)
