@@ -7,13 +7,16 @@
 #    corresponding Z-scores. 
 # 2. All files from github: https://github.com/UMCUGenetics/dIEM
 
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("gridExtra"))
+
+
 library(dplyr) # tidytable is for other_isobaric.R (left_join)
 library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
 library(gridExtra) # for table top highest/lowest
 library(stringr) # for Helix output
-# library(tidyverse) # for Helix output
 
 # load functions
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
@@ -22,7 +25,7 @@ library(stringr) # for Helix output
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-#temporary:
+# #temporary:
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
@@ -30,6 +33,7 @@ source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunction
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/output_Helix.R")
+
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -80,6 +84,7 @@ file_explanation <- "/hpc/dbg_mz/tools/Explanation_violin_plots.txt"
 
 # copy list of isomers to project folder.
 file.copy("/hpc/dbg_mz/tools/isomers.txt", outdir)
+
 
 #### STEP 1: Preparation #### 
 # in: run_name, path_DIMSfile, header_row ||| out: output_dir, DIMS
@@ -327,7 +332,8 @@ if (algorithm == 1) {
 }
 
 #### STEP 5: Make violin plots #####      
-# in: algorithm / zscore_patients, violin, nr_contr, nr_pat, Data, path_textfiles, zscore_cutoff, xaxis_cutoff, top_diseases, top_metab, output_dir ||| out: pdf file
+# in: algorithm / zscore_patients, violin, nr_contr, nr_pat, Data, path_textfiles, zscore_cutoff, xaxis_cutoff, top_diseases, top_metab, output_dir ||| 
+# out: pdf file, Helix csv file
 
 if (violin == 1) { # make violin plots
   
@@ -392,10 +398,13 @@ if (violin == 1) { # make violin plots
     
     # for Diagnostics metabolites to be saved in Helix
     if(grepl("Diagnost", pdf_dir)) {
+      # get table that combines DIMS results with stofgroepen/Helix table
+      DIMS_Helix_table <- get_patient_data_to_Helix(metab_interest_sorted, metab_list_all)
+      
       # check if run contains Diagnostics patients (e.g. "P2024M"), not for research runs
       if(any(grepl("^P[0-9]{4}M", metab_interest_sorted$Patient))){
         # get output file for Helix
-        output_helix <- output_for_Helix(protocol_name, metab_list_all, metab_interest_sorted)
+        output_helix <- output_for_Helix(protocol_name, DIMS_Helix_table)
         # write output to file
         path_Helixfile <- paste0(outdir, "/output_Helix.csv")
         write.csv(output_helix, path_Helixfile, quote = F, row.names = F)
