@@ -17,7 +17,7 @@ create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NU
     suffix <- "_DIMS_PL_DIAG"
     # substitute P and M in P2020M00001 into right format for Helix
     pt_name_sub <- gsub("[PM]", "", pt_name)
-    pr_name_sub <- gsub("\\..*", "", pt_name_sub)
+    pt_name_sub <- gsub("\\..*", "", pt_name_sub)
   } else if (grepl("Diagnostics", pdf_dir)) {
     prefix <- "Dx_"
   } else if (grepl("IEM", pdf_dir)) {
