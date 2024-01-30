@@ -69,6 +69,11 @@ negRes=NULL
 
 x <- suppressMessages(xcmsRaw(filepath))
 
+# New: generate TIC plots. Prepare txt files with data for plots
+tic_intensity_persample <- cbind(round(x@scantime, 2), x@tic)
+colnames(tic_intensity_persample) <- c("retentionTime", "TIC")
+write.table(tic_intensity_persample, file=paste0(outdir, "/2-pklist/", sampname, "_TIC.txt"))
+
 load(paste(outdir, "breaks.fwhm.RData", sep="/"))
 
 # Create empty placeholders for later use
