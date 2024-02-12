@@ -27,6 +27,7 @@ source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/development/DIMS_output_Helix_alarmvalues/pipeline/scripts/AddOnFunctions/get_patient_data_to_Helix.R")
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
