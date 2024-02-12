@@ -1,7 +1,7 @@
 output_for_Helix <- function(protocol_name, df_metabs_Helix){
     
   # Remove positive controls
-  df_metabs_Helix <- df_metabs_Helix %>% filter(grepl("M",Patient))
+  df_metabs_Helix <- df_metabs_Helix %>% filter(grepl("^P[0-9]{4}M",Patient))
   
   # Add 'Vial' column, each patient has unique ID
   df_metabs_Helix <- df_metabs_Helix %>% 

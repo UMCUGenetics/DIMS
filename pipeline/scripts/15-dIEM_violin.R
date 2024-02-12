@@ -25,7 +25,7 @@ library(stringr) # for Helix output
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 #source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-# #temporary:
+#temporary:
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
@@ -33,6 +33,7 @@ source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunction
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
 source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/output_Helix.R")
+source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/get_patient_data_to_Helix.R")
 
 
 # define parameters - check after addition to run.sh
@@ -402,7 +403,7 @@ if (violin == 1) { # make violin plots
       DIMS_Helix_table <- get_patient_data_to_Helix(metab_interest_sorted, metab_list_all)
       
       # check if run contains Diagnostics patients (e.g. "P2024M"), not for research runs
-      if(any(grepl("^P[0-9]{4}M", metab_interest_sorted$Patient))){
+      if(any(grepl("^P[0-9]{4}M", DIMS_Helix_table$Patient))){
         # get output file for Helix
         output_helix <- output_for_Helix(protocol_name, DIMS_Helix_table)
         # write output to file
