@@ -1,7 +1,7 @@
 output_for_Helix <- function(protocol_name, df_metabs_Helix){
     
   # Remove positive controls
-  df_metabs_Helix <- df_metabs_Helix %>% filter(grepl("^P[0-9]{4}M",Patient))
+  df_metabs_Helix <- df_metabs_Helix %>% filter(is_diagnostic_patient(Patient))
   
   # Add 'Vial' column, each patient has unique ID
   df_metabs_Helix <- df_metabs_Helix %>% 
@@ -9,12 +9,8 @@ output_for_Helix <- function(protocol_name, df_metabs_Helix){
     mutate(Vial = cur_group_id()) %>% 
     ungroup()
   
-  # Split patient code into labnummer and Onderzoeksnummer
-  for (row in 1:nrow(df_metabs_Helix)) {
-    df_metabs_Helix[row,"labnummer"] <- gsub("^P|\\.[0-9]*", "", df_metabs_Helix[row,"Patient"])
-    labnummer_split <- strsplit(as.character(df_metabs_Helix[row, "labnummer"]), "M")[[1]]
-    df_metabs_Helix[row, "Onderzoeksnummer"] <- paste0("MB",labnummer_split[1],"/",labnummer_split[2])
-  }
+  # Split patient number into labnummer and Onderzoeksnummer
+  df_metabs_Helix <- add_lab_id_and_onderzoeksnummer(df_metabs_Helix)
   
   # Add column with protocol name
   df_metabs_Helix$Protocol <- protocol_name

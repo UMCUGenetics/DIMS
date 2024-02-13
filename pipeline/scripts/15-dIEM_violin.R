@@ -7,34 +7,25 @@
 #    corresponding Z-scores. 
 # 2. All files from github: https://github.com/UMCUGenetics/dIEM
 
-suppressPackageStartupMessages(library("dplyr"))
-suppressPackageStartupMessages(library("gridExtra"))
 
-
-library(dplyr) # tidytable is for other_isobaric.R (left_join)
+suppressPackageStartupMessages(library("dplyr")) # tidytable is for other_isobaric.R (left_join)
 library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
-library(gridExtra) # for table top highest/lowest
+suppressPackageStartupMessages(library("gridExtra")) # for table top highest/lowest
 library(stringr) # for Helix output
 
 # load functions
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-#temporary:
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/output_Helix.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix/pipeline/scripts/AddOnFunctions/get_patient_data_to_Helix.R")
-
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/output_helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/get_patient_data_to_helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/add_lab_id_and_onderzoeksnummer.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/is_diagnostic_patient.R")
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -400,15 +391,15 @@ if (violin == 1) { # make violin plots
     # for Diagnostics metabolites to be saved in Helix
     if(grepl("Diagnost", pdf_dir)) {
       # get table that combines DIMS results with stofgroepen/Helix table
-      DIMS_Helix_table <- get_patient_data_to_Helix(metab_interest_sorted, metab_list_all)
+      dims_helix_table <- get_patient_data_to_helix(metab_interest_sorted, metab_list_all)
       
       # check if run contains Diagnostics patients (e.g. "P2024M"), not for research runs
-      if(any(grepl("^P[0-9]{4}M", DIMS_Helix_table$Patient))){
+      if(any(is_diagnostic_patient(dims_helix_table$Patient))){
         # get output file for Helix
-        output_helix <- output_for_Helix(protocol_name, DIMS_Helix_table)
+        output_helix <- output_for_helix(protocol_name, dims_helix_table)
         # write output to file
-        path_Helixfile <- paste0(outdir, "/output_Helix.csv")
-        write.csv(output_helix, path_Helixfile, quote = F, row.names = F)
+        path_helixfile <- paste0(outdir, "/output_Helix_", run_name,".csv")
+        write.csv(output_helix, path_helixfile, quote = F, row.names = F)
       }
     }
     
