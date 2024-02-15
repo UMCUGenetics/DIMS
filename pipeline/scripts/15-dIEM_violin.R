@@ -7,27 +7,21 @@
 #    corresponding Z-scores. 
 # 2. All files from github: https://github.com/UMCUGenetics/dIEM
 
-library(dplyr) # tidytable is for other_isobaric.R (left_join)
+suppressPackageStartupMessages(library("dplyr")) # tidytable is for other_isobaric.R (left_join)
 library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
-library(gridExtra) # for table top highest/lowest
+suppressPackageStartupMessages(library("gridExtra"))  # for table top highest/lowest
 
 # load functions
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-#source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-#temporary:
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
-source("/hpc/dbg_mz/development/DIMS_Violinplots/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
-source("/hpc/dbg_mz/development/DIMS_output_Helix_alarmvalues/pipeline/scripts/AddOnFunctions/get_patient_data_to_Helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data_perpage.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/get_patient_data_to_helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/is_diagnostic_patient.R")
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -394,9 +388,9 @@ if (violin == 1) { # make violin plots
       # for category Other, make list of top highest and lowest Z-scores for this patient
       if (grepl("Diagnost", pdf_dir)) {
         # get table that combines DIMS results with stofgroepen/Helix table
-        DIMS_Helix_table <- get_patient_data_to_Helix(metab_interest_sorted, metab_list_all)
+        dims_helix_table <- get_patient_data_to_helix(metab_interest_sorted, metab_list_all)
         
-        top_metab_pt <- prepare_alarmvalues(pt_name, DIMS_Helix_table)
+        top_metab_pt <- prepare_alarmvalues(pt_name, dims_helix_table)
         # save(top_metab_pt, file=paste0(outdir, "/start_15_prepare_alarmvalues.RData"))
       } else {
         top_metab_pt <- prepare_toplist(pt_name, zscore_patients)
