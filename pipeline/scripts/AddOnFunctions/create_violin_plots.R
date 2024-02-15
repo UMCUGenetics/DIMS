@@ -10,19 +10,27 @@ create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NU
   #                   green     blue      blue/purple purple    orange    red
   
   # patient plots, create the PDF device
-  if (grepl("Diagnostics", pdf_dir)) { 
-    prefix <- "Dx_" 
-  } else if (grepl("IEM", pdf_dir)) { 
-    prefix <- "IEM_" 
-  } else { 
-    prefix <- "R_" 
+  pt_name_sub <- pt_name
+  suffix <- ""
+  if (grepl("Diagnostics", pdf_dir) & grepl("^P[0-9]{4}M", pt_name)) {
+    prefix <- "MB"
+    suffix <- "_DIMS_PL_DIAG"
+    # substitute P and M in P2020M00001 into right format for Helix
+    pt_name_sub <- gsub("[PM]", "", pt_name)
+    pt_name_sub <- gsub("\\..*", "", pt_name_sub)
+  } else if (grepl("Diagnostics", pdf_dir)) {
+    prefix <- "Dx_"
+  } else if (grepl("IEM", pdf_dir)) {
+    prefix <- "IEM_"
+  } else {
+    prefix <- "R_"
   }
-
-  pdf(paste0(pdf_dir, "/", prefix, pt_name, ".pdf"), 
-      onefile = TRUE,
-      width = plot_width, 
-      height = plot_height) 
   
+  pdf(paste0(pdf_dir, "/", prefix, pt_name_sub, suffix, ".pdf"),
+      onefile = TRUE,
+      width = plot_width,
+      height = plot_height)
+
   # page headers:
   page_headers <- names(metab_perpage)
   

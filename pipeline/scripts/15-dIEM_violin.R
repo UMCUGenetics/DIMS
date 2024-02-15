@@ -28,6 +28,7 @@ source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/get_patient_
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/add_lab_id_and_onderzoeksnummer.R")
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/is_diagnostic_patient.R")
 
+
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
 for (arg in cmd_args) {
@@ -45,10 +46,12 @@ ratios_cutoff    <- -5 # z-score cutoff of axis on the left for top diseases
 nr_plots_perpage <- 20 # number of violin plots per page in PDF
 
 # Settings from config.R
-# binary variable: run function, yes(1) or no(0). Can be removed at later stage
+# binary variable: run function, yes(1) or no(0). Bug fix: if Z-score = 0, set others to 0 as well.
 if (z_score == 1) { 
-	algorithm <- ratios <- violin <- 1 
-} 
+    algorithm <- ratios <- violin <- 1 
+} else {
+    algorithm <- ratios <- violin <- 0 
+}	
 # integer: are the sample names headers on row 1 or row 2 in the DIMS excel? (default 1)
 header_row <- 1
 # column name where the data starts (default B)
