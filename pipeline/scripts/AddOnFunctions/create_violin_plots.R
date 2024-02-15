@@ -12,7 +12,7 @@ create_violin_plots <- function(pdf_dir, pt_name, metab_perpage, top_metab_pt=NU
   # patient plots, create the PDF device
   pt_name_sub <- pt_name
   suffix <- ""
-  if (grepl("Diagnostics", pdf_dir) & grepl("^P[0-9]{4}M", pt_name)) {
+  if (grepl("Diagnostics", pdf_dir) & is_diagnostic_patient(pt_name)) {
     prefix <- "MB"
     suffix <- "_DIMS_PL_DIAG"
     # substitute P and M in P2020M00001 into right format for Helix
