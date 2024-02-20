@@ -8,6 +8,7 @@ get_patient_data_to_helix <- function(metab_interest_sorted, metab_list_all){
   
   # Delete whitespaces HMDB_name 
   df_all_metabs_zscores$HMDB_name <- str_trim(df_all_metabs_zscores$HMDB_name, "right")
+
   # Split HMDB_name column on "nitine;" for match dims_helix_table
   df_all_metabs_zscores$HMDB_name_split <- str_split_fixed(df_all_metabs_zscores$HMDB_name, "nitine;", 2)[,1]
   

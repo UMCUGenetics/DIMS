@@ -15,6 +15,7 @@ library(ggplot2) # for plotting
 suppressPackageStartupMessages(library("gridExtra")) # for table top highest/lowest
 library(stringr) # for Helix output
 
+
 # load functions
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data.R")
@@ -413,7 +414,7 @@ if (violin == 1) { # make violin plots
       # for category Diagnostics, make list of metabolites that exceed alarm values for this patient
       # for category Other, make list of top highest and lowest Z-scores for this patient
       if (grepl("Diagnost", pdf_dir)) {
-        top_metab_pt <- prepare_alarmvalues(pt_name, metab_interest_sorted)
+        top_metab_pt <- prepare_alarmvalues(pt_name, dims_helix_table)
         # save(top_metab_pt, file=paste0(outdir, "/start_15_prepare_alarmvalues.RData"))
       } else {
         top_metab_pt <- prepare_toplist(pt_name, zscore_patients)
