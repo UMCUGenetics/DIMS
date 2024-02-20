@@ -7,11 +7,14 @@
 #    corresponding Z-scores. 
 # 2. All files from github: https://github.com/UMCUGenetics/dIEM
 
-library(dplyr) # tidytable is for other_isobaric.R (left_join)
+
+suppressPackageStartupMessages(library("dplyr")) # tidytable is for other_isobaric.R (left_join)
 library(reshape2) # used in prepare_data.R
 library(openxlsx) # for opening Excel file
 library(ggplot2) # for plotting
-library(gridExtra) # for table top highest/lowest
+suppressPackageStartupMessages(library("gridExtra")) # for table top highest/lowest
+library(stringr) # for Helix output
+
 
 # load functions
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/check_same_samplename.R")
@@ -20,6 +23,11 @@ source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_data
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_toplist.R")
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/create_violin_plots.R")
 source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/prepare_alarmvalues.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/output_helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/get_patient_data_to_helix.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/add_lab_id_and_onderzoeksnummer.R")
+source("/hpc/dbg_mz/production/DIMS/pipeline/scripts/AddOnFunctions/is_diagnostic_patient.R")
+
 
 # define parameters - check after addition to run.sh
 cmd_args <- commandArgs(trailingOnly = TRUE)
@@ -38,16 +46,19 @@ ratios_cutoff    <- -5 # z-score cutoff of axis on the left for top diseases
 nr_plots_perpage <- 20 # number of violin plots per page in PDF
 
 # Settings from config.R
-# binary variable: run function, yes(1) or no(0). Can be removed at later stage
+# binary variable: run function, yes(1) or no(0). Bug fix: if Z-score = 0, set others to 0 as well.
 if (z_score == 1) { 
-	algorithm <- ratios <- violin <- 1 
-} 
+    algorithm <- ratios <- violin <- 1 
+} else {
+    algorithm <- ratios <- violin <- 0 
+}	
 # integer: are the sample names headers on row 1 or row 2 in the DIMS excel? (default 1)
 header_row <- 1
 # column name where the data starts (default B)
 col_start     <- "B"
 zscore_cutoff <- 5
 xaxis_cutoff  <- 20
+protocol_name <- "DIMS_PL_DIAG"
 
 # path to DIMS excel file
 path_DIMSfile <- paste0(outdir, "/", run_name, ".xlsx") # ${outdir} in run.sh
@@ -69,6 +80,7 @@ file_explanation <- "/hpc/dbg_mz/tools/Explanation_violin_plots.txt"
 
 # copy list of isomers to project folder.
 file.copy("/hpc/dbg_mz/tools/isomers.txt", outdir)
+
 
 #### STEP 1: Preparation #### 
 # in: run_name, path_DIMSfile, header_row ||| out: output_dir, DIMS
@@ -316,7 +328,8 @@ if (algorithm == 1) {
 }
 
 #### STEP 5: Make violin plots #####      
-# in: algorithm / zscore_patients, violin, nr_contr, nr_pat, Data, path_textfiles, zscore_cutoff, xaxis_cutoff, top_diseases, top_metab, output_dir ||| out: pdf file
+# in: algorithm / zscore_patients, violin, nr_contr, nr_pat, Data, path_textfiles, zscore_cutoff, xaxis_cutoff, top_diseases, top_metab, output_dir ||| 
+# out: pdf file, Helix csv file
 
 if (violin == 1) { # make violin plots
   
@@ -379,13 +392,29 @@ if (violin == 1) { # make violin plots
     metab_interest_controls <- prepare_data(metab_list_all, zscore_controls)
     metab_perpage <- prepare_data_perpage(metab_interest_sorted, metab_interest_controls, nr_plots_perpage, nr_pat, nr_contr)
     
+    # for Diagnostics metabolites to be saved in Helix
+    if(grepl("Diagnost", pdf_dir)) {
+      # get table that combines DIMS results with stofgroepen/Helix table
+      dims_helix_table <- get_patient_data_to_helix(metab_interest_sorted, metab_list_all)
+      
+      # check if run contains Diagnostics patients (e.g. "P2024M"), not for research runs
+      if(any(is_diagnostic_patient(dims_helix_table$Patient))){
+        # get output file for Helix
+        output_helix <- output_for_helix(protocol_name, dims_helix_table)
+        # write output to file
+        path_helixfile <- paste0(outdir, "/output_Helix_", run_name,".csv")
+        write.csv(output_helix, path_helixfile, quote = F, row.names = F)
+      }
+    }
+    
+    
     # make violin plots per patient
     for (pt_nr in 1:length(patient_list)) {
       pt_name <- patient_list[pt_nr]
       # for category Diagnostics, make list of metabolites that exceed alarm values for this patient
       # for category Other, make list of top highest and lowest Z-scores for this patient
       if (grepl("Diagnost", pdf_dir)) {
-        top_metab_pt <- prepare_alarmvalues(pt_name, metab_interest_sorted)
+        top_metab_pt <- prepare_alarmvalues(pt_name, dims_helix_table)
         # save(top_metab_pt, file=paste0(outdir, "/start_15_prepare_alarmvalues.RData"))
       } else {
         top_metab_pt <- prepare_toplist(pt_name, zscore_patients)
