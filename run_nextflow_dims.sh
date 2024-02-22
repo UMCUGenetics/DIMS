@@ -42,6 +42,9 @@ sbatch <<EOT
 #SBATCH --export=NONE
 #SBATCH --gres=tmpspace:5G
 
+git --git-dir=$workflow_path/.git rev-parse HEAD > ${output}/log/commit
+echo `date +%s` >> ${output}/logs/commit
+
 NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $workflow_path/DIMS.nf \
 -c $workflow_path/DIMS.config \
 --rawfiles_path $input \
