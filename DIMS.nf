@@ -32,8 +32,7 @@ def matrix          = params.matrix
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(tuple(params.samplesheet,
-             params.nr_replicates))
+    MakeInit(tuple(params.samplesheet, params.nr_replicates))
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
@@ -43,31 +42,32 @@ workflow {
 
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
-    HMDBparts_main(params.hmdb_db_file, 
-                   GenerateBreaks.out)
+    HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
     // Generate HMDB parts for parallel processing in PeakGrouping step
-    HMDBparts(params.hmdb_db_file, 
-              GenerateBreaks.out)
+    HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
     // Assign intensities to bins (breaks) per mzML file
-    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out))
+    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks))
 
     // Average intensities over technical replicates for each sample
     AverageTechReplicates(AssignToBins.out.RData_files.collect(),
                           AssignToBins.out.TIC_txt_files.collect(),
                           MakeInit.out,
+                          params.nr_replicates, 
                           analysis_id,
-                          matrix)
+                          matrix,
+                          GenerateBreaks.out.highest_mz)
 
     // Peak finding per sample
-    PeakFinding(AverageTechReplicates.out.binned.collect().flatten().combine(GenerateBreaks.out))
+    PeakFinding(AverageTechReplicates.out.binned.collect().flatten().combine(GenerateBreaks.out.breaks))
 
     // Spectrum peak finding per sample
     SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.patterns)
 
     // Peak grouping over samples: identified part
-    PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.patterns)
+    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.patterns)
+    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.patterns)
 
     // Fill missing values in peak group list: identified part
     FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.patterns)
@@ -76,16 +76,18 @@ workflow {
     CollectFilled(FillMissing.out.collect(), AverageTechReplicates.out.patterns)
 
     // Sum adducts of each metabolite per scan mode: identfied part
-    SumAdducts(CollectFilled.out.filled_pgrlist, AverageTechReplicates.out.patterns, HMDBparts_main.out.collect().flatten())
+    SumAdducts(CollectFilled.out.filled_pgrlist, 
+               AverageTechReplicates.out.patterns, 
+               HMDBparts_main.out.collect().flatten())
 
     // Collect summed adducts parts
     CollectSumAdducts(SumAdducts.out.collect())
 
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
-    GenerateExcel(CollectSumAdducts.out.collect(), MakeInit.out, analysis_id, params.relevance_file)
+    GenerateExcel(CollectSumAdducts.out.collect(), PeakGrouping.out.grouped_identified.collect(), MakeInit.out, analysis_id, params.relevance_file)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out)
+    GenerateViolinPlots(GenerateExcel.out.excel_file, analysis_id)
 
     // Collect unidentified peaks
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
