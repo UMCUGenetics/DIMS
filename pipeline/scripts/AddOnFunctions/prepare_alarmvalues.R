@@ -1,22 +1,22 @@
-prepare_alarmvalues <- function(pt_name, metab_interest_sorted) {
+prepare_alarmvalues <- function(pt_name, dims_helix_table) {
   # extract data for patient of interest (pt_name)
-  pt_metabs_Helix <- DIMS_Helix_table %>% filter(Patient == pt_name)
-  pt_metabs_Helix$Z_score <- round(pt_metabs_Helix$Z_score, 2)
+  pt_metabs_helix <- dims_helix_table %>% filter(Patient == pt_name)
+  pt_metabs_helix$Z_score <- round(pt_metabs_helix$Z_score, 2)
   
   # Make empty dataframes for metabolites above or below alarmvalues
   pt_list_high <- data.frame(HMDB_name = character(), Z_score = numeric())
   pt_list_low <- data.frame(HMDB_name = character(), Z_score = numeric())
   
   # Loop over individual metabolites
-  for (metab in unique(pt_metabs_Helix$HMDB_name)){
+  for (metab in unique(pt_metabs_helix$HMDB_name)){
     # Get data for individual metabolite
-    pt_metab <- pt_metabs_Helix %>% filter(HMDB_name == metab)
+    pt_metab <- pt_metabs_helix %>% filter(HMDB_name == metab)
     # print(pt_metab)
     
     # Check if zscore is positive of negative
     if(pt_metab$Z_score > 0) {
       # Get specific alarmvalue for metabolite
-      high_zscore_cutoff_metab <- DIMS_Helix_table %>% filter(HMDB_name == metab) %>% pull(high_zscore)
+      high_zscore_cutoff_metab <- pt_metabs_helix %>% filter(HMDB_name == metab) %>% pull(high_zscore)
       
       # If zscore is above the alarmvalue, add to pt_list_high table
       if(pt_metab$Z_score > high_zscore_cutoff_metab) {
@@ -25,7 +25,7 @@ prepare_alarmvalues <- function(pt_name, metab_interest_sorted) {
       }
     } else {
       # Get specific alarmvalue for metabolite
-      low_zscore_cutoff_metab <- DIMS_Helix_table %>% filter(HMDB_name == metab) %>% pull(low_zscore)
+      low_zscore_cutoff_metab <- pt_metabs_helix %>% filter(HMDB_name == metab) %>% pull(low_zscore)
       
       # If zscore is below the alarmvalue, add to pt_list_low table
       if(pt_metab$Z_score < low_zscore_cutoff_metab) {

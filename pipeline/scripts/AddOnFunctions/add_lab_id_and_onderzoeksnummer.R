@@ -6,5 +6,5 @@ add_lab_id_and_onderzoeksnummer <- function(df_metabs_helix) {
     df_metabs_helix[row, "Onderzoeksnummer"] <- paste0("MB", labnummer_split[1], "/", labnummer_split[2])
   }
 
-  return(df_metabs_Helix)
+  return(df_metabs_helix)
 }
