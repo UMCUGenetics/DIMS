@@ -1,4 +1,4 @@
-output_for_Helix <- function(protocol_name, df_metabs_helix){
+output_for_helix <- function(protocol_name, df_metabs_helix){
     
   # Remove positive controls
   df_metabs_helix <- df_metabs_helix %>% filter(is_diagnostic_patient(Patient))
