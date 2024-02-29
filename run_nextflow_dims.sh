@@ -2,7 +2,6 @@
 set -euo pipefail
 
 workflow_path='/hpc/dbg_mz/development/DIMS_Nextflow'
-# export NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2'
 
 # Set input and output dirs
 input=$1
@@ -31,7 +30,7 @@ if ! { [ -f 'workflow.running' ] || [ -f 'workflow.done' ] || [ -f 'workflow.fai
 touch workflow.running
 sbatch <<EOT
 #!/bin/bash
-#SBATCH --time=4:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --mem 5G
 #SBATCH --job-name Nextflow_DIMS

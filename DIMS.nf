@@ -84,7 +84,7 @@ workflow {
     CollectSumAdducts(SumAdducts.out.collect())
 
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
-    GenerateExcel(CollectSumAdducts.out.collect(), PeakGrouping.out.grouped_identified.collect(), MakeInit.out, analysis_id, params.relevance_file)
+    GenerateExcel(CollectSumAdducts.out.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id, params.relevance_file)
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.excel_file, analysis_id)
