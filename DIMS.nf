@@ -1,29 +1,29 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-// nextflow.preview.dsl=2
 
 // get functions and include parameters that are independent of dataset
-include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
-include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
-include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
-include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(trim:"$params.trim", resolution:"$params.resolution")
-include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(hmdb_parts_files:"$params.hmdb_parts_files", standard_run:"$params.standard_run", ppm:"$params.ppm")
-include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
 include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(nr_replicates:"$params.nr_replicates", matrix:"$params.matrix")
-include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(resolution:"$params.resolution", scripts_dir:"$params.scripts_dir")
-include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
-include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(ppm:"$params.ppm")
-include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(scripts_dir:"$params.scripts_dir", ppm:"$params.ppm", zscore:"$params.zscore")
-include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(scripts_dir:"$params.scripts_dir", zscore:"$params.zscore")
 include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
+include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
+include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
+include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
+include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(trim:"$params.trim", resolution:"$params.resolution")
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(analysis_id:"$params.analysis_id", zscore:"$params.zscore", matrix:"$params.matrix")
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(analysis_id:"$params.analysis_id", scripts_dir:"$params.scripts_dir", zscore:"$params.zscore")
-include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(ppm:"$params.ppm")
-include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(resolution:"$params.resolution", ppm:"$params.ppm")
-include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
+include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(hmdb_parts_files:"$params.hmdb_parts_files", standard_run:"$params.standard_run", ppm:"$params.ppm")
+include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
+include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
+include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(resolution:"$params.resolution", scripts_dir:"$params.scripts_dir")
+include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(ppm:"$params.ppm")
+include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
+include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(scripts_dir:"$params.scripts_dir", zscore:"$params.zscore")
 include { UnidentifiedCalcZscores } from './CustomModules/DIMS/UnidentifiedCalcZscores.nf' params(scripts_dir:"$params.scripts_dir", ppm:"$params.ppm", zscore:"$params.zscore")
+include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(ppm:"$params.ppm")
+include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(scripts_dir:"$params.scripts_dir", thresh:"$params.thresh", resolution:"$params.resolution", ppm:"$params.ppm")
+include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(resolution:"$params.resolution", ppm:"$params.ppm")
+include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
 
 // define parameters
 def raw_files       = extractRawfilesFromDir(params.rawfiles_path)
@@ -32,7 +32,7 @@ def matrix          = params.matrix
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(tuple(params.samplesheet, params.nr_replicates))
+    MakeInit(params.samplesheet, params.nr_replicates)
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
@@ -102,13 +102,15 @@ workflow {
     UnidentifiedCalcZscores(UnidentifiedFillMissing.out, AverageTechReplicates.out.patterns)
 
     // Create log files: Repository versions and Workflow params
-    //VersionLog(
-    //    Channel.of(
-    //        "${workflow.projectDir}/",
-    //        "${params.rawfiles_path}/",
-    //    ).collect()
-    //)
-    //Workflow_ExportParams()
+    VersionLog(
+       Channel.of(
+            "${workflow.projectDir}/"
+            "${params.scripts_dir}/",
+            "${params.hmdb_db_file}/",
+            "${params.relevance_file}/",
+        ).collect()
+    )
+    Workflow_ExportParams()
 }
 
 // Workflow completion notification
