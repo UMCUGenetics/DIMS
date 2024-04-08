@@ -1,7 +1,7 @@
 # R:v4.1.0
 
 # parent image tidyverse (v4.1.0), uses rocker/rstudio, which uses rocker/r-ver
-FROM rocker/tidyverse:4.1.0
+FROM bioconductor/bioconductor_docker:RELEASE_3_14
 
 # metadata
 LABEL DIMS_VERSION=1.1
@@ -13,7 +13,7 @@ LABEL BASE_IMAGE="rocker/tidyverse:4.1.0"
 LABEL EXTRA_PACKAGES="xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridExtra"
 
 # install bioconductor packages; their versions according to bioconductor version (v3.14)
-RUN R -e 'BiocManager::install(c("xcms", "stringr", "dplyr", "Rcpp"))'
+RUN R -e 'BiocManager::install(c("Rcpp", "xcms", "stringr", "dplyr"))'
 # install devtools in order to install specific versions of packages
 RUN R -e 'install.packages(c("devtools"))'
 RUN R -e 'devtools::install_cran("openxlsx", version = "4.2.5")'
