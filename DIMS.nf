@@ -143,19 +143,19 @@ workflow {
     GenerateExcel(CollectSumAdducts.out.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id, params.relevance_file)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.excel_file, analysis_id)
+    GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
 
     // Collect unidentified peaks
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
 
     // Peak grouping: unidentified part
-    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.collect(), AverageTechReplicates.out.pattern_files)
+    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), AverageTechReplicates.out.pattern_files)
 
     // Fill missing values in peak group list: unidentified part
     UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, AverageTechReplicates.out.pattern_files)
 
     // Calculate Z-scores for unidentified peak group list
-    UnidentifiedCalcZscores(UnidentifiedFillMissing.out, AverageTechReplicates.out.pattern_files)
+    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
