@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-workflow_path='/hpc/dbg_mz/development/DIMS_Nextflow'
+workflow_path='/hpc/dbg_mz/production/DIMS'
 
 # Set input and output dirs
 input=$1
