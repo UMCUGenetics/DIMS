@@ -1,20 +1,84 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 workflow_path='/hpc/dbg_mz/production/DIMS'
 
+R='\033[0;31m' # Red
+G='\033[0;32m' # Green
+Y='\033[0;33m' # Yellow
+B='\033[0;34m' # Blue
+P='\033[0;35m' # Pink
+C='\033[0;36m' # Cyan
+NC='\033[0m' # No Color
+
 # Set input and output dirs
-input=$1
-output=$2
-email=$3
-samplesheet=$4
-nr_replicates=$5
-resolution=$6
-ppm=$7
-zscore=$8
-matrix=$9
-standard_run=${10}
+input=""
+output=""
+email=""
+samplesheet=""
+nr_replicates=""
+resolution=""
+ppm=""
+zscore=""
+matrix=""
+standard_run=""
 optional_params=( "${@:11}" )
+
+# Show usage information
+function show_help() {
+  if [[ ! -z $1 ]]; then
+  printf "
+  ${R}ERROR:
+    $1${NC}"
+  fi
+  printf "
+  ${P}USAGE:
+    ${0} -i <input path> -o <output path> -e <email> -s <samplesheet> -nr <nr_replicates> -r <resolution> -p <ppm> -z <zscore> -m <matrix> -sr <standard_run> [-v] [-h]
+
+  ${B}REQUIRED ARGS:
+    -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1 (required)
+    -o - full path output folder, eg. /hpc/dbg-mz/processed/run1 (required)
+    -e - emailadress, eg. user@umcutrecht.nl (required)
+    -s - samplesheet, eg. sampleNames.txt (required)
+    -n - number of replicates, eg. 2 (required)
+    -r - resolution, eg. 140000
+    -p - ppm, eg. 5
+    -z - zscore, 1 for Z-score and 0 for no Z-score
+    -m - matrix, eg. Plasma
+    -a - standard run, yes or no${NC}
+
+  ${C}OPTIONAL ARGS:
+    -v - verbose printing (default off)
+    -h - show help${NC}
+
+  ${G}EXAMPLE:
+    sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$ -e user@umcutrecht.nl -s sampleNames.txt -nr 2 -r 140000 -p 5 -z 1 -m Plasma -sr yes${NC}
+
+  "
+  exit 1
+}
+
+while getopts "h?vi:o:e:s:n:r:p:z:m:a:" opt
+do
+  case "${opt}" in
+  h|\?)
+    show_help
+    exit 0
+    ;;
+  v) verbose=1 ;;
+  i) input=${OPTARG} ;;
+  o) output=${OPTARG} ;;
+  e) email=${OPTARG} ;;
+  s) samplesheet=${OPTARG} ;;
+  n) nr_replicates=${OPTARG} ;;
+  r) resolution=${OPTARG} ;;
+  p) ppm=${OPTARG} ;;
+  z) zscore=${OPTARG} ;;
+  m) matrix=${OPTARG} ;;
+  a) standard_run=${OPTARG} ;;
+
+  esac
+done
 
 echo "input directory: $input"
 echo "output directory: $output"
