@@ -160,10 +160,8 @@ workflow {
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
-            "${workflow.projectDir}/"// ,
-        //     "${params.scripts_dir}/", // not a git repository
-        //     "${params.hmdb_db_file}/",
-        //     "${params.relevance_file}/",
+            "${workflow.projectDir}/",
+            "${workflow.projectDir}/CustomModules/"
         ).collect()
     )
     Workflow_ExportParams()
