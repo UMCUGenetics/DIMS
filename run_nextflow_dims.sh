@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-workflow_path='/hpc/dbg_mz/production/DIMS'
+workflow_path='/hpc/dbg_mz/development/DIMS_HMDB_V5'
 
 R='\033[0;31m' # Red
 G='\033[0;32m' # Green
@@ -22,7 +22,7 @@ ppm=""
 zscore=""
 matrix=""
 standard_run=""
-optional_params=( "${@:11}" )
+optional_params=( "${@:21}" )
 
 # Show usage information
 function show_help() {
@@ -37,15 +37,15 @@ function show_help() {
 
   ${B}REQUIRED ARGS:
     -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1 (required)
-    -o - full path output folder, eg. /hpc/dbg-mz/processed/run1 (required)
+    -o - full path output folder, eg. /hpc/dbg_mz/processed/run1 (required)
     -e - emailadress, eg. user@umcutrecht.nl (required)
     -s - samplesheet, eg. sampleNames.txt (required)
     -n - number of replicates, eg. 2 (required)
-    -r - resolution, eg. 140000
-    -p - ppm, eg. 5
-    -z - zscore, 1 for Z-score and 0 for no Z-score
-    -m - matrix, eg. Plasma
-    -t - standard run, yes or no${NC}
+    -r - resolution, eg. 140000 (required)
+    -p - ppm, eg. 5 (required)
+    -z - zscore, 1 for Z-score and 0 for no Z-score (required)
+    -m - matrix, eg. Plasma (required)
+    -t - standard run, yes or no (required)${NC}
 
   ${C}OPTIONAL ARGS:
     -v - verbose printing (default off)
@@ -58,7 +58,7 @@ function show_help() {
   exit 1
 }
 
-while getopts "h?vi:o:e:s:n:r:p:z:m:t:" opt
+while getopts "h?v:i:o:e:s:n:r:p:z:m:t:" opt
 do
   case "${opt}" in
   h|\?)
@@ -80,11 +80,14 @@ do
   esac
 done
 
+shift "$((OPTIND-1))"
+
 echo "input directory: $input"
 echo "output directory: $output"
 echo "workflow path: $workflow_path"
 echo "matrix: $matrix"
 echo "standard run: $standard_run"
+
 mkdir -p $output 
 cd $output
 mkdir -p log
@@ -92,6 +95,38 @@ mkdir -p Bioinformatics
 
 if ! { [ -f 'workflow.running' ] || [ -f 'workflow.done' ] || [ -f 'workflow.failed' ]; }; then
 touch workflow.running
+
+output_log="${output}/log"
+file="${output_log}/nextflow_trace.txt"
+# Check if nextflow_trace.txt exists
+if [ -e "${file}" ]; then
+    current_suffix=0
+    # Get a list of all trace files WITH a suffix
+    trace_file_list=$(ls "${output_log}"/nextflow_trace*.txt 2> /dev/null)
+    # Check if any trace files with a suffix exist
+    if [ "$?" -eq 0 ]; then
+        # Check for each trace file with a suffix if the suffix is the highest and save that one as the current suffix
+        for trace_file in ${trace_file_list}; do
+            basename_trace_file=$(basename "${trace_file}")
+            if echo "${basename_trace_file}" | grep -qE '[0-9]+'; then
+                suffix=$(echo "${basename_trace_file}" | grep -oE '[0-9]+')
+            else
+                suffix=0
+            fi
+
+            if [ "${suffix}" -gt "${current_suffix}" ]; then
+                current_suffix=${suffix}
+            fi
+        done
+    fi
+    # Increment the suffix
+    new_suffix=$((current_suffix + 1))
+    # Create the new file name with the incremented suffix
+    new_file="${file%.*}_$new_suffix.${file##*.}"
+    # Rename the file
+    mv "${file}" "${new_file}"
+fi
+
 sbatch <<EOT
 #!/bin/bash
 #SBATCH --time=12:00:00
@@ -106,7 +141,7 @@ sbatch <<EOT
 #SBATCH --gres=tmpspace:5G
 
 git --git-dir=$workflow_path/.git rev-parse HEAD > ${output}/log/commit
-echo `date +%s` >> ${output}/logs/commit
+echo `date +%s` >> ${output}/log/commit
 
 NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $workflow_path/DIMS.nf \
 -c $workflow_path/DIMS.config \
