@@ -113,7 +113,8 @@ workflow {
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
-                          GenerateBreaks.out.highest_mz)
+                          GenerateBreaks.out.highest_mz,
+                          GenerateBreaks.out.breaks)
 
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
