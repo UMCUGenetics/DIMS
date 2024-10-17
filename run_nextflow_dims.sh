@@ -36,7 +36,7 @@ sbatch <<EOT
 #SBATCH --nodes=1
 #SBATCH --mem 5G
 #SBATCH --job-name Nextflow_DIMS_stitch
-#SBATCH -o log/slurm_nextflow_dims_stitch%j.out
+#SBATCH -o log/slurm_nextflow_dims_stitch.%j.out
 #SBATCH -e log/slurm_nextflow_dims_stitch.%j.err
 #SBATCH --mail-user $email
 #SBATCH --mail-type FAIL
@@ -44,7 +44,7 @@ sbatch <<EOT
 #SBATCH --gres=tmpspace:5G
 
 git --git-dir=$workflow_path/.git rev-parse HEAD > ${output}/log/commit
-echo `date +%s` >> ${output}/logs/commit
+echo `date +%s` >> ${output}/log/commit
 
 NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $workflow_path/DIMS.nf \
 -c $workflow_path/DIMS.config \
