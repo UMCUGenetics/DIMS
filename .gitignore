@@ -13,3 +13,6 @@ post/results
 #Macfiles
 .DS_Store
 pipeline/.DS_Store
+
+#IntelliJ IDEA Nina
+.idea/

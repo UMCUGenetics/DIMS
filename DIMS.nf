@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // get functions and include parameters that are independent of dataset
-include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
+include { AssignToBinsStitching } from './CustomModules/DIMS/AssignToBinsStitching.nf'
 include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
     nr_replicates:"$params.nr_replicates", 
     matrix:"$params.matrix"
@@ -21,9 +21,10 @@ include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
     resolution:"$params.resolution", 
     ppm:"$params.ppm"
 )
-include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
+include { GenerateBreaksStitching } from './CustomModules/DIMS/GenerateBreaksStitching.nf' params(
     trim:"$params.trim", 
-    resolution:"$params.resolution"
+    resolution:"$params.resolution",
+    nr_replicates:"$params.nr_replicates"
 )
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -94,29 +95,29 @@ workflow {
     ConvertRawFile(raw_files)
     
     // Generate breaks on one of the mzML files
-    GenerateBreaks(ConvertRawFile.out.take(1))
+    GenerateBreaksStitching(ConvertRawFile.out.take(1))
 
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
-    HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
+    HMDBparts_main(params.hmdb_db_file, GenerateBreaksStitching.out.breaks)
 
     // Generate HMDB parts for parallel processing in PeakGrouping step
-    HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
+    HMDBparts(params.hmdb_db_file, GenerateBreaksStitching.out.breaks)
 
     // Assign intensities to bins (breaks) per mzML file
-    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks))
+    AssignToBinsStitching(ConvertRawFile.out.combine(GenerateBreaksStitching.out.breaks))
 
     // Average intensities over technical replicates for each sample
-    AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
-                          AssignToBins.out.tic_txt_file.collect(),
+    AverageTechReplicates(AssignToBinsStitching.out.rdata_file.collect(),
+                          AssignToBinsStitching.out.tic_txt_file.collect(),
                           MakeInit.out,
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
-                          GenerateBreaks.out.highest_mz)
+                          GenerateBreaksStitching.out.highest_mz)
 
     // Peak finding per sample
-    PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
+    PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaksStitching.out.breaks))
 
     // Spectrum peak finding per sample
     SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.pattern_files)

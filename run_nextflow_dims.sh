@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-workflow_path='/hpc/dbg_mz/production/DIMS'
+workflow_path='/hpc/dbg_mz/development/DIMS_stitching_nf'
 
 # Set input and output dirs
 input=$1
@@ -16,6 +16,7 @@ matrix=$9
 standard_run=${10}
 optional_params=( "${@:11}" )
 
+# Print parameters and create output dirs
 echo "input directory: $input"
 echo "output directory: $output"
 echo "workflow path: $workflow_path"
@@ -26,6 +27,7 @@ cd $output
 mkdir -p log
 mkdir -p Bioinformatics
 
+# Workflow status check, SLURM job submission, and running Nextflow
 if ! { [ -f 'workflow.running' ] || [ -f 'workflow.done' ] || [ -f 'workflow.failed' ]; }; then
 touch workflow.running
 sbatch <<EOT
@@ -33,9 +35,9 @@ sbatch <<EOT
 #SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --mem 5G
-#SBATCH --job-name Nextflow_DIMS
-#SBATCH -o log/slurm_nextflow_dims.%j.out
-#SBATCH -e log/slurm_nextflow_dims.%j.err
+#SBATCH --job-name Nextflow_DIMS_stitch
+#SBATCH -o log/slurm_nextflow_dims_stitch%j.out
+#SBATCH -e log/slurm_nextflow_dims_stitch.%j.err
 #SBATCH --mail-user $email
 #SBATCH --mail-type FAIL
 #SBATCH --export=NONE
