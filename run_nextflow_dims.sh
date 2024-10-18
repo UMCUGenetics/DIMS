@@ -168,6 +168,9 @@ if [ \$? -eq 0 ]; then
     rm workflow.running
     touch workflow.done
 
+    echo "Copy log directory"
+    cp log/* Bioinformatics/log/
+
     echo "Change permissions"
     chmod 775 -R $output
 
