@@ -28,7 +28,8 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
     zscore:"$params.zscore", 
-    matrix:"$params.matrix"
+    matrix:"$params.matrix",
+    sst_components_file:"$params.sst_components_file"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -113,7 +114,8 @@ workflow {
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
-                          GenerateBreaks.out.highest_mz)
+                          GenerateBreaks.out.highest_mz,
+                          GenerateBreaks.out.breaks)
 
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
