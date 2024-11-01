@@ -46,7 +46,9 @@ include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     ppm:"$params.ppm"
 )
 include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
-include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
+include { MakeInit } from './CustomModules/DIMS/MakeInit.nf' params(
+    analysis_id:"$params.analysis_id"
+)
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     resolution:"$params.resolution", 
     scripts_dir:"$params.scripts_dir"
@@ -88,7 +90,7 @@ def matrix = params.matrix
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(params.samplesheet, params.nr_replicates)
+    MakeInit(params.samplesheet, params.nr_replicates, analysis_id)
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
