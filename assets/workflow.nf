@@ -12,6 +12,6 @@ process ExportParams {
         """
         echo -e "param\tvalue" > workflow_params.txt
         echo -e "${workflow_params}" >> workflow_params.txt
-        echo -e `date +%d-%m-%Y` >> workflow_params.txt
+        echo -e "date\t`date +%d-%m-%Y`" >> workflow_params.txt
         """
 }
