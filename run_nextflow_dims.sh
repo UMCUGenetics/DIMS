@@ -32,7 +32,7 @@ if ! { [ -f 'workflow.running' ] || [ -f 'workflow.done' ] || [ -f 'workflow.fai
 touch workflow.running
 sbatch <<EOT
 #!/bin/bash
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --mem 5G
 #SBATCH --job-name Nextflow_DIMS_stitch
