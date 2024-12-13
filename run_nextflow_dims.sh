@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-workflow_path='/hpc/dbg_mz/development/DIMS_HMDB_V5'
+workflow_path='/hpc/dbg_mz/production/DIMS'
 
 R='\033[0;31m' # Red
 G='\033[0;32m' # Green
