@@ -5,7 +5,7 @@ Pipeline that processes raw Direct Infusion Mass Spectrometry data.
 ```
 .
 |───CustomModules/ (GitHub repo with pipeline scripts)
-|───assests/ (extra Nextflow files)
+|───assets/ (extra Nextflow files)
 |───db/ (Human Metabolome Database files)
 ```
 
@@ -19,7 +19,7 @@ on HPC:
 ```
 srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
 cd /hpc/dbg_mz/tools/singularity_cache/ 
-singularity build /hpc/dbg_mz/tools/MAP/NAME.img docker://ghcr.io/umcugenetics/[NAME]:[tag]
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://ghcr.io/umcugenetics/[NAME]:[tag]
 ```
 
 ## Setup HPC
