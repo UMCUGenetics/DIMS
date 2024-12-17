@@ -135,7 +135,6 @@ workflow {
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
-               AverageTechReplicates.out.pattern_files, 
                HMDBparts_main.out.collect().flatten())
 
     // Collect summed adducts parts
