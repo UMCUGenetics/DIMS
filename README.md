@@ -4,30 +4,22 @@ Pipeline that processes raw Direct Infusion Mass Spectrometry data.
 ### Folder Structure
 ```
 .
-|───GUI/ (GUI scripts)
+|───CustomModules/ (GitHub repo with pipeline scripts)
+|───assets/ (extra Nextflow files)
 |───db/ (Human Metabolome Database files)
-|───extra/ (flowcharts)
-|───pipeline/ (pipeline scripts)
-|───post/ (scripts that can be manually run after pipeline)
 ```
-
-## Setup GUI
-Used R version: 3.6.1 \
-Libraries: DT, shiny, shinydashboard, shinyFiles, ssh
-
-- Copy config_default.R to your own config.R, and configure as needed.
 
 ## Docker image 
 ```
-docker build -t umcugenbioinf/dims:[tag] -f Dockerfile . 
-docker push umcugenbioinf/dims:[tag]
+docker build -t ghcr.io/umcugenetics/[NAME]:[tag] .
+docker push ghcr.io/umcugenetics/[NAME]:[tag]
 ```
 
 on HPC: 
 ```
 srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
 cd /hpc/dbg_mz/tools/singularity_cache/ 
-singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://umcugenbioinf/dims:[tag]
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://ghcr.io/umcugenetics/[NAME]:[tag]
 ```
 
 ## Setup HPC
@@ -42,11 +34,15 @@ Libraries: xcms, stringr, dplyr, Rcpp, openxlsx, reshape2, loder, ggplot2, gridE
   - `/tools`
 - In `/development`, clone the dev branch of the DIMS repo. 
 ```
-git clone -b dev --single-branch git@github.com:UMCUGenetics/DIMS.git
+git clone -b develop --single-branch git@github.com:UMCUGenetics/DIMS.git
+cd DIMS
+git submodule update --init --recursive
 ```
 - In `/production`, clone the master branch of the DIMS repo.
 ```
 git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
+cd DIMS
+git submodule update --init --recursive
 ```
 - In `/tools`, install [mono](https://www.mono-project.com/) with [GUIX](https://guix.gnu.org/) under /mono
 - In `/tools`, place the latest tested release of [ThermoRawFileParser](https://github.com/compomics/ThermoRawFileParser/releases/tag/v1.1.11) (v1.1.11) under /ThermoRawFileParser_1.1.11
@@ -54,44 +50,34 @@ git clone -b master --single-branch git@github.com:UMCUGenetics/DIMS.git
 
 
 ## Usage
-The pipeline is meant to be started with the GUI, which is an R shiny program to transfer data to the HPC and start the pipeline. To open the GUI, open GUI.Rproj in Rstudio, which should open run.R and config.R. Then click "Run App" from the run.R file. 
+The pipeline can be started with a GUI, which is an R shiny program to transfer data to the HPC and start the pipeline. The GUI access can only be used when someone has access. To get access contact the bioinformaticians. 
 
 Manually starting the pipeline is also possible.
 ```
 CMD:
-  sh run.sh -i <input path> -o <output path> [-r] [-v] [-h]
+/hpc/dbg_mz/production/DIMS/run_nextflow_dims.sh -i <input path> -o <output path> -e <email> -s <samplesheet> -n <nr_replicates> -r <resolution> -p <ppm> -z <zscore> -m <matrix> -t <standard_run> [-v] [-h]
 
 REQUIRED ARGS:
-  -i - full path input folder, e.g. /hpc/dbg_mz/raw_data/run1
-  -o - full path output folder, e.g. /hpc/dbg-mz/processed/run1
+    -i - full path input folder, eg /hpc/dbg_mz/raw_data/run1 (required)
+    -o - full path output folder, eg. /hpc/dbg_mz/processed/run1 (required)
+    -e - emailadress, eg. user@umcutrecht.nl (required)
+    -s - samplesheet, eg. sampleNames.txt (required)
+    -n - number of replicates, eg. 2 (required)
+    -r - resolution, eg. 140000 (required)
+    -p - ppm, eg. 5 (required)
+    -z - zscore, 1 for Z-score and 0 for no Z-score (required)
+    -m - matrix, eg. Plasma (required)
+    -t - standard run, yes or no (required)
 
 OPTIONAL ARGS:
-  -r - restart the pipeline, removing any existing output for the entered run (default off)
   -v - verbose printing (default off)
   -h - show help
 
 EXAMPLE:
-  sh run.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1
+  /hpc/dbg_mz/production/DIMS/run_nextflow_dims.sh -i /hpc/dbg_mz/raw_data/run1 -o /hpc/dbg_mz/processed/run1$ -e user@umcutrecht.nl -s sampleNames.txt -n 2 -r 140000 -p 5 -z 1 -m Plasma -t yes
 ```
 
 Input folder requirements:
 - all the .raw files 
-- init.RData (sampelsheet, which contains which technical replicates belong to which biological sample)
-- a 'setting.config' file containing e.g.:
-```thresh_pos=2000
-thresh_neg=2000
-dims_thresh=100
-trim=0.1
-nrepl=3
-normalization=disabled
-thresh2remove=1000000000
-resol=140000
-email=example@example.com
-matrix=DBS
-db=.../tools/db/HMDB_add_iso_corrected_V2.RData
-db2=.../tools/db/HMDB_with_info_relevance_corrected_V2.RData
-z_score=1
-standard_run=yes
-hmdb_parts_dir=/hpc/dbg_mz/production/DIMS/hmdb_preparts
-```
+- text file with all samples and their raw files, e.g. sampleNames.txt
 
