@@ -124,8 +124,7 @@ workflow {
     SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.pattern_files)
 
     // Peak grouping over samples: identified part
-    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
-    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out)
 
     // Fill missing values in peak group list: identified part
     FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.pattern_files)
