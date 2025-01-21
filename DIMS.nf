@@ -53,6 +53,7 @@ include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     scripts_dir:"$params.scripts_dir"
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
+    scripts_dir:"$params.scripts_dir",
     ppm:"$params.ppm"
 )
 include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
@@ -60,24 +61,24 @@ include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
     scripts_dir:"$params.scripts_dir", 
     zscore:"$params.zscore"
 )
-include { UnidentifiedCalcZscores } from './CustomModules/DIMS/UnidentifiedCalcZscores.nf' params(
-    scripts_dir:"$params.scripts_dir", 
-    ppm:"$params.ppm", 
-    zscore:"$params.zscore"
-)
-include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(
-    ppm:"$params.ppm"
-)
-include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(
-    scripts_dir:"$params.scripts_dir", 
-    thresh:"$params.thresh", 
-    resolution:"$params.resolution", 
-    ppm:"$params.ppm"
-)
-include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(
-    resolution:"$params.resolution", 
-    ppm:"$params.ppm"
-)
+// include { UnidentifiedCalcZscores } from './CustomModules/DIMS/UnidentifiedCalcZscores.nf' params(
+//     scripts_dir:"$params.scripts_dir", 
+//     ppm:"$params.ppm", 
+//     zscore:"$params.zscore"
+// )
+// include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(
+//     ppm:"$params.ppm"
+// )
+// include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(
+//     scripts_dir:"$params.scripts_dir", 
+//     thresh:"$params.thresh", 
+//     resolution:"$params.resolution", 
+//     ppm:"$params.ppm"
+// )
+// include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(
+//     resolution:"$params.resolution", 
+//     ppm:"$params.ppm"
+// )
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
 // include { Workflow_Export_Params } from './assets/workflow.nf'
 include { ExportParams as Workflow_ExportParams } from './assets/workflow.nf'
@@ -147,16 +148,16 @@ workflow {
     GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
 
     // Collect unidentified peaks
-    UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
+    // UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
 
     // Peak grouping: unidentified part
-    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), AverageTechReplicates.out.pattern_files)
+    // UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), AverageTechReplicates.out.pattern_files)
 
     // Fill missing values in peak group list: unidentified part
-    UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, AverageTechReplicates.out.pattern_files)
+    // UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, AverageTechReplicates.out.pattern_files)
 
     // Calculate Z-scores for unidentified peak group list
-    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
+    // UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
