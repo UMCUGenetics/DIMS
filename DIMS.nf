@@ -2,8 +2,14 @@
 nextflow.enable.dsl=2
 
 // get functions and include parameters that are independent of dataset
-include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
-include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
+include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
+    resolution:"$params.resolution"
+)
+// include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
+//     nr_replicates:"$params.nr_replicates", 
+//     matrix:"$params.matrix"
+// )
+include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
     nr_replicates:"$params.nr_replicates", 
     matrix:"$params.matrix"
 )
@@ -50,7 +56,7 @@ include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     resolution:"$params.resolution", 
-    scripts_dir:"$params.scripts_dir"
+    scripts_dir:"$params.preprocessing_scripts_dir"
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
     ppm:"$params.ppm"
@@ -104,38 +110,50 @@ workflow {
     // Generate HMDB parts for parallel processing in PeakGrouping step
     HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
+    // ConvertRawFile.out.combine(GenerateBreaks.out.breaks).view()
+
     // Assign intensities to bins (breaks) per mzML file
-    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks))
+    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
 
     // Average intensities over technical replicates for each sample
-    AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
-                          AssignToBins.out.tic_txt_file.collect(),
-                          MakeInit.out,
-                          params.nr_replicates, 
-                          analysis_id,
-                          matrix,
-                          GenerateBreaks.out.highest_mz,
-                          GenerateBreaks.out.breaks)
+    // AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
+    //                       AssignToBins.out.tic_txt_file.collect(),
+    //                       MakeInit.out,
+    //                       params.nr_replicates, 
+    //                       analysis_id,
+    //                       matrix,
+    //                       GenerateBreaks.out.highest_mz,
+    //                       GenerateBreaks.out.breaks)
+
+    // Evaluate quality of TIC plots for eacht technical replicate
+    EvaluateTics(AssignToBins.out.rdata_file.collect(),
+                 AssignToBins.out.tic_txt_file.collect(),
+                 MakeInit.out,
+                 params.nr_replicates, 
+                 analysis_id,
+                 matrix,
+                 GenerateBreaks.out.highest_mz,
+                 GenerateBreaks.out.trim_params)
 
     // Peak finding per sample
-    PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
+    PeakFinding(AssignToBins.out.rdata_file.collect().flatten().combine(GenerateBreaks.out.breaks))
 
     // Spectrum peak finding per sample
-    SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.pattern_files)
+    SpectrumPeakFinding(PeakFinding.out.collect(), EvaluateTics.out.pattern_files)
 
     // Peak grouping over samples: identified part
-    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
-    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
+    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, EvaluateTics.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: identified part
-    FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.pattern_files)
+    FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files)
 
     // Collect filled peak group list: identified part
-    CollectFilled(FillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
+    CollectFilled(FillMissing.out.collect(), EvaluateTics.out.pattern_files)
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
-               AverageTechReplicates.out.pattern_files, 
+               EvaluateTics.out.pattern_files, 
                HMDBparts_main.out.collect().flatten())
 
     // Collect summed adducts parts
@@ -151,13 +169,13 @@ workflow {
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
 
     // Peak grouping: unidentified part
-    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), AverageTechReplicates.out.pattern_files)
+    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: unidentified part
-    UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, AverageTechReplicates.out.pattern_files)
+    UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, EvaluateTics.out.pattern_files)
 
     // Calculate Z-scores for unidentified peak group list
-    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
+    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), EvaluateTics.out.pattern_files)
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
