@@ -5,14 +5,7 @@ nextflow.enable.dsl=2
 include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
     resolution:"$params.resolution"
 )
-// include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
-//     nr_replicates:"$params.nr_replicates", 
-//     matrix:"$params.matrix"
-// )
-include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
-    nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix"
-)
+include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
     scripts_dir:"$params.scripts_dir", 
     ppm:"$params.ppm", 
@@ -20,6 +13,10 @@ include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
 )
 include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
+include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
+    nr_replicates:"$params.nr_replicates", 
+    matrix:"$params.matrix"
+)
 include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
     scripts_dir:"$params.scripts_dir", 
@@ -56,12 +53,11 @@ include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     resolution:"$params.resolution", 
-    scripts_dir:"$params.preprocessing_scripts_dir"
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
     ppm:"$params.ppm"
 )
-include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
     scripts_dir:"$params.scripts_dir", 
     zscore:"$params.zscore"
@@ -115,16 +111,6 @@ workflow {
     // Assign intensities to bins (breaks) per mzML file
     AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
 
-    // Average intensities over technical replicates for each sample
-    // AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
-    //                       AssignToBins.out.tic_txt_file.collect(),
-    //                       MakeInit.out,
-    //                       params.nr_replicates, 
-    //                       analysis_id,
-    //                       matrix,
-    //                       GenerateBreaks.out.highest_mz,
-    //                       GenerateBreaks.out.breaks)
-
     // Evaluate quality of TIC plots for eacht technical replicate
     EvaluateTics(AssignToBins.out.rdata_file.collect(),
                  AssignToBins.out.tic_txt_file.collect(),
@@ -138,12 +124,11 @@ workflow {
     // Peak finding per sample
     PeakFinding(AssignToBins.out.rdata_file.collect().flatten().combine(GenerateBreaks.out.breaks))
 
-    // Spectrum peak finding per sample
-    SpectrumPeakFinding(PeakFinding.out.collect(), EvaluateTics.out.pattern_files)
+    // Collect peak finding results for all samples
+    AveragePeaks(PeakFinding.out.collect(), EvaluateTics.out.pattern_files)
 
     // Peak grouping over samples: identified part
-    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, EvaluateTics.out.pattern_files)
-    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, EvaluateTics.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), AveragePeaks.out, EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: identified part
     FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files)
@@ -166,7 +151,7 @@ workflow {
     GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
 
     // Collect unidentified peaks
-    UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
+    UnidentifiedCollectPeaks(AveragePeaks.out, PeakGrouping.out.peaks_used.collect())
 
     // Peak grouping: unidentified part
     UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), EvaluateTics.out.pattern_files)
