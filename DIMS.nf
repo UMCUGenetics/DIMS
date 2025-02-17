@@ -41,6 +41,7 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
 )
 include { GenerateQC } from './CustomModules/DIMS/GenerateQC.nf' params(
     analysis_id:"$params.analysis_id",
+    zscore:"$params.zscore"
     matrix:"$params.matrix",
     sst_components_file:"$params.sst_components_file"
 )
@@ -148,7 +149,7 @@ workflow {
     GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
 
     // Generate QC rapports
-    GenerateQC(GenerateExcel.out.outlist_zscores, CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id)
+    GenerateQC(GenerateExcel.out.outlist_zscores, CollectSumAdducts.out.adductsums_scanmodes.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id)
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.project_excel, analysis_id)
