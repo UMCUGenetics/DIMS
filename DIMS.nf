@@ -27,7 +27,8 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 )
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore"
+    zscore:"$params.zscore",
+    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -41,9 +42,10 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
 )
 include { GenerateQC } from './CustomModules/DIMS/GenerateQC.nf' params(
     analysis_id:"$params.analysis_id",
-    zscore:"$params.zscore"
+    zscore:"$params.zscore",
     matrix:"$params.matrix",
-    sst_components_file:"$params.sst_components_file"
+    sst_components_file:"$params.sst_components_file",
+    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
