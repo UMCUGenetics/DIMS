@@ -151,7 +151,12 @@ workflow {
     GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
 
     // Generate QC rapports
-    CheckQC(GenerateExcel.out.outlist_zscores, CollectSumAdducts.out.adductsums_scanmodes.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id)
+    CheckQC(GenerateExcel.out.outlist_zscores, 
+            CollectSumAdducts.out.adductsums_scanmodes.collect(), 
+            CollectFilled.out.filled_pgrlist.collect(), 
+            MakeInit.out, 
+            analysis_id, 
+            GenerateBreaks.out.highest_mz)
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.project_excel, analysis_id)
