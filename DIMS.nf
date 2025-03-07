@@ -28,7 +28,8 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
     zscore:"$params.zscore",
-    export_scripts_dir:"$params.export_scripts_dir"
+    export_scripts_dir:"$params.export_scripts_dir",
+    path_metabolite_groups:"$params.path_metabolite_groups"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
