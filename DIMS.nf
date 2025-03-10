@@ -160,7 +160,7 @@ workflow {
             GenerateBreaks.out.highest_mz)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.project_excel, analysis_id)
+    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
 
     // Collect unidentified peaks
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
