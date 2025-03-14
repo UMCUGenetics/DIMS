@@ -156,8 +156,7 @@ workflow {
             CollectSumAdducts.out.adductsums_scanmodes.collect(), 
             CollectFilled.out.filled_pgrlist.collect(), 
             MakeInit.out, 
-            analysis_id, 
-            GenerateBreaks.out.highest_mz)
+            analysis_id)
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
