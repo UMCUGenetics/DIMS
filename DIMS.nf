@@ -86,7 +86,6 @@ include { ExportParams as Workflow_ExportParams } from './assets/workflow.nf'
 def raw_files = extractRawfilesFromDir(params.rawfiles_path)
 def analysis_id = params.outdir.split('/')[-1]
 def matrix = params.matrix
-def outdir = params.outdir
 
 workflow {
     // create init.RData file with info on technical replicates
