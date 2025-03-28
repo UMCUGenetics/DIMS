@@ -28,7 +28,8 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
     zscore:"$params.zscore", 
-    matrix:"$params.matrix"
+    matrix:"$params.matrix",
+    sst_components_file:"$params.sst_components_file"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -113,7 +114,18 @@ workflow {
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
-                          GenerateBreaks.out.highest_mz)
+                          GenerateBreaks.out.highest_mz,
+                          GenerateBreaks.out.breaks)
+
+    // Send e-mail with TIC plot PDF right after its creation
+    AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
+         sendMail {
+              to params.email.trim()
+              attach tic_plots_pdf
+              subject "TIC plots for run ${analysis_id}"
+              body "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+         }
+    }
 
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
@@ -160,10 +172,8 @@ workflow {
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
-            "${workflow.projectDir}/"// ,
-        //     "${params.scripts_dir}/", // not a git repository
-        //     "${params.hmdb_db_file}/",
-        //     "${params.relevance_file}/",
+            "${workflow.projectDir}/",
+            "${workflow.projectDir}/CustomModules/"
         ).collect()
     )
     Workflow_ExportParams()
@@ -183,7 +193,12 @@ workflow.onComplete {
     // Send email
     if (workflow.success) {
         def subject = "DIMS Workflow Successful: ${analysis_id}"
-        sendMail(to: params.email.trim(), subject: subject, body: email_html)
+        sendMail(
+            to: params.email.trim(), 
+            subject: subject, 
+            body: email_html,
+            attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf"
+        )
     } else {
         def subject = "DIMS Workflow Failed: ${analysis_id}"
         sendMail(to: params.email.trim(), subject: subject, body: email_html)
