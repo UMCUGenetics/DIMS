@@ -117,6 +117,16 @@ workflow {
                           GenerateBreaks.out.highest_mz,
                           GenerateBreaks.out.breaks)
 
+    // Send e-mail with TIC plot PDF right after its creation
+    AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
+         sendMail {
+              to params.email.trim()
+              attach tic_plots_pdf
+              subject "TIC plots for run ${analysis_id}"
+              body "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+         }
+    }
+
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
 
@@ -183,7 +193,12 @@ workflow.onComplete {
     // Send email
     if (workflow.success) {
         def subject = "DIMS Workflow Successful: ${analysis_id}"
-        sendMail(to: params.email.trim(), subject: subject, body: email_html)
+        sendMail(
+            to: params.email.trim(), 
+            subject: subject, 
+            body: email_html,
+            attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf"
+        )
     } else {
         def subject = "DIMS Workflow Failed: ${analysis_id}"
         sendMail(to: params.email.trim(), subject: subject, body: email_html)
