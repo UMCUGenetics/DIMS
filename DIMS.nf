@@ -183,12 +183,20 @@ workflow {
 workflow.onComplete {
     // HTML Template
     def template = new File("$baseDir/assets/workflow_complete.html")
+
+    def content_miss_infusions_negative = file("${params.outdir}/Bioinformatics/miss_infusions_negative.txt").text
+    def content_miss_infusions_positive = file("${params.outdir}/Bioinformatics/miss_infusions_positive.txt").text
+
+
     def binding = [
+        miss_infusions_negative: content_miss_infusions_negative,
+        miss_infusions_positive: content_miss_infusions_positive,
         runName: analysis_id,
         workflow: workflow
     ]
     def engine = new groovy.text.GStringTemplateEngine()
     def email_html = engine.createTemplate(template).make(binding).toString()
+
 
     // Send email
     if (workflow.success) {
