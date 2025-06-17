@@ -27,9 +27,9 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 )
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore", 
-    matrix:"$params.matrix",
-    sst_components_file:"$params.sst_components_file"
+    zscore:"$params.zscore",
+    export_scripts_dir:"$params.export_scripts_dir",
+    path_metabolite_groups:"$params.path_metabolite_groups"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -40,6 +40,13 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
     file_explanation:"$params.file_explanation",
     file_isomers:"$params.file_isomers"
+)
+include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
+    analysis_id:"$params.analysis_id",
+    zscore:"$params.zscore",
+    matrix:"$params.matrix",
+    sst_components_file:"$params.sst_components_file",
+    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
@@ -142,10 +149,17 @@ workflow {
     CollectSumAdducts(SumAdducts.out.collect())
 
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
-    GenerateExcel(CollectSumAdducts.out.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id, params.relevance_file)
+    GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
+
+    // Generate QC rapports
+    GenerateQCOutput(GenerateExcel.out.outlist_zscores, 
+                     CollectSumAdducts.out.adductsums_scanmodes.collect(), 
+                     CollectFilled.out.filled_pgrlist.collect(), 
+                     MakeInit.out, 
+                     analysis_id)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
+    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
 
     // Collect unidentified peaks
     UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
