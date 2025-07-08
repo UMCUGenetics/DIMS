@@ -6,6 +6,7 @@ include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
     resolution:"$params.resolution"
 )
 include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
+include { CollectAveraged } from './CustomModules/DIMS/CollectAveraged.nf'
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
     scripts_dir:"$params.scripts_dir", 
     ppm:"$params.ppm", 
@@ -106,12 +107,10 @@ workflow {
     // Generate HMDB parts for parallel processing in PeakGrouping step
     HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
-    // ConvertRawFile.out.combine(GenerateBreaks.out.breaks).view()
-
     // Assign intensities to bins (breaks) per mzML file
     AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
 
-    // Evaluate quality of TIC plots for eacht technical replicate
+    // Evaluate quality of TIC plots for each technical replicate
     EvaluateTics(AssignToBins.out.rdata_file.collect(),
                  AssignToBins.out.tic_txt_file.collect(),
                  MakeInit.out,
@@ -121,14 +120,26 @@ workflow {
                  GenerateBreaks.out.highest_mz,
                  GenerateBreaks.out.trim_params)
 
-    // Peak finding per sample
-    PeakFinding(AssignToBins.out.rdata_file.collect().flatten().combine(GenerateBreaks.out.breaks))
+    // get info on sample with corresponding technical replicates
+    ch_sample_techreps = EvaluateTics.out.sample_techreps
+        .splitCsv(header:false)
+        .splitCsv(sep: ';')
+        .map { row ->
+            def meta = [sample_id: row[0][0], tech_reps: row[1], scanmode: row[2]]
+        }
+        .view()
+
+    // Peak finding per technical replicate
+    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps)
+
+    // AveragePeaks over technical replicates on peak level
+    AveragePeaks(PeakFinding.out.collect(), ch_sample_techreps)
 
     // Collect peak finding results for all samples
-    AveragePeaks(PeakFinding.out.collect(), EvaluateTics.out.pattern_files)
+    CollectAveraged(AveragePeaks.out.collect())
 
     // Peak grouping over samples: identified part
-    PeakGrouping(HMDBparts.out.flatten(), AveragePeaks.out, EvaluateTics.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), CollectAveraged.out.averaged_peaks.collect(), EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: identified part
     FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files)
@@ -151,16 +162,16 @@ workflow {
     GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
 
     // Collect unidentified peaks
-    UnidentifiedCollectPeaks(AveragePeaks.out, PeakGrouping.out.peaks_used.collect())
+    // UnidentifiedCollectPeaks(AveragePeaks.out, PeakGrouping.out.peaks_used.collect())
 
     // Peak grouping: unidentified part
-    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), EvaluateTics.out.pattern_files)
+    // UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: unidentified part
-    UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, EvaluateTics.out.pattern_files)
+    // UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, EvaluateTics.out.pattern_files)
 
     // Calculate Z-scores for unidentified peak group list
-    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), EvaluateTics.out.pattern_files)
+    // UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), EvaluateTics.out.pattern_files)
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
