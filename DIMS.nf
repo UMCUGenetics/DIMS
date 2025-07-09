@@ -108,16 +108,14 @@ workflow {
                           GenerateBreaks.out.breaks)
 
     // Send e-mail with TIC plot PDF right after its creation
-    AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
-        def subject = "TIC plots for run ${analysis_id}"
-        def body = "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
-        sendMail {
-            to: params.email.trim(),
-            subject: subject,
-            body: body,
-            attach: tic_plots_pdf
-        }
-    }
+    def subject = "TIC plots for run ${analysis_id}"
+    def body = "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+    sendMail(
+        to: params.email.trim(),
+        subject: subject,
+        body: body,
+        attach: AverageTechReplicates.out.tic_plots_pdf
+    )
 
     // Peak finding per sample
     PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
