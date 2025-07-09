@@ -109,12 +109,14 @@ workflow {
 
     // Send e-mail with TIC plot PDF right after its creation
     AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
-         sendMail {
-              to params.email.trim()
-              attach tic_plots_pdf
-              subject "TIC plots for run ${analysis_id}"
-              body "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
-         }
+        def subject = "TIC plots for run ${analysis_id}"
+        def body = "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+        sendMail {
+            to: params.email.trim(),
+            subject: subject,
+            body: body,
+            attach: tic_plots_pdf
+        }
     }
 
     // Peak finding per sample
