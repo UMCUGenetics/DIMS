@@ -152,7 +152,9 @@ workflow {
                      analysis_id)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+    if (params.zscore == 1) {
+        GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+    }
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
