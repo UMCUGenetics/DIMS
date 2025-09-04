@@ -105,7 +105,6 @@ workflow {
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
-                          threshold_tics,
                           GenerateBreaks.out.highest_mz,
                           GenerateBreaks.out.breaks)
 
