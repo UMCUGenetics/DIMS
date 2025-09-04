@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
 include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
     nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix"
+    matrix:"$params.matrix",
+    threshold_tics:"$params.threshold_tics"
 )
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
     scripts_dir:"$params.scripts_dir", 
@@ -104,6 +105,7 @@ workflow {
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
+                          threshold_tics,
                           GenerateBreaks.out.highest_mz,
                           GenerateBreaks.out.breaks)
 
