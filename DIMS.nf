@@ -33,7 +33,7 @@ include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
-    scripts_dir:"$params.scripts_dir", 
+    export_scripts_dir:"$params.export_scripts_dir", 
     zscore:"$params.zscore", 
     path_metabolite_groups:"$params.path_metabolite_groups",
     file_ratios_metabolites:"$params.file_ratios_metabolites",
