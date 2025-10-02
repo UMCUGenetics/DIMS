@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
 include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
     nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix"
+    matrix:"$params.matrix",
+    threshold_tics:"$params.threshold_tics"
 )
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
     scripts_dir:"$params.scripts_dir", 
@@ -27,9 +28,9 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 )
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore", 
-    matrix:"$params.matrix",
-    sst_components_file:"$params.sst_components_file"
+    zscore:"$params.zscore",
+    export_scripts_dir:"$params.export_scripts_dir",
+    path_metabolite_groups:"$params.path_metabolite_groups"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -40,6 +41,13 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
     file_explanation:"$params.file_explanation",
     file_isomers:"$params.file_isomers"
+)
+include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
+    analysis_id:"$params.analysis_id",
+    zscore:"$params.zscore",
+    matrix:"$params.matrix",
+    sst_components_file:"$params.sst_components_file",
+    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
@@ -53,30 +61,13 @@ include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     scripts_dir:"$params.scripts_dir"
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     ppm:"$params.ppm"
 )
 include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
-    scripts_dir:"$params.scripts_dir", 
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir", 
     zscore:"$params.zscore"
-)
-include { UnidentifiedCalcZscores } from './CustomModules/DIMS/UnidentifiedCalcZscores.nf' params(
-    scripts_dir:"$params.scripts_dir", 
-    ppm:"$params.ppm", 
-    zscore:"$params.zscore"
-)
-include { UnidentifiedCollectPeaks } from './CustomModules/DIMS/UnidentifiedCollectPeaks.nf' params(
-    ppm:"$params.ppm"
-)
-include { UnidentifiedFillMissing } from './CustomModules/DIMS/UnidentifiedFillMissing.nf' params(
-    scripts_dir:"$params.scripts_dir", 
-    thresh:"$params.thresh", 
-    resolution:"$params.resolution", 
-    ppm:"$params.ppm"
-)
-include { UnidentifiedPeakGrouping } from './CustomModules/DIMS/UnidentifiedPeakGrouping.nf' params(
-    resolution:"$params.resolution", 
-    ppm:"$params.ppm"
 )
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
 // include { Workflow_Export_Params } from './assets/workflow.nf'
@@ -119,12 +110,14 @@ workflow {
 
     // Send e-mail with TIC plot PDF right after its creation
     AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
-         sendMail {
-              to params.email.trim()
-              attach tic_plots_pdf
-              subject "TIC plots for run ${analysis_id}"
-              body "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
-         }
+        def subject = "TIC plots for run ${analysis_id}"
+        def body = "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+        sendMail(
+            to: params.email.trim(),
+            subject: subject,
+            body: body,
+            attach: tic_plots_pdf
+        )
     }
 
     // Peak finding per sample
@@ -134,8 +127,7 @@ workflow {
     SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.pattern_files)
 
     // Peak grouping over samples: identified part
-    // PeakGrouping(HMDBparts.out.collect().flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
-    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out, AverageTechReplicates.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out)
 
     // Fill missing values in peak group list: identified part
     FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.pattern_files)
@@ -145,29 +137,23 @@ workflow {
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
-               AverageTechReplicates.out.pattern_files, 
                HMDBparts_main.out.collect().flatten())
 
     // Collect summed adducts parts
     CollectSumAdducts(SumAdducts.out.collect())
 
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
-    GenerateExcel(CollectSumAdducts.out.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id, params.relevance_file)
+    GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
+
+    // Generate QC rapports
+    GenerateQCOutput(GenerateExcel.out.outlist_zscores, 
+                     CollectSumAdducts.out.adductsums_scanmodes.collect(), 
+                     CollectFilled.out.filled_pgrlist.collect(), 
+                     MakeInit.out, 
+                     analysis_id)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
-
-    // Collect unidentified peaks
-    UnidentifiedCollectPeaks(SpectrumPeakFinding.out, PeakGrouping.out.peaks_used.collect())
-
-    // Peak grouping: unidentified part
-    UnidentifiedPeakGrouping(UnidentifiedCollectPeaks.out.flatten(), AverageTechReplicates.out.pattern_files)
-
-    // Fill missing values in peak group list: unidentified part
-    UnidentifiedFillMissing(UnidentifiedPeakGrouping.out.grouped_unidentified, AverageTechReplicates.out.pattern_files)
-
-    // Calculate Z-scores for unidentified peak group list
-    UnidentifiedCalcZscores(UnidentifiedFillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
+    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
