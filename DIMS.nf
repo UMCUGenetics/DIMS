@@ -144,6 +144,13 @@ workflow {
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
     GenerateExcel(CollectSumAdducts.out.collect(), CollectFilled.out.filled_pgrlist.collect(), MakeInit.out, analysis_id, params.relevance_file)
 
+    // Generate QC rapports
+    GenerateQCOutput(GenerateExcel.out.outlist_zscores,
+                     CollectSumAdducts.out.adductsums_scanmodes.collect(),
+                     CollectFilled.out.filled_pgrlist.collect(),
+                     MakeInit.out,
+                     analysis_id)
+
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.excel_files, analysis_id)
 
@@ -173,10 +180,25 @@ workflow {
 workflow.onComplete {
     // HTML Template
     def template = new File("$baseDir/assets/workflow_complete.html")
+
+    def content_miss_infusions_negative = file("${params.outdir}/Bioinformatics/miss_infusions_negative.txt").text
+    def content_miss_infusions_positive = file("${params.outdir}/Bioinformatics/miss_infusions_positive.txt").text
+    def content_missing_mzrange = file("${params.outdir}/Bioinformatics/missing_mz_warning.txt").text
+    def content_missing_samples = file("${params.outdir}/Bioinformatics/sample_names_nodata.txt").text
+    def content_positive_controls = file("${params.outdir}/Bioinformatics/positive_controls_qc.txt").text
+    def content_sst_zscores = file("${params.outdir}/Bioinformatics/sst_qc.txt").text
+
     def binding = [
+        miss_infusions_negative: content_miss_infusions_negative,
+        miss_infusions_positive: content_miss_infusions_positive,
+        missing_mzrange: content_missing_mzrange,
+        missing_samples: content_missing_samples,
+        positive_controls: content_positive_controls,
+        sst_zscores: content_sst_zscores,
         runName: analysis_id,
         workflow: workflow
     ]
+
     def engine = new groovy.text.GStringTemplateEngine()
     def email_html = engine.createTemplate(template).make(binding).toString()
 
