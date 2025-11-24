@@ -1,7 +1,7 @@
 # R:v4.1.0
 
 # parent image tidyverse (v4.1.0), uses rocker/rstudio, which uses rocker/r-ver
-FROM --platform=linux/amd64 bioconductor/bioconductor_docker:RELEASE_3_21
+FROM --platform=linux/amd64 bioconductor/bioconductor_docker:RELEASE_3_21 AS build_amd64
 
 # Metadata
 LABEL DIMS_VERSION=1.4

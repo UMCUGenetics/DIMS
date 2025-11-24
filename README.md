@@ -14,16 +14,15 @@ Pipeline that processes raw Direct Infusion Mass Spectrometry data.
 ## Docker image
 
 ```bash
-docker build -t ghcr.io/umcugenetics/[NAME]:[tag] .
-docker push ghcr.io/umcugenetics/[NAME]:[tag]
+docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/umcugenetics/dims:[tag] --push .
 ```
 
 on HPC:
 
 ```bash
-srun -c 2 -t 0:30:00 -A dbg_mz --mem=100G --gres=tmpspace:100G --pty /usr/bin/bash 
+srun -c 2 -t 0:30:00 -A dbg_mz --mem=10G --gres=tmpspace:10G --pty /usr/bin/bash 
 cd /hpc/dbg_mz/tools/singularity_cache/ 
-singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://ghcr.io/umcugenetics/[NAME]:[tag]
+singularity build /hpc/dbg_mz/tools/singularity_cache/dims-[tag].img docker://ghcr.io/umcugenetics/dims:[tag]
 ```
 
 ## Setup HPC
