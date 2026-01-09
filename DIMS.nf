@@ -28,9 +28,16 @@ include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
 )
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore",
+    zscore:"$params.zscore", 
     export_scripts_dir:"$params.export_scripts_dir",
     path_metabolite_groups:"$params.path_metabolite_groups"
+)
+include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
+    analysis_id:"$params.analysis_id",
+    zscore:"$params.zscore",
+    matrix:"$params.matrix",
+    sst_components_file:"$params.sst_components_file",
+    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
@@ -41,13 +48,6 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
     file_explanation:"$params.file_explanation",
     file_isomers:"$params.file_isomers"
-)
-include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
-    analysis_id:"$params.analysis_id",
-    zscore:"$params.zscore",
-    matrix:"$params.matrix",
-    sst_components_file:"$params.sst_components_file",
-    export_scripts_dir:"$params.export_scripts_dir"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
@@ -66,7 +66,7 @@ include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
 )
 include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir", 
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     zscore:"$params.zscore"
 )
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
@@ -81,7 +81,7 @@ def matrix = params.matrix
 workflow {
     // create init.RData file with info on technical replicates
     MakeInit(params.samplesheet, params.nr_replicates)
-
+/*
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
     
@@ -110,14 +110,12 @@ workflow {
 
     // Send e-mail with TIC plot PDF right after its creation
     AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
-        def subject = "TIC plots for run ${analysis_id}"
-        def body = "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
-        sendMail(
-            to: params.email.trim(),
-            subject: subject,
-            body: body,
-            attach: tic_plots_pdf
-        )
+         sendMail {
+              to params.email.trim()
+              attach tic_plots_pdf
+              subject "TIC plots for run ${analysis_id}"
+              body "Check TIC plots for run ${analysis_id} for technical replicates that should be removed from the run"
+         }
     }
 
     // Peak finding per sample
@@ -146,13 +144,6 @@ workflow {
     GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
 
     // Generate QC rapports
-    GenerateQCOutput(GenerateExcel.out.outlist_zscores, 
-                     CollectSumAdducts.out.adductsums_scanmodes.collect(), 
-                     CollectFilled.out.filled_pgrlist.collect(), 
-                     MakeInit.out, 
-                     analysis_id)
-
-    // Generate QC rapports
     GenerateQCOutput(GenerateExcel.out.outlist_zscores,
                      CollectSumAdducts.out.adductsums_scanmodes.collect(),
                      CollectFilled.out.filled_pgrlist.collect(),
@@ -160,8 +151,8 @@ workflow {
                      analysis_id)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
-
+    // GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+*/
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
@@ -174,15 +165,16 @@ workflow {
 
 // Workflow completion notification
 workflow.onComplete {
+
     // HTML Template
     def template = new File("$baseDir/assets/workflow_complete.html")
-
-    def content_miss_infusions_negative = file("${params.outdir}/Bioinformatics/miss_infusions_negative.txt").text
-    def content_miss_infusions_positive = file("${params.outdir}/Bioinformatics/miss_infusions_positive.txt").text
-    def content_missing_mzrange = file("${params.outdir}/Bioinformatics/missing_mz_warning.txt").text
-    def content_missing_samples = file("${params.outdir}/Bioinformatics/sample_names_nodata.txt").text
-    def content_positive_controls = file("${params.outdir}/Bioinformatics/positive_controls_qc.txt").text
-    def content_sst_zscores = file("${params.outdir}/Bioinformatics/sst_qc.txt").text
+    def content_miss_infusions_negative = file("${params.outdir}/Bioinformatics/QC/miss_infusions_negative.txt").text
+    def content_miss_infusions_positive = file("${params.outdir}/Bioinformatics/QC/miss_infusions_positive.txt").text
+    def content_missing_mzrange = file("${params.outdir}/Bioinformatics/QC/missing_mz_warning.txt").text
+    def content_missing_samples = file("${params.outdir}/Bioinformatics/QC/sample_names_nodata.txt").text
+    def content_positive_controls = file("${params.outdir}/Bioinformatics/QC/positive_controls_warning.txt").text
+    def content_sst_zscores = file("${params.outdir}/Bioinformatics/QC/sst_qc.txt").text
+    def content_int_std_threshold = file("${params.outdir}/Bioinformatics/QC/internal_standards_below_threshold.txt").text
 
     def binding = [
         miss_infusions_negative: content_miss_infusions_negative,
@@ -191,22 +183,17 @@ workflow.onComplete {
         missing_samples: content_missing_samples,
         positive_controls: content_positive_controls,
         sst_zscores: content_sst_zscores,
+        is_threshold: content_int_std_threshold,
         runName: analysis_id,
         workflow: workflow
     ]
-
     def engine = new groovy.text.GStringTemplateEngine()
     def email_html = engine.createTemplate(template).make(binding).toString()
 
     // Send email
     if (workflow.success) {
         def subject = "DIMS Workflow Successful: ${analysis_id}"
-        sendMail(
-            to: params.email.trim(), 
-            subject: subject, 
-            body: email_html,
-            attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf"
-        )
+        sendMail(to: params.email.trim(), subject: subject, body: email_html, attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf")
     } else {
         def subject = "DIMS Workflow Failed: ${analysis_id}"
         sendMail(to: params.email.trim(), subject: subject, body: email_html)
