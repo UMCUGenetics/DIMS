@@ -49,13 +49,40 @@
     <p>${positive_controls}</p>
 
     <h3>SST components with Z-score below 2</h3>
-    <p>${sst_zscores}</p>
+    <%
+        def sstlines = (sst_zscores ?: '').trim().readLines()
+
+        if (sstlines && sstlines.size() > 0) {
+            def sstheaders = splitTsvLine(sstlines[0])
+            def sstrows = sstlines.tail().findAll { it?.trim() }.collect { splitTsvLine(it) }
+    %>
+
+        <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
+        <thead>
+            <tr>
+            <% sstheaders.each { h -> %>
+                <th><%= h %></th>
+            <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% sstrows.each { row -> %>
+            <tr>
+                <% row.each { cell -> %>
+                    <td><%= cell %></td>
+                <% } %>
+            </tr>
+            <% } %>
+        </tbody>
+        </table>
+    <% } else { %>
+        <p>${sst_zscores}</p>
+    <% } %>
 
     <h3>Internal standards with intensity below threshold</h3>
 
     <%
         def lines = (is_threshold ?: '').trim().readLines()
-
 
         if (lines && lines.size() > 0) {
             def headers = splitTsvLine(lines[0])
@@ -81,7 +108,7 @@
         </tbody>
         </table>
     <% } else { %>
-        <p><em>Geen data gevonden in <code>internal_standards_below_threshold.txt</code>.</em></p>
+        <p>${is_threshold}</p>
     <% } %>
 
     <% } else { %>
