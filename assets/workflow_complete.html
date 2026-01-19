@@ -19,9 +19,9 @@
     </div>
 
     <%
-        def stripQuotes = { v ->
-            if (v == null) return ''
-            v.replaceAll(/^"(.*)"$/, '$1')
+        def stripQuotes = { value ->
+            if (value == null) return ''
+            value.replaceAll(/^"(.*)"$/, '$1')
         }
 
         
@@ -60,8 +60,8 @@
         <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
         <thead>
             <tr>
-            <% sstheaders.each { h -> %>
-                <th><%= h %></th>
+            <% sstheaders.each { header -> %>
+                <th><%= header %></th>
             <% } %>
             </tr>
         </thead>
@@ -92,8 +92,8 @@
         <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
         <thead>
             <tr>
-            <% headers.each { h -> %>
-                <th><%= h %></th>
+            <% headers.each { header -> %>
+                <th><%= header %></th>
             <% } %>
             </tr>
         </thead>
