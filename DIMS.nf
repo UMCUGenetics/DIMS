@@ -81,7 +81,7 @@ def matrix = params.matrix
 workflow {
     // create init.RData file with info on technical replicates
     MakeInit(params.samplesheet, params.nr_replicates)
-/*
+
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
     
@@ -151,8 +151,8 @@ workflow {
                      analysis_id)
 
     // Generate violin plots 
-    // GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
-*/
+    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
@@ -193,9 +193,18 @@ workflow.onComplete {
     // Send email
     if (workflow.success) {
         def subject = "DIMS Workflow Successful: ${analysis_id}"
-        sendMail(to: params.email.trim(), subject: subject, body: email_html, attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf")
+        sendMail(
+            to: params.email.trim(), 
+            subject: subject, 
+            body: email_html, 
+            attach: "${params.outdir}/Bioinformatics/${analysis_id}_TICplots.pdf"
+        )
     } else {
         def subject = "DIMS Workflow Failed: ${analysis_id}"
-        sendMail(to: params.email.trim(), subject: subject, body: email_html)
+        sendMail(
+            to: params.email.trim(), 
+            subject: subject, 
+            body: email_html
+        )
     }
 }
