@@ -55,7 +55,9 @@ include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     ppm:"$params.ppm"
 )
 include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
-include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
+include { ParseSamplesheet } from './CustomModules/DIMS/ParseSamplesheet.nf' params(
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
+)
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     resolution:"$params.resolution", 
     scripts_dir:"$params.scripts_dir"
@@ -80,7 +82,7 @@ def matrix = params.matrix
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(params.samplesheet, params.nr_replicates)
+    ParseSamplesheet(params.samplesheet)
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
@@ -88,6 +90,7 @@ workflow {
     // Generate breaks on one of the mzML files
     GenerateBreaks(ConvertRawFile.out.take(1))
 
+/*
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
     HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
@@ -101,7 +104,7 @@ workflow {
     // Average intensities over technical replicates for each sample
     AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
                           AssignToBins.out.tic_txt_file.collect(),
-                          MakeInit.out,
+                          ParseSamplesheet.out,
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
@@ -149,12 +152,13 @@ workflow {
     GenerateQCOutput(GenerateExcel.out.outlist_zscores, 
                      CollectSumAdducts.out.adductsums_scanmodes.collect(), 
                      CollectFilled.out.filled_pgrlist.collect(), 
-                     MakeInit.out, 
+                     ParseSamplesheet.out, 
                      analysis_id)
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
 
+*/
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
