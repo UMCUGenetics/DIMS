@@ -95,7 +95,7 @@ workflow {
     
     // Generate breaks on one of the mzML files
     GenerateBreaks(ConvertRawFile.out.take(1))
-/*
+
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
     HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
@@ -162,7 +162,7 @@ workflow {
 
     // Generate violin plots 
     GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
-*/
+
     // Create log files: Repository versions and Workflow params
     VersionLog(
         Channel.of(
