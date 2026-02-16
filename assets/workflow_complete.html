@@ -17,6 +17,100 @@
     <div style="color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
         Execution completed successfully!
     </div>
+
+    <%
+        def stripQuotes = { value ->
+            if (value == null) return ''
+            value.replaceAll(/^"(.*)"$/, '$1')
+        }
+
+        
+        def splitTsvLine = { line ->
+            if (!line) return []
+            line.split(/\t/, -1).collect { stripQuotes(it) }
+        }
+    %>
+
+    <h2>QC output</h2>
+
+    <h3>Missing infusions in negative scan mode</h3>
+    <p>${miss_infusions_negative}</p>
+
+    <h3>Missing infusions in positive scan mode</h3>
+    <p>${miss_infusions_positive}</p>
+
+    <h3>Missing samples (all technical replicates rejected)</h3>
+    <p>${missing_samples}</p>
+
+    <h3>Missing mass ranges</h3>
+    <p>${missing_mzrange}</p>
+
+    <h3>Z-scores for positive control samples</h3>
+    <p>${positive_controls}</p>
+
+    <h3>SST components with Z-score below 2</h3>
+    <%
+        def sstlines = (sst_zscores ?: '').trim().readLines()
+
+        if (sstlines && sstlines.size() > 0) {
+            def sstheaders = splitTsvLine(sstlines[0])
+            def sstrows = sstlines.tail().findAll { it?.trim() }.collect { splitTsvLine(it) }
+    %>
+
+        <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
+        <thead>
+            <tr>
+            <% sstheaders.each { header -> %>
+                <th><%= header %></th>
+            <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% sstrows.each { row -> %>
+            <tr>
+                <% row.each { cell -> %>
+                    <td><%= cell %></td>
+                <% } %>
+            </tr>
+            <% } %>
+        </tbody>
+        </table>
+    <% } else { %>
+        <p>${sst_zscores}</p>
+    <% } %>
+
+    <h3>Internal standards with intensity below threshold</h3>
+
+    <%
+        def lines = (is_threshold ?: '').trim().readLines()
+
+        if (lines && lines.size() > 0) {
+            def headers = splitTsvLine(lines[0])
+            def rows = lines.tail().findAll { it?.trim() }.collect { splitTsvLine(it) }
+    %>
+
+        <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
+        <thead>
+            <tr>
+            <% headers.each { header -> %>
+                <th><%= header %></th>
+            <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% rows.each { row -> %>
+            <tr>
+                <% row.each { cell -> %>
+                    <td><%= cell %></td>
+                <% } %>
+            </tr>
+            <% } %>
+        </tbody>
+        </table>
+    <% } else { %>
+        <p>${is_threshold}</p>
+    <% } %>
+
     <% } else { %>
     <div style="color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
         <h4 style="margin-top:0; color: inherit;">Execution completed unsuccessfully!</h4>
@@ -25,6 +119,7 @@
         <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorReport ?: 'n/a'}</pre>
     </div>
     <% } %>
+
 
     <h2>Execution summary</h2>
 
