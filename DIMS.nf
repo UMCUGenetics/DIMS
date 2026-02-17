@@ -16,7 +16,8 @@ include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
 include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
     nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix"
+    matrix:"$params.matrix",
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
 )
 include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
@@ -104,9 +105,7 @@ workflow {
     EvaluateTics(AssignToBins.out.rdata_file.collect(),
                  AssignToBins.out.tic_txt_file.collect(),
                  MakeInit.out,
-                 params.nr_replicates, 
                  analysis_id,
-                 matrix,
                  GenerateBreaks.out.highest_mz,
                  GenerateBreaks.out.trim_params)
 
@@ -133,7 +132,7 @@ workflow {
     PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps)
 
     // AveragePeaks over technical replicates on peak level
-    AveragePeaks(PeakFinding.out.collect(), ch_sample_techreps)
+    AveragePeaks(PeakFinding.out.peaklist_rdata.collect(), ch_sample_techreps)
 
     // Collect peak finding results for all samples
     CollectAveraged(AveragePeaks.out.collect())
