@@ -2,12 +2,11 @@
 nextflow.enable.dsl=2
 
 // get functions and include parameters that are independent of dataset
-include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
-include { AverageTechReplicates } from './CustomModules/DIMS/AverageTechReplicates.nf' params(
-    nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix",
-    threshold_tics:"$params.threshold_tics"
+include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
+    resolution:"$params.resolution"
 )
+include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
+include { CollectAveraged } from './CustomModules/DIMS/CollectAveraged.nf'
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
     scripts_dir:"$params.scripts_dir", 
     ppm:"$params.ppm", 
@@ -15,6 +14,11 @@ include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
 )
 include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
+include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
+    nr_replicates:"$params.nr_replicates", 
+    matrix:"$params.matrix",
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
+)
 include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
     scripts_dir:"$params.scripts_dir", 
@@ -58,13 +62,12 @@ include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
     resolution:"$params.resolution", 
-    scripts_dir:"$params.scripts_dir"
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
     preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     ppm:"$params.ppm"
 )
-include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
     preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     zscore:"$params.zscore"
@@ -96,20 +99,18 @@ workflow {
     HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
     // Assign intensities to bins (breaks) per mzML file
-    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks))
+    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
 
-    // Average intensities over technical replicates for each sample
-    AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
-                          AssignToBins.out.tic_txt_file.collect(),
-                          MakeInit.out,
-                          params.nr_replicates, 
-                          analysis_id,
-                          matrix,
-                          GenerateBreaks.out.highest_mz,
-                          GenerateBreaks.out.breaks)
+    // Evaluate quality of TIC plots for each technical replicate
+    EvaluateTics(AssignToBins.out.rdata_file.collect(),
+                 AssignToBins.out.tic_txt_file.collect(),
+                 MakeInit.out,
+                 analysis_id,
+                 GenerateBreaks.out.highest_mz,
+                 GenerateBreaks.out.trim_params)
 
     // Send e-mail with TIC plot PDF right after its creation
-    AverageTechReplicates.out.tic_plots_pdf.map { tic_plots_pdf ->
+    EvaluateTics.out.tic_plots_pdf.map { tic_plots_pdf ->
          sendMail {
               to params.email.trim()
               attach tic_plots_pdf
@@ -118,20 +119,32 @@ workflow {
          }
     }
 
-    // Peak finding per sample
-    PeakFinding(AverageTechReplicates.out.binned_files.collect().flatten().combine(GenerateBreaks.out.breaks))
+    // get info on sample with corresponding technical replicates
+    ch_sample_techreps = EvaluateTics.out.sample_techreps
+        .splitCsv(header:false)
+        .splitCsv(sep: ';')
+        .map { row ->
+            def meta = [sample_id: row[0][0], tech_reps: row[1], scanmode: row[2]]
+        }
+        .view()
 
-    // Spectrum peak finding per sample
-    SpectrumPeakFinding(PeakFinding.out.collect(), AverageTechReplicates.out.pattern_files)
+    // Peak finding per technical replicate
+    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps)
+
+    // AveragePeaks over technical replicates on peak level
+    AveragePeaks(PeakFinding.out.peaklist_rdata.collect(), ch_sample_techreps)
+
+    // Collect peak finding results for all samples
+    CollectAveraged(AveragePeaks.out.collect())
 
     // Peak grouping over samples: identified part
-    PeakGrouping(HMDBparts.out.flatten(), SpectrumPeakFinding.out)
+    PeakGrouping(HMDBparts.out.flatten(), CollectAveraged.out.averaged_peaks.collect(), EvaluateTics.out.pattern_files)
 
     // Fill missing values in peak group list: identified part
-    FillMissing(PeakGrouping.out.grouped_identified, AverageTechReplicates.out.pattern_files)
+    FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files)
 
     // Collect filled peak group list: identified part
-    CollectFilled(FillMissing.out.collect(), AverageTechReplicates.out.pattern_files)
+    CollectFilled(FillMissing.out.collect(), EvaluateTics.out.pattern_files)
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
