@@ -8,7 +8,7 @@ include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
 include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
 include { CollectAveraged } from './CustomModules/DIMS/CollectAveraged.nf'
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
-    scripts_dir:"$params.scripts_dir", 
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     ppm:"$params.ppm", 
     zscore:"$params.zscore"
 )
@@ -21,7 +21,7 @@ include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
 )
 include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
-    scripts_dir:"$params.scripts_dir", 
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     thresh:"$params.thresh", 
     resolution:"$params.resolution", 
     ppm:"$params.ppm"
