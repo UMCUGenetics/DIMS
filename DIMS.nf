@@ -21,7 +21,7 @@ include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
 )
 include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
-    scripts_dir:"$params.scripts_dir", 
+    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     thresh:"$params.thresh", 
     resolution:"$params.resolution", 
     ppm:"$params.ppm"
