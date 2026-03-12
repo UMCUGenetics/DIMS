@@ -45,7 +45,7 @@ include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' par
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
-    export_scripts_dir:"$params.export_scripts_dir"
+    export_scripts_dir:"$params.export_scripts_dir",
     path_metabolite_groups:"$params.path_metabolite_groups",
     file_ratios_metabolites:"$params.file_ratios_metabolites",
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
