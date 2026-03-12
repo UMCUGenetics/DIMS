@@ -45,13 +45,11 @@ include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' par
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
     analysis_id:"$params.analysis_id", 
-    scripts_dir:"$params.scripts_dir", 
-    zscore:"$params.zscore", 
+    export_scripts_dir:"$params.export_scripts_dir",
     path_metabolite_groups:"$params.path_metabolite_groups",
     file_ratios_metabolites:"$params.file_ratios_metabolites",
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
-    file_explanation:"$params.file_explanation",
-    file_isomers:"$params.file_isomers"
+    file_explanation:"$params.file_explanation"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
@@ -164,7 +162,9 @@ workflow {
                      analysis_id)
 
     // Generate violin plots 
-    GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+    if (params.zscore == 1) {
+        GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+    }
 
     // Create log files: Repository versions and Workflow params
     VersionLog(
