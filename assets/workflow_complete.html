@@ -57,7 +57,7 @@
             def sstrows = sstlines.tail().findAll { it?.trim() }.collect { splitTsvLine(it) }
     %>
 
-        <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
+        <table style="border-collapse:collapse; width:100%; padding: 4px; text-align: left;">
         <thead>
             <tr>
             <% sstheaders.each { header -> %>
@@ -89,7 +89,7 @@
             def rows = lines.tail().findAll { it?.trim() }.collect { splitTsvLine(it) }
     %>
 
-        <table border="1" style="border-collapse:collapse; width:100%; padding: 4px;">
+        <table style="border-collapse:collapse; width:100%; padding: 4px; text-align: left;">
         <thead>
             <tr>
             <% headers.each { header -> %>
