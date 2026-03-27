@@ -66,7 +66,9 @@ include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
 include { SpectrumPeakFinding } from './CustomModules/DIMS/SpectrumPeakFinding.nf'
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
     preprocessing_scripts_dir:"$params.preprocessing_scripts_dir", 
-    zscore:"$params.zscore"
+    zscore:"$params.zscore",
+    adducts_pos:"$params.adducts_pos",
+    adducts_neg:"$params.adducts_neg"
 )
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
 // include { Workflow_Export_Params } from './assets/workflow.nf'
