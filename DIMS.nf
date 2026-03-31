@@ -81,8 +81,7 @@ def raw_files = Channel
     .splitCsv(header: true, sep: '\t')
     .map { row ->
         def file_id = row.File_Name
-        def raw_file = file("${params.rawfiles_path}/${file_id}.raw")
-        if (!raw_file.exists()) error "Missing file for ${file_id}: ${raw_file}"
+        def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
         tuple(file_id, raw_file)
      }
 
