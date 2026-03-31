@@ -104,7 +104,7 @@ workflow {
     // Average intensities over technical replicates for each sample
     AverageTechReplicates(AssignToBins.out.rdata_file.collect(),
                           AssignToBins.out.tic_txt_file.collect(),
-                          ParseSamplesheet.out,
+                          ParseSamplesheet.out.rdata_file,
                           params.nr_replicates, 
                           analysis_id,
                           matrix,
@@ -152,7 +152,7 @@ workflow {
     GenerateQCOutput(GenerateExcel.out.outlist_zscores, 
                      CollectSumAdducts.out.adductsums_scanmodes.collect(), 
                      CollectFilled.out.filled_pgrlist.collect(), 
-                     ParseSamplesheet.out, 
+                     ParseSamplesheet.out.rdata_file, 
                      analysis_id)
 
     // Generate violin plots 
