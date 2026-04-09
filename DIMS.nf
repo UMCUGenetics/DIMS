@@ -75,9 +75,16 @@ include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
 include { ExportParams as Workflow_ExportParams } from './assets/workflow.nf'
 
 // define parameters
-def raw_files = extractRawfilesFromDir(params.rawfiles_path)
 def analysis_id = params.outdir.split('/')[-1]
 def matrix = params.matrix
+def raw_files = Channel
+    .fromPath(params.samplesheet)
+    .splitCsv(header: true, sep: '\t')
+    .map { row ->
+        def file_id = row.File_Name
+        def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
+        tuple(file_id, raw_file)
+     }
 
 workflow {
     // create init.RData file with info on technical replicates
