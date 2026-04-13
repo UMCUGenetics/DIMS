@@ -143,8 +143,8 @@ sbatch <<EOT
 git --git-dir=$workflow_path/.git rev-parse HEAD > ${output}/log/commit
 echo `date +%s` >> ${output}/log/commit
 
-NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $workflow_path/DIMS.nf \
--c $workflow_path/DIMS.config \
+NXF_JAVA_HOME='/hpc/dbg_mz/tools/jdk-20.0.2' /hpc/dbg_mz/tools/nextflow run $workflow_path/main.nf \
+-c $workflow_path/nextflow.config \
 --rawfiles_path $input \
 --outdir $output \
 --email $email \
