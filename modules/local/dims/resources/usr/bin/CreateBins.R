@@ -31,7 +31,7 @@ low_mz  <- raw_data@mzrange[1]
 high_mz <- raw_data@mzrange[2]
 
 # create bins and save to file
-create_empty_bins(low_mz, high_mz)
+create_empty_bins(low_mz, high_mz, resol)
 
 # save highest mz to file
 save(high_mz, file = "highest_mz.RData")
