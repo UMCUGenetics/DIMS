@@ -8,7 +8,6 @@ include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
 include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
 include { CollectAveraged } from './CustomModules/DIMS/CollectAveraged.nf'
 include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     ppm:"$params.ppm", 
     zscore:"$params.zscore"
 )
@@ -16,58 +15,39 @@ include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
 include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
     nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix",
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
+    matrix:"$params.matrix"
 )
-include { extractRawfilesFromDir } from './CustomModules/DIMS/Utils/RawFiles.nf'
 include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     thresh:"$params.thresh", 
     resolution:"$params.resolution", 
     ppm:"$params.ppm"
 )
-include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf' params(
-    trim:"$params.trim", 
-    resolution:"$params.resolution"
-)
+include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf'
 include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
     analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore", 
-    export_scripts_dir:"$params.export_scripts_dir",
-    path_metabolite_groups:"$params.path_metabolite_groups"
+    zscore:"$params.zscore" 
 )
 include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
     analysis_id:"$params.analysis_id",
     zscore:"$params.zscore",
-    matrix:"$params.matrix",
-    sst_components_file:"$params.sst_components_file",
-    export_scripts_dir:"$params.export_scripts_dir"
+    matrix:"$params.matrix"
 )
 include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
-    analysis_id:"$params.analysis_id", 
-    export_scripts_dir:"$params.export_scripts_dir",
-    path_metabolite_groups:"$params.path_metabolite_groups",
-    file_ratios_metabolites:"$params.file_ratios_metabolites",
-    file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
-    file_explanation:"$params.file_explanation"
+    analysis_id:"$params.analysis_id" 
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
-    hmdb_parts_files:"$params.hmdb_parts_files", 
     standard_run:"$params.standard_run", 
     ppm:"$params.ppm"
 )
 include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
-include { MakeInit } from './CustomModules/DIMS/MakeInit.nf'
+include { ParseSamplesheet } from './CustomModules/DIMS/ParseSamplesheet.nf'
 include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
-    resolution:"$params.resolution", 
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir"
+    resolution:"$params.resolution" 
 )
 include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     ppm:"$params.ppm"
 )
 include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
-    preprocessing_scripts_dir:"$params.preprocessing_scripts_dir",
     zscore:"$params.zscore"
 )
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
@@ -76,32 +56,36 @@ include { ExportParams as Workflow_ExportParams } from './assets/workflow.nf'
 
 // define parameters
 def analysis_id = params.outdir.split('/')[-1]
-def matrix = params.matrix
 def raw_files = Channel
     .fromPath(params.samplesheet)
     .splitCsv(header: true, sep: '\t')
     .map { row ->
-        def file_id = row.File_Name
+        // Normalize keys to lowercase and remove underscores
+        def norm = row.collectEntries { k, v ->
+            [ k.toLowerCase().replaceAll('_',''), v ]
+        }
+        def file_id = norm.filename
         def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
         tuple(file_id, raw_file)
      }
+// def hmdb_parts_files = params.hmdb_parts_files
 
 workflow {
     // create init.RData file with info on technical replicates
-    MakeInit(params.samplesheet, params.nr_replicates)
+    ParseSamplesheet(params.samplesheet, params.preprocessing_scripts_dir)
 
     // Read raw files and convert to mzML format
     ConvertRawFile(raw_files)
     
     // Generate breaks on one of the mzML files
-    GenerateBreaks(ConvertRawFile.out.take(1))
+    GenerateBreaks(ConvertRawFile.out.take(1), params.trim, params.resolution, params.preprocessing_scripts_dir)
 
     // Generate HMDB parts for parallel processing in SumAdducts step
     // HMDB without adducts, without isotopes, only main entry for each metabolite
     HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
     // Generate HMDB parts for parallel processing in PeakGrouping step
-    HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks)
+    HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks, params.hmdb_parts_files)
 
     // Assign intensities to bins (breaks) per mzML file
     AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
@@ -109,10 +93,11 @@ workflow {
     // Evaluate quality of TIC plots for each technical replicate
     EvaluateTics(AssignToBins.out.rdata_file.collect(),
                  AssignToBins.out.tic_txt_file.collect(),
-                 MakeInit.out,
+                 ParseSamplesheet.out.rdata_file,
                  analysis_id,
                  GenerateBreaks.out.highest_mz,
-                 GenerateBreaks.out.trim_params)
+                 GenerateBreaks.out.trim_params,
+                 params.preprocessing_scripts_dir)
 
     // Send e-mail with TIC plot PDF right after its creation
     EvaluateTics.out.tic_plots_pdf.map { tic_plots_pdf ->
@@ -134,43 +119,54 @@ workflow {
         .view()
 
     // Peak finding per technical replicate
-    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps)
+    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps, params.preprocessing_scripts_dir)
 
     // AveragePeaks over technical replicates on peak level
-    AveragePeaks(PeakFinding.out.peaklist_rdata.collect(), ch_sample_techreps)
+    AveragePeaks(PeakFinding.out.peaklist_rdata.collect(), ch_sample_techreps, params.preprocessing_scripts_dir)
 
     // Collect peak finding results for all samples
     CollectAveraged(AveragePeaks.out.collect())
 
     // Peak grouping over samples: identified part
-    PeakGrouping(HMDBparts.out.flatten(), CollectAveraged.out.averaged_peaks.collect(), EvaluateTics.out.pattern_files)
+    PeakGrouping(HMDBparts.out.flatten(), CollectAveraged.out.averaged_peaks.collect(), EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
 
     // Fill missing values in peak group list: identified part
-    FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files)
+    FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
 
     // Collect filled peak group list: identified part
-    CollectFilled(FillMissing.out.collect(), EvaluateTics.out.pattern_files)
+    CollectFilled(FillMissing.out.collect(), EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
-               HMDBparts_main.out.collect().flatten())
+               HMDBparts_main.out.collect().flatten(), params.preprocessing_scripts_dir)
 
     // Collect summed adducts parts
-    CollectSumAdducts(SumAdducts.out.collect())
+    CollectSumAdducts(SumAdducts.out.collect(), params.preprocessing_scripts_dir)
 
     // Generate final Excel file with Z-scores on adduct sums (pos + neg)
-    GenerateExcel(CollectSumAdducts.out.adductsums_combined, analysis_id, params.relevance_file)
+    GenerateExcel(CollectSumAdducts.out.adductsums_combined,
+                  params.relevance_file,
+                  analysis_id,
+                  params.export_scripts_dir,
+                  params.path_metabolite_groups)
 
     // Generate QC rapports
     GenerateQCOutput(GenerateExcel.out.outlist_zscores,
                      CollectSumAdducts.out.adductsums_scanmodes.collect(),
                      CollectFilled.out.filled_pgrlist.collect(),
-                     MakeInit.out,
-                     analysis_id)
+                     ParseSamplesheet.out,
+                     analysis_id,
+                     params.export_scripts_dir)
 
     // Generate violin plots 
     if (params.zscore == 1) {
-        GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+        GenerateViolinPlots(GenerateExcel.out.outlist_zscores,
+                            analysis_id,
+                            params.export_scripts_dir,
+                            params.path_metabolite_groups,
+                            params.file_ratios_metabolites,
+                            params.file_expected_biomarkers_IEM,
+                            params.file_explanation)
     }
 
     // Create log files: Repository versions and Workflow params
