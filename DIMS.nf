@@ -49,7 +49,8 @@ include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.n
     path_metabolite_groups:"$params.path_metabolite_groups",
     file_ratios_metabolites:"$params.file_ratios_metabolites",
     file_expected_biomarkers_IEM:"$params.file_expected_biomarkers_IEM",
-    file_explanation:"$params.file_explanation"
+    file_explanation:"$params.file_explanation",
+    file_previous_runs:"$params.file_previous_runs"
 )
 include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
     hmdb_parts_files:"$params.hmdb_parts_files", 
@@ -81,7 +82,11 @@ def raw_files = Channel
     .fromPath(params.samplesheet)
     .splitCsv(header: true, sep: '\t')
     .map { row ->
-        def file_id = row.File_Name
+        // Normalize keys to lowercase and remove underscores
+        def norm = row.collectEntries { k, v ->
+            [ k.toLowerCase().replaceAll('_',''), v ]
+        }
+        def file_id = norm.filename
         def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
         tuple(file_id, raw_file)
      }
