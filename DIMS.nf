@@ -81,7 +81,8 @@ def raw_files = Channel
     .fromPath(params.samplesheet)
     .splitCsv(header: true, sep: '\t')
     .map { row ->
-        def file_id = row.File_Name
+        def r = row.collectEntries { k, v -> [(k.toLowerCase()): v] }
+        def file_id = r.file_name
         def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
         tuple(file_id, raw_file)
      }
@@ -170,7 +171,7 @@ workflow {
 
     // Generate violin plots 
     if (params.zscore == 1) {
-        GenerateViolinPlots(GenerateExcel.out.outlist_zscores, analysis_id)
+        GenerateViolinPlots(GenerateExcel.out.outlist_zscores, GenerateExcel.out.outlist_drugs, analysis_id)
     }
 
     // Create log files: Repository versions and Workflow params
