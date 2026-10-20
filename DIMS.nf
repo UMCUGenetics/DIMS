@@ -2,56 +2,25 @@
 nextflow.enable.dsl=2
 
 // get functions and include parameters that are independent of dataset
-include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf' params(
-    resolution:"$params.resolution"
-)
+include { AssignToBins } from './CustomModules/DIMS/AssignToBins.nf'
 include { AveragePeaks } from './CustomModules/DIMS/AveragePeaks.nf'
 include { CollectAveraged } from './CustomModules/DIMS/CollectAveraged.nf'
-include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf' params(
-    ppm:"$params.ppm", 
-    zscore:"$params.zscore"
-)
+include { CollectFilled } from './CustomModules/DIMS/CollectFilled.nf'
 include { CollectSumAdducts } from './CustomModules/DIMS/CollectSumAdducts.nf'
 include { ConvertRawFile } from './CustomModules/DIMS/ThermoRawFileParser.nf'
-include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf' params(
-    nr_replicates:"$params.nr_replicates", 
-    matrix:"$params.matrix"
-)
-include { FillMissing } from './CustomModules/DIMS/FillMissing.nf' params(
-    thresh:"$params.thresh", 
-    resolution:"$params.resolution", 
-    ppm:"$params.ppm"
-)
+include { EvaluateTics } from './CustomModules/DIMS/EvaluateTics.nf'
+include { FillMissing } from './CustomModules/DIMS/FillMissing.nf'
 include { GenerateBreaks } from './CustomModules/DIMS/GenerateBreaks.nf'
-include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf' params(
-    analysis_id:"$params.analysis_id", 
-    zscore:"$params.zscore" 
-)
-include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf' params(
-    analysis_id:"$params.analysis_id",
-    zscore:"$params.zscore",
-    matrix:"$params.matrix"
-)
-include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf' params(
-    analysis_id:"$params.analysis_id" 
-)
-include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf' params(
-    standard_run:"$params.standard_run", 
-    ppm:"$params.ppm"
-)
+include { GenerateExcel } from './CustomModules/DIMS/GenerateExcel.nf'
+include { GenerateQCOutput } from './CustomModules/DIMS/GenerateQCOutput.nf'
+include { GenerateViolinPlots } from './CustomModules/DIMS/GenerateViolinPlots.nf'
+include { HMDBparts } from './CustomModules/DIMS/HMDBparts.nf'
 include { HMDBparts_main } from './CustomModules/DIMS/HMDBparts_main.nf'
 include { ParseSamplesheet } from './CustomModules/DIMS/ParseSamplesheet.nf'
-include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf' params(
-    resolution:"$params.resolution" 
-)
-include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf' params(
-    ppm:"$params.ppm"
-)
-include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf' params(
-    zscore:"$params.zscore"
-)
+include { PeakFinding } from './CustomModules/DIMS/PeakFinding.nf'
+include { PeakGrouping } from './CustomModules/DIMS/PeakGrouping.nf'
+include { SumAdducts } from './CustomModules/DIMS/SumAdducts.nf'
 include { VersionLog } from './CustomModules/Utils/VersionLog.nf'
-// include { Workflow_Export_Params } from './assets/workflow.nf'
 include { ExportParams as Workflow_ExportParams } from './assets/workflow.nf'
 
 // define parameters
@@ -85,10 +54,14 @@ workflow {
     HMDBparts_main(params.hmdb_db_file, GenerateBreaks.out.breaks)
 
     // Generate HMDB parts for parallel processing in PeakGrouping step
-    HMDBparts(params.hmdb_db_file, GenerateBreaks.out.breaks, params.hmdb_parts_files)
+    HMDBparts(params.hmdb_db_file,
+              GenerateBreaks.out.breaks,
+              params.standard_run,
+              params.hmdb_parts_files)
 
     // Assign intensities to bins (breaks) per mzML file
-    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params))
+    AssignToBins(ConvertRawFile.out.combine(GenerateBreaks.out.breaks).combine(GenerateBreaks.out.trim_params),
+                 params.resolution)
 
     // Evaluate quality of TIC plots for each technical replicate
     EvaluateTics(AssignToBins.out.rdata_file.collect(),
@@ -97,7 +70,9 @@ workflow {
                  analysis_id,
                  GenerateBreaks.out.highest_mz,
                  GenerateBreaks.out.trim_params,
-                 params.preprocessing_scripts_dir)
+                 params.preprocessing_scripts_dir,
+                 params.nr_replicates,
+                 params.matrix)
 
     // Send e-mail with TIC plot PDF right after its creation
     EvaluateTics.out.tic_plots_pdf.map { tic_plots_pdf ->
@@ -119,7 +94,10 @@ workflow {
         .view()
 
     // Peak finding per technical replicate
-    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(), EvaluateTics.out.sample_techreps, params.preprocessing_scripts_dir)
+    PeakFinding(AssignToBins.out.rdata_file.collect().flatten(),
+                EvaluateTics.out.sample_techreps,
+                params.resolution,
+                params.preprocessing_scripts_dir)
 
     // AveragePeaks over technical replicates on peak level
     AveragePeaks(PeakFinding.out.peaklist_rdata.collect(), ch_sample_techreps, params.preprocessing_scripts_dir)
@@ -128,17 +106,30 @@ workflow {
     CollectAveraged(AveragePeaks.out.collect())
 
     // Peak grouping over samples: identified part
-    PeakGrouping(HMDBparts.out.flatten(), CollectAveraged.out.averaged_peaks.collect(), EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
+    PeakGrouping(HMDBparts.out.flatten(),
+                 CollectAveraged.out.averaged_peaks.collect(),
+                 EvaluateTics.out.pattern_files,
+                 params.preprocessing_scripts_dir,
+                 params.ppm)
 
     // Fill missing values in peak group list: identified part
-    FillMissing(PeakGrouping.out.grouped_identified, EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
+    FillMissing(PeakGrouping.out.grouped_identified,
+                EvaluateTics.out.pattern_files,
+                params.preprocessing_scripts_dir,
+                params.thresh)
 
     // Collect filled peak group list: identified part
-    CollectFilled(FillMissing.out.collect(), EvaluateTics.out.pattern_files, params.preprocessing_scripts_dir)
+    CollectFilled(FillMissing.out.collect(),
+                  EvaluateTics.out.pattern_files,
+                  params.preprocessing_scripts_dir,
+                  params.ppm,
+                  params.zscore)
 
     // Sum adducts of each metabolite per scan mode: identfied part
     SumAdducts(CollectFilled.out.filled_pgrlist, 
-               HMDBparts_main.out.collect().flatten(), params.preprocessing_scripts_dir)
+               HMDBparts_main.out.collect().flatten(),
+               params.zscore,
+               params.preprocessing_scripts_dir)
 
     // Collect summed adducts parts
     CollectSumAdducts(SumAdducts.out.collect(), params.preprocessing_scripts_dir)
@@ -148,15 +139,19 @@ workflow {
                   params.relevance_file,
                   analysis_id,
                   params.export_scripts_dir,
-                  params.path_metabolite_groups)
+                  params.path_metabolite_groups,
+                  params.zscore)
 
     // Generate QC rapports
     GenerateQCOutput(GenerateExcel.out.outlist_zscores,
                      CollectSumAdducts.out.adductsums_scanmodes.collect(),
                      CollectFilled.out.filled_pgrlist.collect(),
-                     ParseSamplesheet.out,
+                     ParseSamplesheet.out.rdata_file,
                      analysis_id,
-                     params.export_scripts_dir)
+                     params.sst_components_file,
+                     params.export_scripts_dir,
+                     params.zscore,
+                     params.matrix)
 
     // Generate violin plots 
     if (params.zscore == 1) {
