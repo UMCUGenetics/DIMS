@@ -161,7 +161,8 @@ workflow {
                             params.path_metabolite_groups,
                             params.file_ratios_metabolites,
                             params.file_expected_biomarkers_IEM,
-                            params.file_explanation)
+                            params.file_explanation,
+                            params.file_previous_runs)
     }
 
     // Create log files: Repository versions and Workflow params
