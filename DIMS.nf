@@ -37,7 +37,6 @@ def raw_files = Channel
         def raw_file = file("${params.rawfiles_path}/${file_id}.raw", checkIfExists: true)
         tuple(file_id, raw_file)
      }
-// def hmdb_parts_files = params.hmdb_parts_files
 
 workflow {
     // create init.RData file with info on technical replicates
@@ -156,6 +155,7 @@ workflow {
     // Generate violin plots 
     if (params.zscore == 1) {
         GenerateViolinPlots(GenerateExcel.out.outlist_zscores,
+                            GenerateExcel.out.outlist_drugs,
                             analysis_id,
                             params.export_scripts_dir,
                             params.path_metabolite_groups,
