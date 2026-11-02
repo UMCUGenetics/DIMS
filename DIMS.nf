@@ -121,7 +121,6 @@ workflow {
     CollectFilled(FillMissing.out.collect(),
                   EvaluateTics.out.pattern_files,
                   params.preprocessing_scripts_dir,
-                  params.ppm,
                   params.zscore)
 
     // Sum adducts of each metabolite per scan mode: identfied part
