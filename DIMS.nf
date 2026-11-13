@@ -121,7 +121,6 @@ workflow {
     CollectFilled(FillMissing.out.collect(),
                   EvaluateTics.out.pattern_files,
                   params.preprocessing_scripts_dir,
-                  params.ppm,
                   params.zscore)
 
     // Sum adducts of each metabolite per scan mode: identfied part
@@ -142,7 +141,7 @@ workflow {
                   params.zscore)
 
     // Generate QC rapports
-    GenerateQCOutput(GenerateExcel.out.outlist_zscores,
+    GenerateQCOutput(GenerateExcel.out.peakgrouplist_zscores,
                      CollectSumAdducts.out.adductsums_scanmodes.collect(),
                      CollectFilled.out.filled_pgrlist.collect(),
                      ParseSamplesheet.out.rdata_file,
@@ -154,8 +153,8 @@ workflow {
 
     // Generate violin plots 
     if (params.zscore == 1) {
-        GenerateViolinPlots(GenerateExcel.out.outlist_zscores,
-                            GenerateExcel.out.outlist_drugs,
+        GenerateViolinPlots(GenerateExcel.out.peakgrouplist_zscores,
+                            GenerateExcel.out.peakgrouplist_drugs,
                             analysis_id,
                             params.export_scripts_dir,
                             params.path_metabolite_groups,
