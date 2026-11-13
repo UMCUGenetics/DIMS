@@ -149,7 +149,8 @@ workflow {
                      params.sst_components_file,
                      params.export_scripts_dir,
                      params.zscore,
-                     params.matrix)
+                     params.matrix,
+                     GenerateBreaks.out.highest_mz)
 
     // Generate violin plots 
     if (params.zscore == 1) {
