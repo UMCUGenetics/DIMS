@@ -174,6 +174,9 @@ if [ \$? -eq 0 ]; then
     echo "Change permissions"
     chmod 775 -R $output
 
+    echo "Remove raw files"
+    rm $input
+
     exit 0
 else
     echo "Nextflow failed"
